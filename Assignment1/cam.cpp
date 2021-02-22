@@ -8,19 +8,30 @@ class mouseSelection{
     public:
     Mat image;
     vector<Point2f> inPoints;
+    vector<Mat> imageTrack;
 
     // function to be given to set mouse callback (PROBLEM HERE)
     static void selectingPoints(int event, int x, int y, int flag, void* param) {
 
         mouseSelection *mouse = reinterpret_cast<mouseSelection*>(param);
+        mouse->imageTrack.push_back(mouse->image);
         if (event == EVENT_LBUTTONDOWN) {
-            circle(mouse->image,Point2f(x,y),5,Scalar(0,0,0),FILLED);
-            imshow("Original Frame",mouse->image);
+            circle(mouse->imageTrack.back(),Point2f(x,y),5,Scalar(0,0,0),FILLED);        
+            imshow("Original Frame",mouse->imageTrack.back());
             if (mouse->inPoints.size() < 4) {
                 mouse->inPoints.push_back(Point2f(x,y));
-                // circle(sourcImg, Point(x,y),3,Scalar(0,0,255), 5, cv::LINE_AA);
             }
         }
+        else if (event == EVENT_RBUTTONDOWN){
+            if (mouse->inPoints.size()>0){
+                mouse->inPoints.pop_back();
+                mouse->imageTrack.pop_back();
+                cout<<mouse->imageTrack.size()<<endl;
+            }
+            imshow("Original Frame",mouse->imageTrack.back());
+        }
+        Mat imagei=mouse->image.clone();
+        mouse->imageTrack.push_back(imagei);   
 
     }
     //function to sort the points in our prefrence always gives a  quad angle 
@@ -65,7 +76,7 @@ int main(int argc, char* argv[]) {
     mouse.image = sourcImgcopy;
 
     // display grayscaled source image
-    imshow("Original Frame", sourcImg);
+    imshow("Original Frame", sourcImgcopy);
 
 
     // maping points given on course website
