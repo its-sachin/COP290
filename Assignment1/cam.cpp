@@ -8,16 +8,14 @@ class mouseSelection{
     public:
     Mat image;
     vector<Point2f> inPoints;
-    vector<Mat> imageTrack;
 
     // function to be given to set mouse callback (PROBLEM HERE)
     static void selectingPoints(int event, int x, int y, int flag, void* param) {
 
         mouseSelection *mouse = reinterpret_cast<mouseSelection*>(param);
-        mouse->imageTrack.push_back(mouse->image);
         if (event == EVENT_LBUTTONDOWN) {
-            circle(mouse->imageTrack.back(),Point2f(x,y),5,Scalar(0,0,0),FILLED);        
-            imshow("Original Frame",mouse->imageTrack.back());
+            circle(mouse->image,Point2f(x,y),5,Scalar(0,0,0),FILLED);        
+            imshow("Original Frame",mouse->image);
             if (mouse->inPoints.size() < 4) {
                 mouse->inPoints.push_back(Point2f(x,y));
             }
@@ -25,16 +23,11 @@ class mouseSelection{
         else if (event == EVENT_RBUTTONDOWN){
             if (mouse->inPoints.size()>0){
                 mouse->inPoints.pop_back();
-                mouse->imageTrack.pop_back();
-                cout<<mouse->imageTrack.size()<<endl;
             }
-            imshow("Original Frame",mouse->imageTrack.back());
-        }
-        Mat imagei=mouse->image.clone();
-        mouse->imageTrack.push_back(imagei);   
+        }  
 
     }
-    //function to sort the points in our prefrence always gives a  quad angle 
+    //function to sort the points in our prefrence always gives a  quad enumeration
     void pointsSort(){
         Point2f mid= Point2f(0,0);
         for (auto it = inPoints.begin(); it != inPoints.end(); it++){ 
@@ -56,6 +49,14 @@ class mouseSelection{
         if (inPoints[2].x<mid.x){
             swap(inPoints[2],inPoints[3]);          
         }           
+    }
+    //function to draw the quad formed by the points to better realise the selection
+    void drawQuad(){
+        for(int i=0;i<3;i++){
+        line(image,inPoints[i],inPoints[i+1],Scalar(0,0,0),4,LINE_8);
+    }
+    line(image,inPoints[3],inPoints[0],Scalar(0,0,0),4,LINE_8);  
+    imshow("Original Frame",image);
     }
 };
 
@@ -95,8 +96,7 @@ int main(int argc, char* argv[]) {
     setMouseCallback("Original Frame", mouse.selectingPoints, &mouse);
     waitKey(0); // ---> to be changed.
     mouse.pointsSort();
-    
-
+    mouse.drawQuad();
     // do homography
     Mat wrapedMatrix = findHomography(mouse.inPoints, mapPoints);
     warpPerspective(sourcImg, wrapImg, wrapedMatrix, sourcImg.size());
