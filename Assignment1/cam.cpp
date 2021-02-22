@@ -14,7 +14,6 @@ class mouseSelection{
 
         mouseSelection *mouse = reinterpret_cast<mouseSelection*>(param);
         if (event == EVENT_LBUTTONDOWN) {
-            cout << x << endl;
             imshow("Original Frame",mouse->image);
             if (mouse->inPoints.size() < 4) {
                 mouse->inPoints.push_back(Point2f(x,y));
@@ -22,6 +21,31 @@ class mouseSelection{
             }
         }
 
+    }
+    //function to sort the points in our prefrence always gives a  quad angle 
+    void pointsSort(){
+        Point2f mid= Point2f(0,0);
+        for (auto it = inPoints.begin(); it != inPoints.end(); it++){ 
+            mid.x+=(*it).x;
+            mid.y+=(*it).y;
+        }
+        mid.x=mid.x/4;
+        mid.y=mid.y/4;
+        int i=0;
+        for (int j=2;j<4; j++){ 
+            if (inPoints[j].y<mid.y){
+                if (inPoints[i].y<mid.y){
+                    i++;
+                }
+                swap(inPoints[j],inPoints[i]);
+            }        
+        }
+        if (inPoints[0].x>mid.x){
+            swap(inPoints[0],inPoints[1]);          
+        }
+        if (inPoints[2].x<mid.x){
+            swap(inPoints[2],inPoints[3]);          
+        }           
     }
 };
 
@@ -44,6 +68,7 @@ int main(int argc, char* argv[]) {
     // display grayscaled source image
     imshow("Original Frame", sourcImg);
 
+
     // maping points given on course website
     vector<Point2f> mapPoints;
     mapPoints.push_back(Point2f(472,52));
@@ -59,7 +84,7 @@ int main(int argc, char* argv[]) {
     
     setMouseCallback("Original Frame", mouse.selectingPoints, &mouse);
     waitKey(0); // ---> to be changed.
-
+    mouse.pointsSort();
     
 
     // do homography
