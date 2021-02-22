@@ -4,24 +4,25 @@
 using namespace cv;
 using namespace std;
 
-// function to be given to set mouse callback (PROBLEM HERE)
-void selectingPoints(int event, int x, int y, int flag, void* image) {
-
-    Mat sourcImg = *reinterpret_cast<Mat*>(image);
-
+struct mouseSelection{
+    Mat image;
     vector<Point2f> inPoints;
 
-    if (event == EVENT_LBUTTONDOWN) {
-        cout << x << endl;
-        if (inPoints.size() < 4) {
-            inPoints.push_back(Point2f(x,y));
+    // function to be given to set mouse callback (PROBLEM HERE)
+    static void selectingPoints(int event, int x, int y, int flag, void* param) {
+
+        mouseSelection *mouse = reinterpret_cast<mouseSelection*>(param);
+        if (event == EVENT_LBUTTONDOWN) {
+            cout << x << endl;
+            imshow("Original Frame",mouse->image);
+            if (mouse->inPoints.size() < 4) {
+                mouse->inPoints.push_back(Point2f(x,y));
+                // circle(sourcImg, Point(x,y),3,Scalar(0,0,255), 5, cv::LINE_AA);
+            }
         }
 
     }
-
-    image = reinterpret_cast<void*>(&inPoints);
-
-}
+};
 
 
 int main(int argc, char* argv[]) {
@@ -35,7 +36,10 @@ int main(int argc, char* argv[]) {
         cin.get(); //wait for any key press
         return -1;
     }
-      
+
+    mouseSelection mouse;
+    mouse.image = sourcImg;
+
     // display grayscaled source image
     imshow("Original Frame", sourcImg);
 
@@ -45,16 +49,13 @@ int main(int argc, char* argv[]) {
     mapPoints.push_back(Point2f(472,830));
     mapPoints.push_back(Point2f(800,830));
     mapPoints.push_back(Point2f(800,52));
-
-    void* data = reinterpret_cast<void*>(&sourcImg);
     
-    setMouseCallback("Original Frame", selectingPoints, data);
+    setMouseCallback("Original Frame", mouse.selectingPoints, &mouse);
     waitKey(0); // ---> to be changed.
-
-    vector<Point2f> inPoints = *reinterpret_cast<Mat*>(data);
+    
 
     // do homography
-    Mat wrapedMatrix = findHomography(mapPoints, mapPoints);
+    Mat wrapedMatrix = findHomography(mouse.inPoints, mapPoints);
     warpPerspective(sourcImg, wrapImg, wrapedMatrix, sourcImg.size());
 
     imshow("Image", wrapImg);
