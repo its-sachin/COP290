@@ -4,7 +4,8 @@
 using namespace cv;
 using namespace std;
 
-struct mouseSelection{
+class mouseSelection{
+    public:
     Mat image;
     vector<Point2f> inPoints;
 
@@ -30,7 +31,7 @@ int main(int argc, char* argv[]) {
     // reading the image (grayscale) 
     Mat sourcImg = imread("empty.jpg",0);
     Mat wrapImg = Mat::zeros(sourcImg.size(),CV_8UC3);
-
+    Mat cropImage(779,329,CV_8UC3,Scalar(0,0,0));
     if (sourcImg.empty()) {
         cout << "Unable to open the source image file - Check if empty.jpg present in the folder or not." << endl;
         cin.get(); //wait for any key press
@@ -46,21 +47,30 @@ int main(int argc, char* argv[]) {
     // maping points given on course website
     vector<Point2f> mapPoints;
     mapPoints.push_back(Point2f(472,52));
-    mapPoints.push_back(Point2f(472,830));
-    mapPoints.push_back(Point2f(800,830));
     mapPoints.push_back(Point2f(800,52));
+    mapPoints.push_back(Point2f(800,830));
+    mapPoints.push_back(Point2f(472,830));
+    vector<Point2f> cropPoints;
+    cropPoints.push_back(Point2f(0,0));  
+    cropPoints.push_back(Point2f(328,0));
+    cropPoints.push_back(Point2f(328,778));
+    cropPoints.push_back(Point2f(0,778));
+          
     
     setMouseCallback("Original Frame", mouse.selectingPoints, &mouse);
     waitKey(0); // ---> to be changed.
+
     
 
     // do homography
     Mat wrapedMatrix = findHomography(mouse.inPoints, mapPoints);
     warpPerspective(sourcImg, wrapImg, wrapedMatrix, sourcImg.size());
-
-    imshow("Image", wrapImg);
+    wrapedMatrix = findHomography(mapPoints,cropPoints);
+    warpPerspective(wrapImg, cropImage, wrapedMatrix, cropImage.size());
+    imshow("Wraped Image", wrapImg);
     waitKey(0);
- 
+    imshow("Croped Image",cropImage);
+    waitKey(0);
     
 }
 
