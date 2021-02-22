@@ -14,6 +14,7 @@ class mouseSelection{
 
         mouseSelection *mouse = reinterpret_cast<mouseSelection*>(param);
         if (event == EVENT_LBUTTONDOWN) {
+            circle(mouse->image,Point2f(x,y),5,Scalar(0,0,0),FILLED);
             imshow("Original Frame",mouse->image);
             if (mouse->inPoints.size() < 4) {
                 mouse->inPoints.push_back(Point2f(x,y));
@@ -26,11 +27,9 @@ class mouseSelection{
     void pointsSort(){
         Point2f mid= Point2f(0,0);
         for (auto it = inPoints.begin(); it != inPoints.end(); it++){ 
-            mid.x+=(*it).x;
-            mid.y+=(*it).y;
+            mid.x+=(*it).x/4;
+            mid.y+=(*it).y/4;
         }
-        mid.x=mid.x/4;
-        mid.y=mid.y/4;
         int i=0;
         for (int j=2;j<4; j++){ 
             if (inPoints[j].y<mid.y){
@@ -61,9 +60,9 @@ int main(int argc, char* argv[]) {
         cin.get(); //wait for any key press
         return -1;
     }
-
+    Mat sourcImgcopy=sourcImg.clone();
     mouseSelection mouse;
-    mouse.image = sourcImg;
+    mouse.image = sourcImgcopy;
 
     // display grayscaled source image
     imshow("Original Frame", sourcImg);
