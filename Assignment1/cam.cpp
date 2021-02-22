@@ -66,7 +66,6 @@ int main(int argc, char* argv[]) {
     // reading the image (grayscale) 
     Mat sourcImg = imread("empty.jpg",0);
     Mat wrapImg = Mat::zeros(sourcImg.size(),CV_8UC3);
-    Mat cropImage(779,329,CV_8UC3,Scalar(0,0,0));
     if (sourcImg.empty()) {
         cout << "Unable to open the source image file - Check if empty.jpg present in the folder or not." << endl;
         cin.get(); //wait for any key press
@@ -86,11 +85,7 @@ int main(int argc, char* argv[]) {
     mapPoints.push_back(Point2f(800,52));
     mapPoints.push_back(Point2f(800,830));
     mapPoints.push_back(Point2f(472,830));
-    vector<Point2f> cropPoints;
-    cropPoints.push_back(Point2f(0,0));  
-    cropPoints.push_back(Point2f(328,0));
-    cropPoints.push_back(Point2f(328,778));
-    cropPoints.push_back(Point2f(0,778));
+
           
     
     setMouseCallback("Original Frame", mouse.selectingPoints, &mouse);
@@ -100,6 +95,24 @@ int main(int argc, char* argv[]) {
     // do homography
     Mat wrapedMatrix = findHomography(mouse.inPoints, mapPoints);
     warpPerspective(sourcImg, wrapImg, wrapedMatrix, sourcImg.size());
+    int xdimension,ydimension;
+    int c=waitKey() & 0xFF;
+    if (c==109){
+        cout<<"Please Enter the x dimension of the croped image to be formed:\n";
+        cin>>xdimension;
+        cout<<"Please Enter the y dimension of the croped image to be formed:\n";
+        cin>>ydimension;
+    }
+    else{
+        xdimension=329;
+        ydimension=779;
+    }
+    vector<Point2f> cropPoints;
+    Mat cropImage(ydimension,xdimension,CV_8UC3,Scalar(0,0,0));
+    cropPoints.push_back(Point2f(0,0));  
+    cropPoints.push_back(Point2f(xdimension-1,0));
+    cropPoints.push_back(Point2f(xdimension-1,ydimension-1));
+    cropPoints.push_back(Point2f(0,ydimension-1));
     wrapedMatrix = findHomography(mapPoints,cropPoints);
     warpPerspective(wrapImg, cropImage, wrapedMatrix, cropImage.size());
     imshow("Wraped Image", wrapImg);
