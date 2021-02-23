@@ -8,22 +8,29 @@ class mouseSelection{
     public:
     Mat image;
     vector<Point2f> inPoints;
+    vector<Mat> cache;
 
     // function to be given to set mouse callback (PROBLEM HERE)
     static void selectingPoints(int event, int x, int y, int flag, void* param) {
 
         mouseSelection *mouse = reinterpret_cast<mouseSelection*>(param);
+
         if (event == EVENT_LBUTTONDOWN) {
 
-            circle(mouse->image,Point2f(x,y),5,Scalar(0,0,0),FILLED);        
-            imshow("Original Frame",mouse->image);
-
             if (mouse->inPoints.size() < 4) {
+                mouse->cache.push_back(mouse->image.clone());
+                
+                circle(mouse->image,Point2f(x,y),5,Scalar(0,0,0),FILLED);        
+                imshow("Original Frame",mouse->image);
                 mouse->inPoints.push_back(Point2f(x,y));
             }
         }
         else if (event == EVENT_RBUTTONDOWN){
+
             if (mouse->inPoints.size()>0){
+                mouse->cache.back().copyTo(mouse->image);
+                mouse->cache.pop_back();
+                imshow("Original Frame",mouse->image);
                 mouse->inPoints.pop_back();
             }
         }  
@@ -56,18 +63,20 @@ class mouseSelection{
     void drawQuad(){
         for(int i=0;i<3;i++){
         line(image,inPoints[i],inPoints[i+1],Scalar(0,0,0),4,LINE_8);
-    }
-    line(image,inPoints[3],inPoints[0],Scalar(0,0,0),4,LINE_8);  
-    imshow("Original Frame",image);
+        }
+        line(image,inPoints[3],inPoints[0],Scalar(0,0,0),4,LINE_8);  
+        imshow("Original Frame",image);
     }
 };
 
-
-int main(int argc, char* argv[]) {
+int main(int argc, char** argv) {
     //taking the input as the filename from user
-    string filename;
-    cout<<"Please Enter filname:"<<endl;
-    cin>>filename;
+    string filename,destWrap,destCrop;//names for source and dest files
+    if (argc==1){
+        cout<<"Please provide an filname for source image\n";
+        return 0;
+    }
+    filename=argv[1];
     // reading the image (grayscale) 
     Mat sourcImg = imread(filename,0);
     Mat wrapImg = Mat::zeros(sourcImg.size(),CV_8UC3);
@@ -76,7 +85,6 @@ int main(int argc, char* argv[]) {
         cin.get(); //wait for any key press
         return -1;
     }
-    filename=filename.substr(0,filename.size()-4);
     Mat sourcImgcopy=sourcImg.clone();
     mouseSelection mouse;
     mouse.image = sourcImgcopy;
@@ -93,9 +101,18 @@ int main(int argc, char* argv[]) {
     mapPoints.push_back(Point2f(472,830));
 
           
-    
+    //controling the mouse
     setMouseCallback("Original Frame", mouse.selectingPoints, &mouse);
     waitKey(0); // ---> to be changed.
+    while (mouse.inPoints.size()<4){
+        cout<<"Please select 4 points\n";
+        mouse.inPoints.clear();
+        mouse.image=sourcImg.clone();
+        destroyWindow("Original Frame");
+        imshow("Original Frame",mouse.image);
+        setMouseCallback("Original Frame", mouse.selectingPoints, &mouse); 
+        waitKey(0);       
+    }
     mouse.pointsSort();
     mouse.drawQuad();
 
@@ -115,8 +132,23 @@ int main(int argc, char* argv[]) {
     if (c==109){
         cout<<"Please Enter the x dimension of the croped image to be formed:\n";
         cin>>xdimension;
+
+        if (xdimension < 0) {
+            while (xdimension < 0) {
+                cout<<"Input INVALID Enter x dimension again:\n";
+                cin>>xdimension;
+            }
+        }
+        
         cout<<"Please Enter the y dimension of the croped image to be formed:\n";
         cin>>ydimension;
+
+        if (ydimension < 0) {
+            while (ydimension < 0) {
+                cout<<"Input INVALID Enter y dimension again:\n";
+                cin>>ydimension;
+            }
+        }
     }
     else{
         xdimension=329;
@@ -135,8 +167,18 @@ int main(int argc, char* argv[]) {
     warpPerspective(wrapImg, cropImage, wrapedMatrix, cropImage.size());
     destroyWindow("Wraped Image");
     imshow("Croped Image",cropImage);
-    imwrite("WrapedOf\""+filename+"\".jpg",wrapImg);
-    imwrite("pCorrectedOf\""+filename+"\".jpg",cropImage);
+
+    destCrop="pCorrectedOf\""+filename+"\".jpg";
+    destWrap="WrapedOf\""+filename+"\".jpg";    
+    if (argc==4){
+        destCrop=argv[3];
+        destWrap=argv[2];
+    }
+    else if (argc==3){
+        destWrap=argv[2];
+    }        
+    imwrite(destWrap,wrapImg);
+    imwrite(destCrop,cropImage);
     waitKey(0);
     
 }
