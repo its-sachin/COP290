@@ -8,22 +8,29 @@ class mouseSelection{
     public:
     Mat image;
     vector<Point2f> inPoints;
+    vector<Mat> cache;
 
     // function to be given to set mouse callback (PROBLEM HERE)
     static void selectingPoints(int event, int x, int y, int flag, void* param) {
 
         mouseSelection *mouse = reinterpret_cast<mouseSelection*>(param);
+
         if (event == EVENT_LBUTTONDOWN) {
 
-            circle(mouse->image,Point2f(x,y),5,Scalar(0,0,0),FILLED);        
-            imshow("Original Frame",mouse->image);
-
             if (mouse->inPoints.size() < 4) {
+                mouse->cache.push_back(mouse->image.clone());
+                
+                circle(mouse->image,Point2f(x,y),5,Scalar(0,0,0),FILLED);        
+                imshow("Original Frame",mouse->image);
                 mouse->inPoints.push_back(Point2f(x,y));
             }
         }
         else if (event == EVENT_RBUTTONDOWN){
+
             if (mouse->inPoints.size()>0){
+                mouse->cache.back().copyTo(mouse->image);
+                mouse->cache.pop_back();
+                imshow("Original Frame",mouse->image);
                 mouse->inPoints.pop_back();
             }
         }  
@@ -96,6 +103,10 @@ int main(int argc, char* argv[]) {
     
     setMouseCallback("Original Frame", mouse.selectingPoints, &mouse);
     waitKey(0); // ---> to be changed.
+    if (mouse.inPoints.size() <4) {
+        cout << "Desired number of points not selected for homography!!. Select 4 corner points of a quadrilateral." << endl;
+        return -1;
+    }
     mouse.pointsSort();
     mouse.drawQuad();
 
@@ -115,8 +126,23 @@ int main(int argc, char* argv[]) {
     if (c==109){
         cout<<"Please Enter the x dimension of the croped image to be formed:\n";
         cin>>xdimension;
+
+        if (xdimension < 0) {
+            while (xdimension < 0) {
+                cout<<"Input INVALID Enter x dimension again:\n";
+                cin>>xdimension;
+            }
+        }
+        
         cout<<"Please Enter the y dimension of the croped image to be formed:\n";
         cin>>ydimension;
+
+        if (ydimension < 0) {
+            while (ydimension < 0) {
+                cout<<"Input INVALID Enter y dimension again:\n";
+                cin>>ydimension;
+            }
+        }
     }
     else{
         xdimension=329;
