@@ -8,24 +8,21 @@ class mouseSelection{
     public:
     Mat image;
     vector<Point2f> inPoints;
-    string frameName;
 
     // function to be given to set mouse callback (PROBLEM HERE)
     static void selectingPoints(int event, int x, int y, int flag, void* param) {
 
         mouseSelection *mouse = reinterpret_cast<mouseSelection*>(param);
-        Mat cache;
         if (event == EVENT_LBUTTONDOWN) {
 
             circle(mouse->image,Point2f(x,y),5,Scalar(0,0,0),FILLED);        
-            imshow(mouse->frameName,mouse->image);
+            imshow("Original Frame",mouse->image);
 
             if (mouse->inPoints.size() < 4) {
                 mouse->inPoints.push_back(Point2f(x,y));
             }
         }
         else if (event == EVENT_RBUTTONDOWN){
-
             if (mouse->inPoints.size()>0){
                 mouse->inPoints.pop_back();
             }
@@ -61,7 +58,7 @@ class mouseSelection{
         line(image,inPoints[i],inPoints[i+1],Scalar(0,0,0),4,LINE_8);
     }
     line(image,inPoints[3],inPoints[0],Scalar(0,0,0),4,LINE_8);  
-    imshow(frameName,image);
+    imshow("Original Frame",image);
     }
 };
 
@@ -79,7 +76,6 @@ int main(int argc, char* argv[]) {
     Mat sourcImgcopy=sourcImg.clone();
     mouseSelection mouse;
     mouse.image = sourcImgcopy;
-    mouse.frameName = "Original Frame";
 
     // display grayscaled source image
     imshow("Original Frame", sourcImgcopy);
@@ -98,10 +94,17 @@ int main(int argc, char* argv[]) {
     waitKey(0); // ---> to be changed.
     mouse.pointsSort();
     mouse.drawQuad();
-    
+
+    waitKey(0);
+
+
     // do homography
     Mat wrapedMatrix = findHomography(mouse.inPoints, mapPoints);
     warpPerspective(sourcImg, wrapImg, wrapedMatrix, sourcImg.size());
+
+    destroyWindow("Original Frame");
+    imshow("Wraped Image", wrapImg);
+
 
     int xdimension,ydimension;
     int c=waitKey() & 0xFF;
@@ -124,36 +127,10 @@ int main(int argc, char* argv[]) {
     cropPoints.push_back(Point2f(xdimension-1,ydimension-1));
     cropPoints.push_back(Point2f(0,ydimension-1));
 
-    destroyWindow("Original Frame");
-    imshow("Wraped Image", wrapImg);
-
-    int d=waitKey() & 0xFF;
-    if (d == 109) {
-        cout << "hey" << endl;
-        mouse.image = wrapImg;
-
-        mouse.inPoints.clear();
-        mouse.frameName = "Wraped Image";
-
-        setMouseCallback("Wraped Image", mouse.selectingPoints, &mouse);
-        waitKey(0);
-        mouse.pointsSort();
-        mouse.drawQuad();
-        wrapedMatrix = findHomography(mouse.inPoints,cropPoints);
-        waitKey(0);
-
-    }
-
-    else {
-
-        wrapedMatrix = findHomography(mapPoints,cropPoints);
-    }
-
+    wrapedMatrix = findHomography(mapPoints,cropPoints);
     warpPerspective(wrapImg, cropImage, wrapedMatrix, cropImage.size());
     destroyWindow("Wraped Image");
     imshow("Croped Image",cropImage);
     waitKey(0);
     
 }
-
-
