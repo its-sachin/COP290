@@ -104,7 +104,6 @@ int main(int argc, char** argv) {
     //controling the mouse
     setMouseCallback("Original Frame", mouse.selectingPoints, &mouse);
     waitKey(0); // ---> to be changed.
-<<<<<<< HEAD
     while (mouse.inPoints.size()<4){
         cout<<"Please select 4 points\n";
         mouse.inPoints.clear();
@@ -113,11 +112,6 @@ int main(int argc, char** argv) {
         imshow("Original Frame",mouse.image);
         setMouseCallback("Original Frame", mouse.selectingPoints, &mouse); 
         waitKey(0);       
-=======
-    if (mouse.inPoints.size() <4) {
-        cout << "Desired number of points not selected for homography!!. Select 4 corner points of a quadrilateral." << endl;
-        return -1;
->>>>>>> origin
     }
     mouse.pointsSort();
     mouse.drawQuad();
