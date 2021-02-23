@@ -1,5 +1,5 @@
 
-# COL290: Project1 (Traffic Density Estimation)
+# COP290: Project1 (Traffic Density Estimation)
 
 ## Part 1 - __Homography__
 

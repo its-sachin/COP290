@@ -64,15 +64,19 @@ class mouseSelection{
 
 
 int main(int argc, char* argv[]) {
-
+    //taking the input as the filename from user
+    string filename;
+    cout<<"Please Enter filname:"<<endl;
+    cin>>filename;
     // reading the image (grayscale) 
-    Mat sourcImg = imread("empty.jpg",0);
+    Mat sourcImg = imread(filename,0);
     Mat wrapImg = Mat::zeros(sourcImg.size(),CV_8UC3);
     if (sourcImg.empty()) {
-        cout << "Unable to open the source image file - Check if empty.jpg present in the folder or not." << endl;
+        cout << "Unable to open the file "+filename+" Check if the file exists in this directory" << endl;
         cin.get(); //wait for any key press
         return -1;
     }
+    filename=filename.substr(0,filename.size()-4);
     Mat sourcImgcopy=sourcImg.clone();
     mouseSelection mouse;
     mouse.image = sourcImgcopy;
@@ -131,6 +135,8 @@ int main(int argc, char* argv[]) {
     warpPerspective(wrapImg, cropImage, wrapedMatrix, cropImage.size());
     destroyWindow("Wraped Image");
     imshow("Croped Image",cropImage);
+    imwrite("WrapedOf\""+filename+"\".jpg",wrapImg);
+    imwrite("pCorrectedOf\""+filename+"\".jpg",cropImage);
     waitKey(0);
     
 }
