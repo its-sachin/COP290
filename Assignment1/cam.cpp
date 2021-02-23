@@ -71,14 +71,18 @@ class mouseSelection{
 
 int main(int argc, char** argv) {
     //taking the input as the filename from user
-    string filename,destWrap,destCrop;//names for source and dest files
+    string filepath,filename,destWrap,destCrop;//names for source and dest files
     if (argc==1){
         cout<<"Please provide an filname for source image\n";
         return 0;
     }
-    filename=argv[1];
+
+    filepath=argv[1];
+    size_t found = filepath.find_last_of("/\\");
+    filename = filepath.substr(found+1);
+
     // reading the image (grayscale) 
-    Mat sourcImg = imread(filename,0);
+    Mat sourcImg = imread(filepath,0);
     Mat wrapImg = Mat::zeros(sourcImg.size(),CV_8UC3);
     if (sourcImg.empty()) {
         cout << "Unable to open the file "+filename+" Check if the file exists in this directory" << endl;
@@ -133,18 +137,25 @@ int main(int argc, char** argv) {
         cout<<"Please Enter the x dimension of the croped image to be formed:\n";
         cin>>xdimension;
 
-        if (xdimension < 0) {
-            while (xdimension < 0) {
+        if (!cin || xdimension < 0 ) {
+            while (!cin || xdimension < 0 ) {
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(),'\n');
                 cout<<"Input INVALID Enter x dimension again:\n";
                 cin>>xdimension;
+
             }
         }
         
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(),'\n');
         cout<<"Please Enter the y dimension of the croped image to be formed:\n";
         cin>>ydimension;
 
-        if (ydimension < 0) {
-            while (ydimension < 0) {
+        if (!cin || ydimension < 0) {
+            while (!cin ||ydimension < 0) {
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(),'\n');
                 cout<<"Input INVALID Enter y dimension again:\n";
                 cin>>ydimension;
             }
@@ -168,8 +179,8 @@ int main(int argc, char** argv) {
     destroyWindow("Wraped Image");
     imshow("Croped Image",cropImage);
 
-    destCrop="pCorrectedOf\""+filename+"\".jpg";
-    destWrap="WrapedOf\""+filename+"\".jpg";    
+    destCrop = "wrapped-" + filename;
+    destWrap = "cropped-" + filename;    
     if (argc==4){
         destCrop=argv[3];
         destWrap=argv[2];
