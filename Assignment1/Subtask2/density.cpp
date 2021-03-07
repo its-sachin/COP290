@@ -46,14 +46,14 @@ void show(VideoCapture video,String winName[],double fps, Mat bg) {
     int i = 0;
     Mat frame1;
     Mat frame2;
-    double QueueDensity,DynamicDensity,TotalDensity;
-    int time=0;
+    double QueueDensity,DynamicDensity;
+    double time=0;
     string filename="graph.csv";
     ofstream myfile; 
     myfile.open(filename);
-    myfile<<"time(ms)"<<","<<"QueueDensity"<<","<<"DynamicDensity"<<endl;
+    myfile<<"Time(s)"<<","<<"Queue Density"<<","<<"Dynamic Density"<<endl;
     while (true) {
-        time+=(10);
+        time+=(1);
         frame1 = frame2.clone();
         bool isOpened = video.read(frame2);
 
@@ -70,7 +70,6 @@ void show(VideoCapture video,String winName[],double fps, Mat bg) {
         absdiff(bg, birdEye2,overallDiff);
         GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
         threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY );
-        TotalDensity=(double)countNonZero(overallDiff)/(double)256291;
         imshow(winName[1], overallDiff);
 
         if (i == 0) {
@@ -80,14 +79,16 @@ void show(VideoCapture video,String winName[],double fps, Mat bg) {
             Mat birdEye1 = changeHom(frame1);  
             Mat currDiff;
             absdiff(birdEye1, birdEye2,currDiff);
-            GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
-            threshold(currDiff,currDiff, 30, 255, THRESH_BINARY );
-            DynamicDensity=(double)(countNonZero(currDiff))/(double)256291;
-            QueueDensity=TotalDensity-DynamicDensity;
+            GaussianBlur(currDiff,currDiff, Size(5,5),0);
+            threshold(currDiff,currDiff, 20, 255, THRESH_BINARY );
             imshow(winName[2], currDiff);
+
+            QueueDensity=(double)countNonZero(overallDiff)/(double)256291;
+            DynamicDensity=(double)(countNonZero(currDiff))/(double)256291;
+            myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
         }
-        myfile<<time<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-        if (waitKey(10) == 27){
+        
+        if (waitKey(1) == 27){
             cout << "Esc key is pressed by user. Stoppig the video" << endl;
             break;
         }
