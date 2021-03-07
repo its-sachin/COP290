@@ -54,7 +54,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg) {
     myfile<<"Time(s)"<<","<<"Queue Density"<<","<<"Dynamic Density"<<endl;
     cout<<"Time(s)"<<","<<"Queue Density"<<","<<"Dynamic Density"<<endl;
     while (true) {
-        time+=(1);
+        time+=(1000/fps);
         frame1 = frame2.clone();
         bool isOpened = video.read(frame2);
 
@@ -90,8 +90,8 @@ void show(VideoCapture video,String winName[],double fps, Mat bg) {
             cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
         }
         
-        if (waitKey(1) == 27){
-            cout << "Esc key is pressed by user. Stoppig the video" << endl;
+        if (waitKey(1000/fps) == 27){
+            cout << "Esc key is pressed by user. Stopping the video" << endl;
             break;
         }
     }
@@ -116,6 +116,7 @@ Mat getBack(VideoCapture video,int emptime) {
 int main(int argc, char** argv) {
     string videopath,videoname;
     int emptime=345;
+    double fps,speed; 
     if (argc==1){
         cout<<"Please provide an filname/filepath for source video\n";
         return 0;
@@ -128,8 +129,17 @@ int main(int argc, char** argv) {
     videoname = videopath.substr(found+1);
 
     VideoCapture video(videoname);
-
+    fps = video.get(CAP_PROP_FPS);
+    cout<<"Please Enter The Speed at Which Video is to be Played(0 for default):"<<endl;
+    cin>>speed;
+    if (speed>0){
+        fps=fps*speed;
+    }
+    else if (speed<0){
+        cout<<"Please Enter a Valid Speed:"<<endl;
+    }
     String winName[3] = {"Original Video","Overall Difference","Dynamic Difference"};
+
 
     if (video.isOpened() == false) {
         cout << "Unable to open the video, Check if the file exists in this directory" << endl;
@@ -137,7 +147,6 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    double fps = video.get(CAP_PROP_FPS); 
 
     Mat bg = getBack(video,emptime);
     
