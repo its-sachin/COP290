@@ -49,6 +49,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg) {
     while (true) {
         frame1 = frame2.clone();
         bool isOpened = video.read(frame2);
+        cvtColor(frame2, frame2, COLOR_BGR2GRAY);
 
         if (isOpened == false) {
             cout << "ERROR" << endl;
@@ -56,7 +57,6 @@ void show(VideoCapture video,String winName[],double fps, Mat bg) {
         } 
 
         Mat birdEye2 = changeHom(frame2);
-        cvtColor(birdEye2, birdEye2, COLOR_BGR2GRAY);
         imshow(winName[0], birdEye2);
 
         Mat overallDiff;
@@ -68,7 +68,6 @@ void show(VideoCapture video,String winName[],double fps, Mat bg) {
         }
         else {
             Mat birdEye1 = changeHom(frame1);  
-            cvtColor(birdEye1, birdEye1, COLOR_BGR2GRAY);
             Mat currDiff;
             absdiff(birdEye1, birdEye2,currDiff);
             imshow(winName[2], currDiff);
@@ -86,6 +85,7 @@ Mat getBack(VideoCapture video) {
     video.set(CAP_PROP_POS_MSEC,345000) ;
     Mat frame;
     bool isOpened = video.read(frame);
+    cvtColor(frame, frame, COLOR_BGR2GRAY);
 
     if (isOpened == false) {
         cout << "ERROR in skipping to background frame" << endl;
@@ -93,7 +93,6 @@ Mat getBack(VideoCapture video) {
 
     video.set(CAP_PROP_POS_MSEC,0) ;
     Mat changed = changeHom(frame);
-    cvtColor(changed, changed, COLOR_BGR2GRAY);
     return changed;
 }
 
