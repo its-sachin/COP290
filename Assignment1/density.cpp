@@ -1,6 +1,6 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
-
+#include <fstream>
 using namespace cv;
 using namespace std;
 
@@ -46,21 +46,31 @@ void show(VideoCapture video,String winName[],double fps, Mat bg) {
     int i = 0;
     Mat frame1;
     Mat frame2;
+    double QueueDensity,DynamicDensity,TotalDensity;
+    int time=0;
+    string filename="graph.csv";
+    ofstream myfile; 
+    myfile.open(filename);
+    myfile<<"time(ms)"<<","<<"QueueDensity"<<","<<"DynamicDensity"<<endl;
     while (true) {
+        time+=(100/fps);
         frame1 = frame2.clone();
         bool isOpened = video.read(frame2);
-        cvtColor(frame2, frame2, COLOR_BGR2GRAY);
 
         if (isOpened == false) {
-            cout << "ERROR" << endl;
+            cout << "Video has ended" << endl;
+            myfile.close();
             break;
         } 
-
+        cvtColor(frame2, frame2, COLOR_BGR2GRAY);
         Mat birdEye2 = changeHom(frame2);
         imshow(winName[0], birdEye2);
 
         Mat overallDiff;
         absdiff(bg, birdEye2,overallDiff);
+        GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
+        threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY );
+        TotalDensity=(double)countNonZero(overallDiff)/(double)256291;
         imshow(winName[1], overallDiff);
 
         if (i == 0) {
@@ -70,11 +80,14 @@ void show(VideoCapture video,String winName[],double fps, Mat bg) {
             Mat birdEye1 = changeHom(frame1);  
             Mat currDiff;
             absdiff(birdEye1, birdEye2,currDiff);
+            GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
+            threshold(currDiff,currDiff, 30, 255, THRESH_BINARY );
+            DynamicDensity=(double)(countNonZero(currDiff))/(double)256291;
+            QueueDensity=TotalDensity-DynamicDensity;
             imshow(winName[2], currDiff);
         }
-
-
-        if (waitKey(1000/fps) == 27){
+        myfile<<time<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+        if (waitKey(100/fps) == 27){
             cout << "Esc key is pressed by user. Stoppig the video" << endl;
             break;
         }
@@ -98,7 +111,7 @@ Mat getBack(VideoCapture video) {
 
 
 int main(int argc, char** argv) {
-    VideoCapture video("../../trafficvideo.mp4");
+    VideoCapture video("trafficvideo.mp4");
 
     String winName[3] = {"Original Video","Overall Difference","Dynamic Difference"};
 
