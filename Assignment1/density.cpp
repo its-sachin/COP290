@@ -4,7 +4,7 @@
 using namespace cv;
 using namespace std;
 
-void changeHom(Mat in) {
+Mat changeHom(Mat in) {
 
     vector<Point2f> mapPoints;
     mapPoints.push_back(Point2f(472,52));
@@ -37,7 +37,7 @@ void changeHom(Mat in) {
 
     warpPerspective(wrapImg, out, wrapedMatrix, out.size());
 
-    in = out;
+    return out;
 
 }
 
@@ -52,11 +52,11 @@ void show(VideoCapture video,String winName,String diffwin, double fps, Mat bg) 
             break;
         } 
 
-        changeHom(frame);
-        imshow(winName, frame);
+        Mat birdEye  = changeHom(frame);
+        imshow(winName, birdEye);
 
         Mat diff;
-        absdiff(bg, frame,diff);
+        absdiff(bg, birdEye,diff);
         imshow(diffwin, diff);
 
 
@@ -77,13 +77,13 @@ Mat getBack(VideoCapture video) {
     } 
 
     video.set(CAP_PROP_POS_MSEC,0) ;
-    changeHom(frame);
-    return frame;
+    Mat changed = changeHom(frame);
+    return changed;
 }
 
 
 int main(int argc, char** argv) {
-    VideoCapture video("trafficvideo.mp4");
+    VideoCapture video("/home/mrstark/Desktop/Semesters/Sem4/COP290/Assignments/trafficvideo.mp4");
 
     String winName = "Original Video";
     String diffwin = "Difference Video";
