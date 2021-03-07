@@ -53,7 +53,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg) {
     myfile.open(filename);
     myfile<<"time(ms)"<<","<<"QueueDensity"<<","<<"DynamicDensity"<<endl;
     while (true) {
-        time+=(100/fps);
+        time+=(10);
         frame1 = frame2.clone();
         bool isOpened = video.read(frame2);
 
@@ -87,21 +87,21 @@ void show(VideoCapture video,String winName[],double fps, Mat bg) {
             imshow(winName[2], currDiff);
         }
         myfile<<time<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-        if (waitKey(100/fps) == 27){
+        if (waitKey(10) == 27){
             cout << "Esc key is pressed by user. Stoppig the video" << endl;
             break;
         }
     }
 }
 
-Mat getBack(VideoCapture video) {
-    video.set(CAP_PROP_POS_MSEC,345000) ;
+Mat getBack(VideoCapture video,int emptime) {
+    video.set(CAP_PROP_POS_MSEC,emptime*1000) ;
     Mat frame;
     bool isOpened = video.read(frame);
     cvtColor(frame, frame, COLOR_BGR2GRAY);
 
     if (isOpened == false) {
-        cout << "ERROR in skipping to background frame" << endl;
+        cout << "The time for empty frame is not correct\n" << endl;
     } 
 
     video.set(CAP_PROP_POS_MSEC,0) ;
@@ -111,7 +111,20 @@ Mat getBack(VideoCapture video) {
 
 
 int main(int argc, char** argv) {
-    VideoCapture video("trafficvideo.mp4");
+    string videopath,videoname;
+    int emptime=345;
+    if (argc==1){
+        cout<<"Please provide an filname/filepath for source video\n";
+        return 0;
+    }
+    if (argc==3){
+        emptime= stoi(argv[2]);
+    }
+    videopath=argv[1];
+    size_t found = videopath.find_last_of("/\\");
+    videoname = videopath.substr(found+1);
+
+    VideoCapture video(videoname);
 
     String winName[3] = {"Original Video","Overall Difference","Dynamic Difference"};
 
@@ -124,7 +137,7 @@ int main(int argc, char** argv) {
     double fps = video.get(CAP_PROP_FPS); 
     cout << "FPS: " << fps << endl;
 
-    Mat bg = getBack(video);
+    Mat bg = getBack(video,emptime);
     
     show(video,winName,fps,bg);
     return 0;
