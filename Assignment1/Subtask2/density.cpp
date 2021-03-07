@@ -52,6 +52,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg) {
     ofstream myfile; 
     myfile.open(filename);
     myfile<<"Time(s)"<<","<<"Queue Density"<<","<<"Dynamic Density"<<endl;
+    cout<<"Time(s)"<<","<<"Queue Density"<<","<<"Dynamic Density"<<endl;
     while (true) {
         time+=(1);
         frame1 = frame2.clone();
@@ -86,6 +87,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg) {
             QueueDensity=(double)countNonZero(overallDiff)/(double)256291;
             DynamicDensity=(double)(countNonZero(currDiff))/(double)256291;
             myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+            cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
         }
         
         if (waitKey(1) == 27){
@@ -136,7 +138,6 @@ int main(int argc, char** argv) {
     }
 
     double fps = video.get(CAP_PROP_FPS); 
-    cout << "FPS: " << fps << endl;
 
     Mat bg = getBack(video,emptime);
     
