@@ -55,7 +55,8 @@ void show(VideoCapture video,String winName[],double fps, Mat bg) {
             break;
         } 
 
-        Mat birdEye2  = changeHom(frame2);
+        Mat birdEye2 = changeHom(frame2);
+        cvtColor(birdEye2, birdEye2, COLOR_BGR2GRAY);
         imshow(winName[0], birdEye2);
 
         Mat overallDiff;
@@ -66,7 +67,8 @@ void show(VideoCapture video,String winName[],double fps, Mat bg) {
             i =1;
         }
         else {
-            Mat birdEye1  = changeHom(frame1);
+            Mat birdEye1 = changeHom(frame1);  
+            cvtColor(birdEye1, birdEye1, COLOR_BGR2GRAY);
             Mat currDiff;
             absdiff(birdEye1, birdEye2,currDiff);
             imshow(winName[2], currDiff);
@@ -91,6 +93,7 @@ Mat getBack(VideoCapture video) {
 
     video.set(CAP_PROP_POS_MSEC,0) ;
     Mat changed = changeHom(frame);
+    cvtColor(changed, changed, COLOR_BGR2GRAY);
     return changed;
 }
 
@@ -109,10 +112,7 @@ int main(int argc, char** argv) {
     double fps = video.get(CAP_PROP_FPS); 
     cout << "FPS: " << fps << endl;
 
-    namedWindow(winName[0], WINDOW_NORMAL);
-
     Mat bg = getBack(video);
-    // imshow(bgName, bg);
     
     show(video,winName,fps,bg);
     return 0;
