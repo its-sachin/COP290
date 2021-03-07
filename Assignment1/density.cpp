@@ -42,22 +42,35 @@ Mat changeHom(Mat in) {
 }
 
 
-void show(VideoCapture video,String winName,String diffwin, double fps, Mat bg) {
+void show(VideoCapture video,String winName[],double fps, Mat bg) {
+    int i = 0;
+    Mat frame1;
+    Mat frame2;
     while (true) {
-        Mat frame;
-        bool isOpened = video.read(frame);
+        frame1 = frame2.clone();
+        bool isOpened = video.read(frame2);
 
         if (isOpened == false) {
             cout << "ERROR" << endl;
             break;
         } 
 
-        Mat birdEye  = changeHom(frame);
-        imshow(winName, birdEye);
+        Mat birdEye2  = changeHom(frame2);
+        imshow(winName[0], birdEye2);
 
-        Mat diff;
-        absdiff(bg, birdEye,diff);
-        imshow(diffwin, diff);
+        Mat overallDiff;
+        absdiff(bg, birdEye2,overallDiff);
+        imshow(winName[1], overallDiff);
+
+        if (i == 0) {
+            i =1;
+        }
+        else {
+            Mat birdEye1  = changeHom(frame1);
+            Mat currDiff;
+            absdiff(birdEye1, birdEye2,currDiff);
+            imshow(winName[2], currDiff);
+        }
 
 
         if (waitKey(1000/fps) == 27){
@@ -73,7 +86,7 @@ Mat getBack(VideoCapture video) {
     bool isOpened = video.read(frame);
 
     if (isOpened == false) {
-        cout << "ERROR in skipping to back frame" << endl;
+        cout << "ERROR in skipping to background frame" << endl;
     } 
 
     video.set(CAP_PROP_POS_MSEC,0) ;
@@ -83,10 +96,9 @@ Mat getBack(VideoCapture video) {
 
 
 int main(int argc, char** argv) {
-    VideoCapture video("/home/mrstark/Desktop/Semesters/Sem4/COP290/Assignments/trafficvideo.mp4");
+    VideoCapture video("../../trafficvideo.mp4");
 
-    String winName = "Original Video";
-    String diffwin = "Difference Video";
+    String winName[3] = {"Original Video","Overall Difference","Dynamic Difference"};
 
     if (video.isOpened() == false) {
         cout << "Unable to open the video, Check if the file exists in this directory" << endl;
@@ -97,12 +109,12 @@ int main(int argc, char** argv) {
     double fps = video.get(CAP_PROP_FPS); 
     cout << "FPS: " << fps << endl;
 
-    namedWindow(winName, WINDOW_NORMAL);
+    namedWindow(winName[0], WINDOW_NORMAL);
 
     Mat bg = getBack(video);
     // imshow(bgName, bg);
     
-    show(video,winName,diffwin,fps,bg);
+    show(video,winName,fps,bg);
     return 0;
     
 }
