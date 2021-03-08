@@ -46,15 +46,18 @@ void show(VideoCapture video,String winName[],double fps, Mat bg) {
     int i = 0;
     Mat frame1;
     Mat frame2;
+
     double QueueDensity,DynamicDensity;
     double time=0;
+
     string filename="graph.csv";
     ofstream myfile; 
     myfile.open(filename);
     myfile<<"Time(s)"<<","<<"Queue Density"<<","<<"Dynamic Density"<<endl;
     cout<<"Time(s)"<<","<<"Queue Density"<<","<<"Dynamic Density"<<endl;
+
     while (true) {
-        time+=(1000/fps);
+        time+=(1);
         frame1 = frame2.clone();
         bool isOpened = video.read(frame2);
 
@@ -71,6 +74,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg) {
         absdiff(bg, birdEye2,overallDiff);
         GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
         threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY );
+
         imshow(winName[1], overallDiff);
 
         if (i == 0) {
@@ -82,10 +86,12 @@ void show(VideoCapture video,String winName[],double fps, Mat bg) {
             absdiff(birdEye1, birdEye2,currDiff);
             GaussianBlur(currDiff,currDiff, Size(5,5),0);
             threshold(currDiff,currDiff, 20, 255, THRESH_BINARY );
+
             imshow(winName[2], currDiff);
 
             QueueDensity=(double)countNonZero(overallDiff)/(double)256291;
             DynamicDensity=(double)(countNonZero(currDiff))/(double)256291;
+
             myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
             cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
         }
@@ -115,37 +121,61 @@ Mat getBack(VideoCapture video,int emptime) {
 
 int main(int argc, char** argv) {
     string videopath,videoname;
-    int emptime=345;
-    double fps,speed; 
+    
+    double fps,speed,totalTime; 
     if (argc==1){
         cout<<"Please provide an filname/filepath for source video\n";
         return 0;
     }
-    if (argc==3){
-        emptime= stoi(argv[2]);
-    }
+
     videopath=argv[1];
-    size_t found = videopath.find_last_of("/\\");
-    videoname = videopath.substr(found+1);
 
-    VideoCapture video(videoname);
-    fps = video.get(CAP_PROP_FPS);
-    cout<<"Please Enter The Speed at Which Video is to be Played(0 for default):"<<endl;
-    cin>>speed;
-    if (speed>0){
-        fps=fps*speed;
-    }
-    else if (speed<0){
-        cout<<"Please Enter a Valid Speed:"<<endl;
-    }
-    String winName[3] = {"Original Video","Overall Difference","Dynamic Difference"};
-
+    VideoCapture video(videopath);
 
     if (video.isOpened() == false) {
         cout << "Unable to open the video, Check if the file exists in this directory" << endl;
         cin.get(); //wait for any key press
         return -1;
     }
+    fps = video.get(CAP_PROP_FPS);
+    totalTime = video.get(CAP_PROP_FRAME_COUNT)/fps;
+
+    if (argc==3){
+        try{
+            speed = stod(argv[2]);
+            if (speed>0){
+                fps=fps*speed;
+            }
+            else if (speed<0){
+                cout<<"Speed given is INVALID, doing computation in normal speed."<<endl;
+            }
+        }	
+
+        catch(exception &err)
+        {
+            cout<<"Speed given is INVALID, doing computation in normal speed." <<endl;
+        }
+    }
+
+    int emptime=345;
+    if (argc == 4) {
+        try{
+            emptime= stoi(argv[3]);
+            if (emptime<0 || emptime > totalTime) {
+                cout<<"Time provided for background is invalid, taking default value." <<endl;
+                emptime = 345;
+            }
+        }	
+
+        catch(exception &err)
+        {
+            cout<<"Time provided for background is invalid, taking default value." <<endl;
+            emptime = 345;
+        }        
+    }
+
+
+    String winName[3] = {"Original Video","Overall Difference","Dynamic Difference"};
 
 
     Mat bg = getBack(video,emptime);
