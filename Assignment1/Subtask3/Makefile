@@ -1,4 +1,4 @@
-#target entry to build program executable named wrapP from density.cpp
+#target entry to build program executable named wrapP from optimise.cpp
 #defining the compiler to be used	
 CC=g++
 #compiler flags:
@@ -6,7 +6,7 @@ CC=g++
 #we us -Wall to turn on complier warning
 CFLAGS=-Wall
 #our exicutable file 
-EXCICUTABLE=density
+EXCICUTABLE=optimise
 #our opencv library
 LI=`pkg-config --cflags --libs opencv`
 

@@ -4,6 +4,40 @@
 using namespace cv;
 using namespace std;
 
+class Mode
+{
+
+public:
+
+int getMethod() {
+    return method;
+}
+int getSkipper() {
+    return skipper;
+}
+
+void setMethod(int set_method) {
+    method = set_method;
+}
+
+void setSkipper(int set_skipper) {
+    skipper = set_skipper;
+}
+
+
+private:
+
+int method;
+
+// skipper is method related variable
+// frames skipped for method 1
+// number of threads for method 3 and 4
+int skipper; 
+
+    
+};
+
+
 Mat changeHom(Mat in) {
 
     vector<Point2f> mapPoints;
@@ -42,9 +76,9 @@ Mat changeHom(Mat in) {
 }
 
 
-void show(VideoCapture video,String winName[],double fps, Mat bg) {
-    int i = 0;
-    Mat frame1;
+void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
+    // int i = 0;
+    // Mat frame1;
     Mat frame2;
 
     double QueueDensity,DynamicDensity;
@@ -52,13 +86,15 @@ void show(VideoCapture video,String winName[],double fps, Mat bg) {
 
     string filename="graph.csv";
     ofstream myfile; 
+
     myfile.open(filename);
     myfile<<"Time(s)"<<","<<"Queue Density"<<","<<"Dynamic Density"<<endl;
+
     cout<<"Time(s)"<<","<<"Queue Density"<<","<<"Dynamic Density"<<endl;
 
     while (true) {
         time+=(1);
-        frame1 = frame2.clone();
+        // frame1 = frame2.clone();
         bool isOpened = video.read(frame2);
 
         if (isOpened == false) {
@@ -77,24 +113,40 @@ void show(VideoCapture video,String winName[],double fps, Mat bg) {
 
         imshow(winName[1], overallDiff);
 
-        if (i == 0) {
-            i =1;
+        // if (i == 0) {
+        //     i =1;
+        // }
+        // else {
+            // Mat birdEye1 = changeHom(frame1);  
+            // Mat currDiff;
+            // absdiff(birdEye1, birdEye2,currDiff);
+            // GaussianBlur(currDiff,currDiff, Size(5,5),0);
+            // threshold(currDiff,currDiff, 20, 255, THRESH_BINARY );
+
+            // DynamicDensity=(double)(countNonZero(currDiff))/(double)256291;
+
+            // imshow(winName[2], currDiff);
+
+        // }
+
+        QueueDensity=(double)countNonZero(overallDiff)/(double)256291;
+        DynamicDensity = 0;
+
+        myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+        cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+
+        if (mode.getMethod() == 1){
+            int skipFrame = mode.getSkipper();
+
+            for (int i=1; i < skipFrame; i++) {
+                myfile<<(time+i)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+                cout<< (time+i)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+            }
+
+            time += skipFrame -1;
+            video.set(1,time);
         }
-        else {
-            Mat birdEye1 = changeHom(frame1);  
-            Mat currDiff;
-            absdiff(birdEye1, birdEye2,currDiff);
-            GaussianBlur(currDiff,currDiff, Size(5,5),0);
-            threshold(currDiff,currDiff, 20, 255, THRESH_BINARY );
-
-            imshow(winName[2], currDiff);
-
-            QueueDensity=(double)countNonZero(overallDiff)/(double)256291;
-            DynamicDensity=(double)(countNonZero(currDiff))/(double)256291;
-
-            myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-            cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-        }
+        
         
         if (waitKey(1000/fps) == 27){
             cout << "Esc key is pressed by user. Stopping the video" << endl;
@@ -122,7 +174,7 @@ Mat getBack(VideoCapture video,int emptime) {
 int main(int argc, char** argv) {
     string videopath,videoname;
     
-    double fps,speed,totalTime; 
+    double fps,totalTime; 
     if (argc==1){
         cout<<"Please provide an filname/filepath for source video\n";
         return 0;
@@ -140,27 +192,23 @@ int main(int argc, char** argv) {
     fps = video.get(CAP_PROP_FPS);
     totalTime = video.get(CAP_PROP_FRAME_COUNT)/fps;
 
-    if (argc==3){
-        try{
-            speed = stod(argv[2]);
-            if (speed>0){
-                fps=fps*speed;
-            }
-            else if (speed<0){
-                cout<<"Speed given is INVALID, doing computation in normal speed."<<endl;
-            }
-        }	
-
-        catch(exception &err)
-        {
-            cout<<"Speed given is INVALID, doing computation in normal speed." <<endl;
-        }
+    Mode mode;
+    if (argc == 2) {
+        cout<< "Please provide the method for optimization" << endl;
+        return 0;
+    }
+    if (argc == 3) {
+        cout<< "Please provide the argument for method" << endl;
+        return 0;
     }
 
+    mode.setMethod(stoi(argv[2]));
+    mode.setSkipper(stoi(argv[3]));
+
     int emptime=345;
-    if (argc == 4) {
+    if (argc == 5) {
         try{
-            emptime= stoi(argv[3]);
+            emptime= stoi(argv[4]);
             if (emptime<0 || emptime > totalTime) {
                 cout<<"Time provided for background is invalid, taking default value." <<endl;
                 emptime = 345;
@@ -180,7 +228,7 @@ int main(int argc, char** argv) {
 
     Mat bg = getBack(video,emptime);
     
-    show(video,winName,fps,bg);
+    show(video,winName,fps,bg, mode);
     return 0;
     
 }
