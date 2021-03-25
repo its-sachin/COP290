@@ -27,6 +27,8 @@ void setSkipper(int set_skipper) {
     skipper = set_skipper;
 }
 
+double xDimen;
+double yDimen;
 
 private:
 
@@ -84,6 +86,13 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
     // Mat frame1;
     Mat frame2;
 
+    if (mode.getMethod() == 2){
+        cout<< bg.size() << endl;
+        resize(bg, bg, Size(mode.xDimen, mode.yDimen), 0,0);
+        cout<< bg.size() <<endl;
+
+    }
+
     double QueueDensity =0;
     double DynamicDensity=0;
     double time=0;
@@ -114,9 +123,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
         }
 
         if (mode.getMethod() == 2) {
-            int factor = mode.getSkipper();
-            resize(frame2, frame2, frame2.size(), factor,factor, INTER_LANCZOS4);
-            resize(bg, bg, bg.size(), factor,factor, INTER_LANCZOS4);
+            resize(frame2, frame2, Size(mode.xDimen,mode.yDimen), 0,0);
         }
         
         cvtColor(frame2, frame2, COLOR_BGR2GRAY);
@@ -178,7 +185,7 @@ Mat getBack(VideoCapture video,int emptime) {
 int main(int argc, char** argv) {
     string videopath,videoname;
     
-    double fps,totalTime; 
+    double fps; 
     if (argc==1){
         cout<<"Please provide an filname/filepath for source video\n";
         return 0;
@@ -194,37 +201,51 @@ int main(int argc, char** argv) {
         return -1;
     }
     fps = video.get(CAP_PROP_FPS);
-    totalTime = video.get(CAP_PROP_FRAME_COUNT)/fps;
 
     Mode mode;
     if (argc == 2) {
-        cout<< "Please provide the method for optimization" << endl;
+        cout<< "Method for optimization not provided" << endl;
         return 0;
     }
-    if (argc == 3) {
-        cout<< "Please provide the argument for method" << endl;
-        return 0;
+    int modeVal = stoi(argv[2]);
+    mode.setMethod(modeVal);
+
+    if (modeVal ==1){
+        if (argc == 3) {
+            cout<< "Number of frames to skip not provided" << endl;
+            return 0;
+        }
+
+        mode.setSkipper(stoi(argv[3]));
     }
 
-    mode.setMethod(stoi(argv[2]));
-    mode.setSkipper(stoi(argv[3]));
+    else if (modeVal == 2){
+        if (argc <5) {
+            cout<< "Both dimensions not provided" << endl;
+            return 0;
+        }
+
+        mode.xDimen = stod(argv[3]);
+        mode.yDimen = stod(argv[4]);
+    }
 
     int emptime=345;
-    if (argc == 5) {
-        try{
-            emptime= stoi(argv[4]);
-            if (emptime<0 || emptime > totalTime) {
-                cout<<"Time provided for background is invalid, taking default value." <<endl;
-                emptime = 345;
-            }
-        }	
+    // if (argc == 5) {
+        // double totalTime = video.get(CAP_PROP_FRAME_COUNT)/fps;
+    //     try{
+    //         emptime= stoi(argv[4]);
+    //         if (emptime<0 || emptime > totalTime) {
+    //             cout<<"Time provided for background is invalid, taking default value." <<endl;
+    //             emptime = 345;
+    //         }
+    //     }	
 
-        catch(exception &err)
-        {
-            cout<<"Time provided for background is invalid, taking default value." <<endl;
-            emptime = 345;
-        }        
-    }
+    //     catch(exception &err)
+    //     {
+    //         cout<<"Time provided for background is invalid, taking default value." <<endl;
+    //         emptime = 345;
+    //     }        
+    // }
 
 
     String winName[3] = {"Original Video","Overall Difference","Dynamic Difference"};
