@@ -102,6 +102,13 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
             myfile.close();
             break;
         } 
+
+        if (mode.getMethod() == 2) {
+            int factor = mode.getSkipper();
+            resize(frame2, frame2, frame2.size(), factor,factor, INTER_LANCZOS4);
+            resize(bg, bg, bg.size(), factor,factor, INTER_LANCZOS4);
+        }
+        
         cvtColor(frame2, frame2, COLOR_BGR2GRAY);
         Mat birdEye2 = changeHom(frame2);
         imshow(winName[0], birdEye2);
