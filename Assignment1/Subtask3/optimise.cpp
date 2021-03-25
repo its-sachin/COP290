@@ -45,24 +45,28 @@ int skipper;
 
 Mat changeHom(Mat in) {
 
+    double xFactor = in.size().width/1920.0;
+    double yFactor = in.size().height/1080.0;
+
+
     vector<Point2f> mapPoints;
-    mapPoints.push_back(Point2f(472,52));
-    mapPoints.push_back(Point2f(800,52));
-    mapPoints.push_back(Point2f(800,830));
-    mapPoints.push_back(Point2f(472,830));
+    mapPoints.push_back(Point2f(472*xFactor,52*yFactor));
+    mapPoints.push_back(Point2f(800*xFactor,52*yFactor));
+    mapPoints.push_back(Point2f(800*xFactor,830*yFactor));
+    mapPoints.push_back(Point2f(472*xFactor,830*yFactor));
 
     vector<Point2f> srcPoints;
-    srcPoints.push_back(Point2f(962,213));
-    srcPoints.push_back(Point2f(1291,211));
-    srcPoints.push_back(Point2f(1558,978));
-    srcPoints.push_back(Point2f(338,976));
+    srcPoints.push_back(Point2f(962*xFactor,213*yFactor));
+    srcPoints.push_back(Point2f(1291*xFactor,211*yFactor));
+    srcPoints.push_back(Point2f(1558*xFactor,978*yFactor));
+    srcPoints.push_back(Point2f(338*xFactor,976*yFactor));
 
     Mat wrapImg = Mat::zeros(in.size(),CV_8UC3);
     Mat wrapedMatrix = findHomography(srcPoints, mapPoints);
     warpPerspective(in, wrapImg, wrapedMatrix, in.size());
 
-    int xdimension=329;
-    int ydimension=779;
+    int xdimension=329*xFactor;
+    int ydimension=779*yFactor;
 
     Mat out(ydimension,xdimension,CV_8UC3,Scalar(0,0,0));
 
@@ -85,13 +89,6 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
     // int i = 0;
     // Mat frame1;
     Mat frame2;
-
-    if (mode.getMethod() == 2){
-        cout<< bg.size() << endl;
-        resize(bg, bg, Size(mode.xDimen, mode.yDimen), 0,0);
-        cout<< bg.size() <<endl;
-
-    }
 
     double QueueDensity =0;
     double DynamicDensity=0;
@@ -123,7 +120,8 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
         }
 
         if (mode.getMethod() == 2) {
-            resize(frame2, frame2, Size(mode.xDimen,mode.yDimen), 0,0);
+            Mat temp = frame2.clone();
+            resize(temp, frame2, Size(mode.xDimen,mode.yDimen), 0,0);
         }
         
         cvtColor(frame2, frame2, COLOR_BGR2GRAY);
@@ -166,15 +164,27 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
     }
 }
 
-Mat getBack(VideoCapture video,int emptime) {
+Mat getBack(VideoCapture video,int emptime, Mode mode) {
     video.set(CAP_PROP_POS_MSEC,emptime*1000) ;
     Mat frame;
     bool isOpened = video.read(frame);
-    cvtColor(frame, frame, COLOR_BGR2GRAY);
 
     if (isOpened == false) {
         cout << "The time for empty frame is not correct\n" << endl;
     } 
+
+    if (mode.getMethod() == 2){
+        Mat bg;
+        resize(frame, bg, Size(mode.xDimen, mode.yDimen), 0,0);
+        cvtColor(bg, bg, COLOR_BGR2GRAY);
+
+        video.set(CAP_PROP_POS_MSEC,0) ;
+        Mat changed = changeHom(bg);
+        return changed;
+
+    }
+
+    cvtColor(frame, frame, COLOR_BGR2GRAY);
 
     video.set(CAP_PROP_POS_MSEC,0) ;
     Mat changed = changeHom(frame);
@@ -251,7 +261,7 @@ int main(int argc, char** argv) {
     String winName[3] = {"Original Video","Overall Difference","Dynamic Difference"};
 
     auto start = high_resolution_clock::now();
-    Mat bg = getBack(video,emptime);
+    Mat bg = getBack(video,emptime, mode);
     
     show(video,winName,fps,bg, mode);
     auto stop = high_resolution_clock::now();

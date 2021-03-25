@@ -16,8 +16,11 @@ int main(int argc, char* argv[])
     cout << "image size after " << im.size() << endl;
     
     while (true) {
-        cvtColor(im, im, COLOR_BGR2GRAY);
-        imshow("Image", im);
+        // imshow("Image", im);
+        Mat gray;
+        cvtColor(im, gray, COLOR_BGR2GRAY);
+        // im = gray;
+        imshow("GrayImage", gray);
         if (waitKey(10) == 27){
             break;
         }
