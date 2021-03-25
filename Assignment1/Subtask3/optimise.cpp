@@ -185,10 +185,6 @@ void* show1(void* arg ) {
     VideoCapture video = arg_struct->video;
     video.set(CAP_PROP_POS_FRAMES,count);
 
-    cout<< "thread :" << endl;
-    cout<< count << endl;
-    cout<<  arg_struct->end << endl;
-
     Mat frame2;
     Mat bg = arg_struct->bg;
     map<int,double> data;
@@ -207,8 +203,7 @@ void* show1(void* arg ) {
         threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY );
 
         QueueDensity=(double)countNonZero(overallDiff)/(double)256291;
-        cout<<count<<" "<<QueueDensity<<endl;
-        data[count] = QueueDensity;
+        data.insert({count,QueueDensity});
         if (waitKey(1) == 27){
             cout << "Esc key is pressed by user. Stopping the video" << endl;
             break;
@@ -296,6 +291,7 @@ int main(int argc, char** argv) {
         mode.yDimen = stod(argv[4]);
     }
     else if (modeVal == 4){
+        auto start = high_resolution_clock::now();
         if (argc==3){
             cout<<"No of threads not provided"<<endl;
             return 0;
@@ -323,21 +319,34 @@ int main(int argc, char** argv) {
             pthread_attr_init(&attr);
             pthread_create(&tids[i],&attr,show1,&args[i]);
         }
+
+        ofstream myfile;
+        myfile.open ("graph.csv");
         for (int i=0; i<no;i++){
             pthread_join(tids[i],NULL);
+            myfile<<"Frame No.,Queue Density\n";
         }
+        auto stop = high_resolution_clock::now();
+        auto duration = duration_cast<microseconds>(stop - start);
+        cout << "Time taken by function: "<< duration.count()/1000000 << " seconds" << endl;
+        for (int i=0; i<no;i++){
+            for (int j=args[i].start;j<args[i].end;j++){
+                if (j<frameT-2){
+                    double k= (double) j /15.0;
+                    myfile<<k<<","<<args[i].data.at(j)<<endl;
+                }
+            }
+        }        
+        myfile.close(); 
         return 0;
     }
 
 
     String winName[3] = {"Original Video","Overall Difference","Dynamic Difference"};
 
-    auto start = high_resolution_clock::now();
+
     
     show(video,winName,fps,bg, mode);
-    auto stop = high_resolution_clock::now();
-    auto duration = duration_cast<microseconds>(stop - start);
-    cout << "Time taken by function: "<< duration.count()/1000000 << " seconds" << endl;
     return 0;
     
 }
