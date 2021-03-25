@@ -1,8 +1,11 @@
+#include <algorithm>
+#include <chrono>
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <fstream>
 using namespace cv;
 using namespace std;
+using namespace std::chrono;
 
 class Mode
 {
@@ -232,10 +235,13 @@ int main(int argc, char** argv) {
 
     String winName[3] = {"Original Video","Overall Difference","Dynamic Difference"};
 
-
+    auto start = high_resolution_clock::now();
     Mat bg = getBack(video,emptime);
     
     show(video,winName,fps,bg, mode);
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(stop - start);
+    cout << "Time taken by function: "<< duration.count() << " microseconds" << endl;
     return 0;
     
 }
