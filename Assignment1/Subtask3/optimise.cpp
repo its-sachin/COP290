@@ -84,8 +84,9 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
     // Mat frame1;
     Mat frame2;
 
-    double QueueDensity,DynamicDensity;
-    double time=0;
+    double QueueDensity =0;
+    double DynamicDensity=0;
+    int time=0;
 
     string filename="graph.csv";
     ofstream myfile; 
@@ -105,6 +106,12 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
             myfile.close();
             break;
         } 
+
+        if (mode.getMethod() == 1 && time%10 != 0) {
+            myfile<<(time)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+            cout<< (time)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+            continue;
+        }
 
         if (mode.getMethod() == 2) {
             int factor = mode.getSkipper();
@@ -140,25 +147,12 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
         // }
 
         QueueDensity=(double)countNonZero(overallDiff)/(double)256291;
-        DynamicDensity = 0;
 
         myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
         cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-
-        if (mode.getMethod() == 1){
-            int skipFrame = mode.getSkipper();
-
-            for (int i=1; i < skipFrame; i++) {
-                myfile<<(time+i)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-                cout<< (time+i)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-            }
-
-            time += skipFrame -1;
-            video.set(1,time);
-        }
         
         
-        if (waitKey(1000/fps) == 27){
+        if (waitKey(1) == 27){
             cout << "Esc key is pressed by user. Stopping the video" << endl;
             break;
         }
@@ -241,7 +235,7 @@ int main(int argc, char** argv) {
     show(video,winName,fps,bg, mode);
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(stop - start);
-    cout << "Time taken by function: "<< duration.count() << " microseconds" << endl;
+    cout << "Time taken by function: "<< duration.count()/1000000 << " seconds" << endl;
     return 0;
     
 }
