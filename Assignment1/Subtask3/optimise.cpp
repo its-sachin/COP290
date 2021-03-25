@@ -86,7 +86,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
 
     double QueueDensity =0;
     double DynamicDensity=0;
-    int time=0;
+    double time=0;
 
     string filename="graph.csv";
     ofstream myfile; 
@@ -107,7 +107,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
             break;
         } 
 
-        if (mode.getMethod() == 1 && time%10 != 0) {
+        if (mode.getMethod() == 1 && (int)time%mode.getSkipper() != 0) {
             myfile<<(time)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
             cout<< (time)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
             continue;
