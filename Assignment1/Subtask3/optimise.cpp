@@ -3,9 +3,18 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <fstream>
+#include <map>
 using namespace cv;
 using namespace std;
 using namespace std::chrono;
+
+struct modefour{
+    VideoCapture video;
+    map<int,double> data;
+    Mat bg;
+    int start;
+    int end;
+};
 
 class Mode
 {
@@ -29,7 +38,7 @@ void setSkipper(int set_skipper) {
 
 double xDimen;
 double yDimen;
-
+int noThread;
 private:
 
 int method;
@@ -103,6 +112,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
     cout<<"Time(s)"<<","<<"Queue Density"<<","<<"Dynamic Density"<<endl;
 
     while (true) {
+        cout<<time<<endl;
         time+=(1);
         // frame1 = frame2.clone();
         bool isOpened = video.read(frame2);
@@ -164,6 +174,44 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
     }
 }
 
+
+void* show1(void* arg ) {
+    struct modefour *arg_struct =(struct  modefour*) arg;
+
+    double QueueDensity =0;
+    int count=arg_struct->start;
+    VideoCapture video=arg_struct->video;
+    video.set(CAP_PROP_POS_FRAMES,count);
+    Mat frame2;
+    Mat bg=arg_struct->bg;
+    map<int,double> data;
+    while (count!=arg_struct->end) {
+        bool isOpened = video.read(frame2);
+
+        if (isOpened == false) {
+            cout << "Video has ended" << endl;
+            break;
+        } 
+        cvtColor(frame2, frame2, COLOR_BGR2GRAY);
+        Mat birdEye2 = changeHom(frame2);
+        Mat overallDiff;
+        absdiff(bg, birdEye2,overallDiff);
+        GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
+        threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY );
+
+        QueueDensity=(double)countNonZero(overallDiff)/(double)256291;
+        cout<<count<<" "<<QueueDensity<<endl;
+        data[count]=QueueDensity;
+        if (waitKey(1) == 27){
+            cout << "Esc key is pressed by user. Stopping the video" << endl;
+            break;
+        }
+        count++;
+    }
+    arg_struct->data=data;
+    return 0;
+}
+
 Mat getBack(VideoCapture video,int emptime, Mode mode) {
     video.set(CAP_PROP_POS_MSEC,emptime*1000) ;
     Mat frame;
@@ -196,6 +244,7 @@ int main(int argc, char** argv) {
     string videopath,videoname;
     
     double fps; 
+    int frameT;
     if (argc==1){
         cout<<"Please provide an filname/filepath for source video\n";
         return 0;
@@ -211,7 +260,7 @@ int main(int argc, char** argv) {
         return -1;
     }
     fps = video.get(CAP_PROP_FPS);
-
+    frameT= (int) video.get(CAP_PROP_FRAME_COUNT);
     Mode mode;
     if (argc == 2) {
         cout<< "Method for optimization not provided" << endl;
@@ -220,12 +269,14 @@ int main(int argc, char** argv) {
     int modeVal = stoi(argv[2]);
     mode.setMethod(modeVal);
 
+    int emptime=345;
+    Mat bg = getBack(video,emptime, mode);
+
     if (modeVal ==1){
         if (argc == 3) {
             cout<< "Number of frames to skip not provided" << endl;
             return 0;
         }
-
         mode.setSkipper(stoi(argv[3]));
     }
 
@@ -234,34 +285,44 @@ int main(int argc, char** argv) {
             cout<< "Both dimensions not provided" << endl;
             return 0;
         }
-
         mode.xDimen = stod(argv[3]);
         mode.yDimen = stod(argv[4]);
     }
-
-    int emptime=345;
-    // if (argc == 5) {
-        // double totalTime = video.get(CAP_PROP_FRAME_COUNT)/fps;
-    //     try{
-    //         emptime= stoi(argv[4]);
-    //         if (emptime<0 || emptime > totalTime) {
-    //             cout<<"Time provided for background is invalid, taking default value." <<endl;
-    //             emptime = 345;
-    //         }
-    //     }	
-
-    //     catch(exception &err)
-    //     {
-    //         cout<<"Time provided for background is invalid, taking default value." <<endl;
-    //         emptime = 345;
-    //     }        
-    // }
+    else if (modeVal == 4){
+        if (argc==3){
+            cout<<"No of threads not provided"<<endl;
+            return 0;
+        }
+        int no=stoi(argv[3]);
+        mode.noThread=no;
+        pthread_t tids[no];
+        int count=0;
+        for (int i=0; i<no; i++){
+            struct modefour args;
+            args.start=count;
+            count+=frameT/no;
+            if (i==no-1){
+                args.end=frameT+1;
+            }
+            else{
+                args.end=count;
+            }
+            args.bg=bg; 
+            args.video=video;
+            pthread_attr_t attr;
+            pthread_attr_init(&attr);
+            pthread_create(&tids[i],&attr,show1,&args);
+        }
+        for (int i=0; i<no;i++){
+            pthread_join(tids[i],NULL);
+        }
+        return 0;
+    }
 
 
     String winName[3] = {"Original Video","Overall Difference","Dynamic Difference"};
 
     auto start = high_resolution_clock::now();
-    Mat bg = getBack(video,emptime, mode);
     
     show(video,winName,fps,bg, mode);
     auto stop = high_resolution_clock::now();
@@ -270,3 +331,6 @@ int main(int argc, char** argv) {
     return 0;
     
 }
+
+
+
