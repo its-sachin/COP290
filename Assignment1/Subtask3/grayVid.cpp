@@ -10,6 +10,64 @@ struct summer {
     long long ans;
 };
 
+Mat changeHom(Mat in, int a) {
+
+    double xFactor = in.size().width/1920.0;
+    double yFactor = in.size().height/1080.0;
+
+
+    vector<Point2f> mapPoints;
+    vector<Point2f> srcPoints;
+    
+
+    if (a == -1) {
+        mapPoints.push_back(Point2f(472,52));
+        mapPoints.push_back(Point2f(800,52));
+        mapPoints.push_back(Point2f(800,830));
+        mapPoints.push_back(Point2f(472,830));
+
+        
+        srcPoints.push_back(Point2f(962,213));
+        srcPoints.push_back(Point2f(1291,211));
+        srcPoints.push_back(Point2f(1558,978));
+        srcPoints.push_back(Point2f(338,976));
+    }
+
+    else {
+        mapPoints.push_back(Point2f(800,52-a));
+        mapPoints.push_back(Point2f(472,52-a));
+        mapPoints.push_back(Point2f(800,830-a));
+        mapPoints.push_back(Point2f(472,830-a));
+
+        srcPoints.push_back(Point2f(962,213-a));
+        srcPoints.push_back(Point2f(1291,211-a));
+        srcPoints.push_back(Point2f(1558,978-a));
+        srcPoints.push_back(Point2f(338,976-a));
+    }
+
+    Mat wrapImg = Mat::zeros(in.size(),CV_8UC3);
+    Mat wrapedMatrix = findHomography(srcPoints, mapPoints);
+    warpPerspective(in, wrapImg, wrapedMatrix, in.size());
+
+    int xdimension=329;
+    int ydimension=779;
+
+    Mat out(ydimension*yFactor,xdimension,CV_8UC3,Scalar(0,0,0));
+
+    vector<Point2f> cropPoints;
+    cropPoints.push_back(Point2f(0,0));  
+    cropPoints.push_back(Point2f(xdimension-1,0));
+    cropPoints.push_back(Point2f(xdimension-1,ydimension-1));
+    cropPoints.push_back(Point2f(0,ydimension-1));
+
+    wrapedMatrix = findHomography(mapPoints,cropPoints);
+
+    warpPerspective(wrapImg, out, wrapedMatrix, out.size());
+
+    return wrapImg;
+
+}
+
 void* sum(void* arg) {
 
 
@@ -42,8 +100,8 @@ Mat cropImage(Mat source,  int width, int start, int end){
 
 int main(int argc, char* argv[])
 {
-    Mat im = imread("../Subtask1/wrapped-empty.jpg");
-    Mat bg = imread("../Subtask1/wrapped-traffic.jpg");
+    Mat im = imread("../Subtask1/empty.jpg");
+    // Mat bg = imread("../Subtask1/wrapped-traffic.jpg");
     // double xDimen = stod(argv[1]);
     // double yDimen = stod(argv[2]);
 
@@ -82,29 +140,30 @@ int main(int argc, char* argv[])
     //     cout<< "answer for " << args[i].limit<< " is " << args[i].ans << endl;
     // }
 
-        cout<< "width "<< im.cols<< endl;
-        cout<< "height "<< im.rows<< endl;
 
-        Mat cropIm = cropImage(im, 329, 0, 389);
-        Mat cropbg = cropImage(bg, 329, 0, 389);
+        Mat cropIm1 = cropImage(im, im.cols, 0, im.rows/2);
+        Mat cropIm2 = cropImage(im, im.cols, im.rows/2, im.rows);
+        // Mat cropbg = cropImage(bg, 329, 0, 389);
 
-        Mat overallDiff;
-        absdiff(bg, im ,overallDiff);
-        GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
-        threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY);
+        // Mat overallDiff;
+        // absdiff(bg, im ,overallDiff);
+        // GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
+        // threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY);
 
-        Mat cropDiff;
-        absdiff(cropbg, cropIm ,cropDiff);
-        GaussianBlur(cropDiff,cropDiff, Size(5,5),0);
-        threshold(cropDiff,cropDiff, 50, 255,THRESH_BINARY);
+        // Mat cropDiff;
+        // absdiff(cropbg, cropIm ,cropDiff);
+        // GaussianBlur(cropDiff,cropDiff, Size(5,5),0);
+        // threshold(cropDiff,cropDiff, 50, 255,THRESH_BINARY);
+
+        Mat changeFull = changeHom(im,-1);
+        Mat changeCr1 = changeHom(cropIm1,0);
+        Mat changeCr2 = changeHom(cropIm2,im.rows/2);
 
         while (true) {
-            imshow("Image", im);
-            imshow("Cropped Image", cropIm);
-            imshow("Cropped bg", cropbg);
 
-            imshow("Difference", overallDiff);
-            imshow("Cropped Difference", cropDiff);
+            imshow("Hom", changeFull);
+            imshow("Cropped Hom Up", changeCr1);
+            imshow("Cropped Hom Down", changeCr2);
 
             if (waitKey(1) == 27){
                 break;
