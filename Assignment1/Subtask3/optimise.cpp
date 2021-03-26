@@ -110,10 +110,10 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
     myfile.open(filename);
     myfile<<"Time(s)"<<","<<"Queue Density"<<","<<"Dynamic Density"<<endl;
 
-    cout<<"Time(s)"<<","<<"Queue Density"<<","<<"Dynamic Density"<<endl;
+    // cout<<"Time(s)"<<","<<"Queue Density"<<","<<"Dynamic Density"<<endl;
 
+    cout<< "Analysis started" << endl;
     while (true) {
-        cout<<time<<endl;
         time+=(1);
         // frame1 = frame2.clone();
         bool isOpened = video.read(frame2);
@@ -126,7 +126,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
 
         if (mode.getMethod() == 1 && (int)time%mode.getSkipper() != 0) {
             myfile<<(time)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-            cout<< (time)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+            // cout<< (time)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
             continue;
         }
 
@@ -137,14 +137,14 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
         
         cvtColor(frame2, frame2, COLOR_BGR2GRAY);
         Mat birdEye2 = changeHom(frame2);
-        imshow(winName[0], birdEye2);
+        // imshow(winName[0], birdEye2);
 
         Mat overallDiff;
         absdiff(bg, birdEye2,overallDiff);
         GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
         threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY );
 
-        imshow(winName[1], overallDiff);
+        // imshow(winName[1], overallDiff);
 
         // if (i == 0) {
         //     i =1;
@@ -165,7 +165,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
         QueueDensity=(double)countNonZero(overallDiff)/(double)256291;
 
         myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-        cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+        // cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
         
         
         if (waitKey(1) == 27){
@@ -272,7 +272,6 @@ int main(int argc, char** argv) {
     mode.setMethod(modeVal);
 
     int emptime=345;
-    Mat bg = getBack(video,emptime, mode);
 
     if (modeVal ==1){
         if (argc == 3) {
@@ -290,8 +289,8 @@ int main(int argc, char** argv) {
         mode.xDimen = stod(argv[3]);
         mode.yDimen = stod(argv[4]);
     }
-    else if (modeVal == 4){
-        auto start = high_resolution_clock::now();
+    Mat bg = getBack(video,emptime, mode);
+    if (modeVal == 4){
         if (argc==3){
             cout<<"No of threads not provided"<<endl;
             return 0;
@@ -303,6 +302,8 @@ int main(int argc, char** argv) {
         pthread_t tids[no];
         int count=0;
 
+        cout<< "Analysis started" <<endl;
+        auto start = high_resolution_clock::now();
         for (int i=0; i<no; i++){
             args[i].start = count;
             count += frameT/no;
@@ -324,8 +325,8 @@ int main(int argc, char** argv) {
         myfile.open ("graph.csv");
         for (int i=0; i<no;i++){
             pthread_join(tids[i],NULL);
-            myfile<<"Frame No.,Queue Density\n";
         }
+        myfile<<"Time(s),Queue Density\n";
         auto stop = high_resolution_clock::now();
         auto duration = duration_cast<microseconds>(stop - start);
         cout << "Time taken by function: "<< duration.count()/1000000 << " seconds" << endl;
@@ -345,8 +346,11 @@ int main(int argc, char** argv) {
     String winName[3] = {"Original Video","Overall Difference","Dynamic Difference"};
 
 
-    
+    auto start = high_resolution_clock::now();
     show(video,winName,fps,bg, mode);
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(stop - start);
+    cout << "Time taken by function: "<< duration.count()/1000000 << " seconds" << endl;
     return 0;
     
 }
