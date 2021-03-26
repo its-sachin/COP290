@@ -114,8 +114,11 @@ struct modethree{
     int start;
     int end;
 
-    void initailize(Mat bg, Mat frame, int width) {
+    void initFirst(Mat bg, int width) {
         bgPart = cropImage(bg, width, start, end);
+    }
+
+    void init(Mat frame, int width){
         framePart = cropImage(frame, width, start, end);
     }
 };
@@ -130,7 +133,7 @@ void* show2(void* arg ) {
     GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
     threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY);
 
-    partialSum =(double)countNonZero(overallDiff);
+    partialSum =(double)countNonZero(overallDiff)/(double)256291;
 
     arg_struct->partialSum = partialSum;
     pthread_exit(0);
@@ -144,7 +147,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
 
     double QueueDensity =0;
     double DynamicDensity=0;
-    double totalSum = 0;
+    
     double time=0;
 
     cout<< "Analysis started" << endl;
@@ -157,56 +160,48 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
 
     // cout<<"Time(s)"<<","<<"Queue Density"<<","<<"Dynamic Density"<<endl;
 
-    while (true) {
-        time+=(1);
-        // frame1 = frame2.clone();
-        bool isOpened = video.read(frame2);
+    if (mode.getMethod() == 3) {
 
-        if (isOpened == false) {
-            cout << "Video has ended" << endl;
-            myfile.close();
-            break;
-        } 
+        int no = mode.noThread;
+        struct modethree args[no];
 
-        if (mode.getMethod() == 1 && (int)time%mode.getSkipper() != 0) {
-            myfile<<(time)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-            // cout<< (time)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-            continue;
-        }
+        int count= 0; 
+        int height = bg.rows;
+        int width = bg.cols;
 
-        if (mode.getMethod() == 2) {
-            Mat temp = frame2.clone();
-            resize(temp, frame2, Size(mode.xDimen,mode.yDimen), 0,0);
-        }
-        
-        cvtColor(frame2, frame2, COLOR_BGR2GRAY);
-        Mat birdEye2 = changeHom(frame2);
-        // imshow(winName[0], birdEye2);
+        for(int i=0; i<no; i++){
 
-        if (mode.getMethod() == 3) {
-            int no = mode.noThread;
-            struct modethree args[no];
-            pthread_t tids[no];
+            args[i].start = count;
 
-            int count= 0; 
-            int height = birdEye2.rows;
-            int width = birdEye2.cols;
+            count += height/no;
+            if (i == no-1){
+                args[i].end=height;
+            }
+            else{
+                args[i].end=count;
+            }
 
-            for (int i=0; i<no; i++){
-                args[i].start = count;
+            args[i].initFirst(bg,width);
+        }  
 
-                // cout<< "start " << start<< endl;
-                count += height/no;
-                if (i == no-1){
-                    args[i].end=height;
-                }
-                else{
-                    args[i].end=count;
-                }
-                
-                // cout<< "end " << end<< endl;
-                // cout<< "width " << width<< endl;
-                args[i].initailize(bg,frame2, width);
+        while (true) {
+            time+=(1);
+            // frame1 = frame2.clone();
+            bool isOpened = video.read(frame2);
+
+            if (isOpened == false) {
+                cout << "Video has ended" << endl;
+                myfile.close();
+                break;
+            } 
+
+            cvtColor(frame2, frame2, COLOR_BGR2GRAY);
+            Mat birdEye2 = changeHom(frame2);
+            // imshow(winName[0], birdEye2);
+
+            for(int i=0; i<no; i++){
+
+                args[i].init(birdEye2, width);
                 pthread_attr_t attr;
                 pthread_attr_init(&attr);
                 pthread_create(&tids[i],&attr,show2,&args[i]);
@@ -217,16 +212,56 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
             }
 
             for (int i=0; i<no;i++){
-                totalSum += args[i].partialSum;
+                QueueDensity += args[i].partialSum;
+            }
+
+            QueueDensity = QueueDensity/(double)no;
+
+
+            myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+            // cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+            
+            
+            if (waitKey(1) == 27){
+                cout << "Esc key is pressed by user. Stopping the video" << endl;
+                break;
             }
         }
+    }
 
-        else {
+    else {
+
+        while (true) {
+            time+=(1);
+            // frame1 = frame2.clone();
+            bool isOpened = video.read(frame2);
+
+            if (isOpened == false) {
+                cout << "Video has ended" << endl;
+                myfile.close();
+                break;
+            } 
+
+            if (mode.getMethod() == 1 && (int)time%mode.getSkipper() != 0) {
+                myfile<<(time)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+                // cout<< (time)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+                continue;
+            }
+
+            if (mode.getMethod() == 2) {
+                Mat temp = frame2.clone();
+                resize(temp, frame2, Size(mode.xDimen,mode.yDimen), 0,0);
+            }
+            
+            cvtColor(frame2, frame2, COLOR_BGR2GRAY);
+            Mat birdEye2 = changeHom(frame2);
+            // imshow(winName[0], birdEye2);
+
             Mat overallDiff;
             absdiff(bg, birdEye2,overallDiff);
             GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
             threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY );
-            totalSum = (double)countNonZero(overallDiff);
+            QueueDensity = (double)countNonZero(overallDiff)/(double)256291;
 
             // imshow(winName[1], overallDiff);
 
@@ -246,17 +281,15 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
 
             // }
 
-        }
 
-        QueueDensity= totalSum/(double)256291;
-
-        myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-        // cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-        
-        
-        if (waitKey(1) == 27){
-            cout << "Esc key is pressed by user. Stopping the video" << endl;
-            break;
+            myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+            // cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+            
+            
+            if (waitKey(1) == 27){
+                cout << "Esc key is pressed by user. Stopping the video" << endl;
+                break;
+            }
         }
     }
 }

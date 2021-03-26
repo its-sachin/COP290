@@ -34,8 +34,8 @@ Mat changeHom(Mat in, int a) {
     }
 
     else {
-        mapPoints.push_back(Point2f(800,52-a));
         mapPoints.push_back(Point2f(472,52-a));
+        mapPoints.push_back(Point2f(800,52-a));
         mapPoints.push_back(Point2f(800,830-a));
         mapPoints.push_back(Point2f(472,830-a));
 
@@ -52,7 +52,7 @@ Mat changeHom(Mat in, int a) {
     int xdimension=329;
     int ydimension=779;
 
-    Mat out(ydimension*yFactor,xdimension,CV_8UC3,Scalar(0,0,0));
+    Mat out(ydimension,xdimension,CV_8UC3,Scalar(0,0,0));
 
     vector<Point2f> cropPoints;
     cropPoints.push_back(Point2f(0,0));  
@@ -64,7 +64,7 @@ Mat changeHom(Mat in, int a) {
 
     warpPerspective(wrapImg, out, wrapedMatrix, out.size());
 
-    return wrapImg;
+    return out;
 
 }
 
@@ -141,8 +141,10 @@ int main(int argc, char* argv[])
     // }
 
 
-        Mat cropIm1 = cropImage(im, im.cols, 0, im.rows/2);
-        Mat cropIm2 = cropImage(im, im.cols, im.rows/2, im.rows);
+        int a = 8;
+        double b = 5.75;
+        Mat cropIm1 = cropImage(im, im.cols, 0, im.rows/2 - im.rows/a);
+        Mat cropIm2 = cropImage(im, im.cols, im.rows/2 - im.rows/b, im.rows);
         // Mat cropbg = cropImage(bg, 329, 0, 389);
 
         // Mat overallDiff;
@@ -157,10 +159,15 @@ int main(int argc, char* argv[])
 
         Mat changeFull = changeHom(im,-1);
         Mat changeCr1 = changeHom(cropIm1,0);
-        Mat changeCr2 = changeHom(cropIm2,im.rows/2);
+        Mat changeCr2 = changeHom(cropIm2,im.rows/2 - im.rows/b);
+
+        circle(im, Point2f(stoi(argv[1]),stoi(argv[2])), 10, Scalar(0,0,255), FILLED);
+        circle(cropIm2, Point2f(stoi(argv[1]),stoi(argv[2]) - im.rows/2), 10, Scalar(0,0,255), FILLED);
 
         while (true) {
 
+            imshow("Image", im);
+            imshow("Crop", cropIm2);
             imshow("Hom", changeFull);
             imshow("Cropped Hom Up", changeCr1);
             imshow("Cropped Hom Down", changeCr2);
