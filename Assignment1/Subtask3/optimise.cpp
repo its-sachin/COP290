@@ -116,50 +116,30 @@ struct modethree{
     Mat bgPart;
     int start;
     int end;
-    int timeA;
-
-    bool done;
-    bool finish;
 
     void initFirst(Mat bg, int width) {
         bgPart = cropImage(bg, width, start, end);
-        done = true;
-        finish = false;
+
     }
 
-    void init(Mat frame, int width){
+    void initialize(Mat frame, int width){
         framePart = cropImage(frame, width, start, end);
-        done = false;
     }
 };
 
 void* show2(void* arg ) {
     struct modethree *arg_struct =(struct modethree*) arg;
 
-    while (true) {
+    double partialSum = 0;
+    
+    Mat overallDiff;
+    absdiff(arg_struct->bgPart, arg_struct->framePart ,overallDiff);
+    GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
+    threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY);
 
-        if (arg_struct->done == false){
-            double partialSum = 0;
-            
-            Mat overallDiff;
-            auto start5 = high_resolution_clock::now();
-            absdiff(arg_struct->bgPart, arg_struct->framePart ,overallDiff);
-            GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
-            threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY);
-            auto stop5 = high_resolution_clock::now();
-            auto duration5 = duration_cast<microseconds>(stop5 - start5);
-            arg_struct->timeA=duration5.count();
+    partialSum =(double)countNonZero(overallDiff);
 
-            partialSum =(double)countNonZero(overallDiff)/(double)256291;
-
-            arg_struct->partialSum = partialSum;
-            arg_struct->done = true;
-        }
-
-        if (arg_struct->finish == true) {
-            break;
-        }
-    }
+    arg_struct->partialSum = partialSum;
     pthread_exit(0);
 }
 
@@ -177,6 +157,12 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
     
     double time=0;
 
+    int height = bg.rows;
+    int width = bg.cols;
+
+    int pixel = height*width;
+    cout<< "pixel " << pixel<<endl;
+
     cout<< "Analysis started" << endl;
 
     string filename="graph.csv";
@@ -189,23 +175,19 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
 
     if (mode.getMethod() == 3) {
 
+        int timeH=0;
+        int timeT=0;
+
+        
         int no = mode.noThread;
         struct modethree args[no];
 
         int count= 0; 
-        int height = bg.rows;
-        int width = bg.cols;
-        pthread_t tids[no];
-        int timeH=0;
-        int timeC=0;
-        int timeA=0;
-        int timej=0;
 
-        for(int i=0; i<no; i++){
-
+        for (int i=0; i<no; i++){
             args[i].start = count;
-            args[i].timeA=0;    
 
+            // cout<< "start " << start<< endl;
             count += height/no;
             if (i == no-1){
                 args[i].end=height;
@@ -213,69 +195,56 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
             else{
                 args[i].end=count;
             }
-            auto start2 = high_resolution_clock::now();
             args[i].initFirst(bg,width);
-            auto stop2 = high_resolution_clock::now();
-            auto duration2 = duration_cast<microseconds>(stop2 - start2);
-            timeC+=duration2.count();
-            pthread_attr_t attr;
-            pthread_attr_init(&attr);
-            pthread_create(&tids[i],&attr,show2,&args[i]);
+            
+            // cout<< "end " << end<< endl;
+            // cout<< "width " << width<< endl;
         }  
 
         while (true) {
-
-            // done is true for all parts now!!
-
+            QueueDensity =0;
             time+=(1);
             bool isOpened = video.read(frame2);
 
             if (isOpened == false) {
                 cout << "Video has ended" << endl;
-                
-                for (int i=0; i<no;i++){
-                    args[i].finish = true;
-                }
-
                 break;
-            } 
-            auto start3 = high_resolution_clock::now();
+            }
+
+            auto startH = high_resolution_clock::now(); 
+
             cvtColor(frame2, frame2, COLOR_BGR2GRAY);
             Mat birdEye2 = changeHom(frame2);
-            auto stop3 = high_resolution_clock::now();
-            auto duration3 = duration_cast<microseconds>(stop3 - start3);
-            timeH+=duration3.count();
-            auto start4= high_resolution_clock::now();
-            for(int i=0; i<no; i++){
-                
-                args[i].init(birdEye2, width);
-            }  
-            auto stop4 = high_resolution_clock::now();
-            auto duration4 = duration_cast<microseconds>(stop4 - start4);
-            timeC+=duration4.count();
-            //now for all parts analysis starts and done is false for all parts now!!
-            while (true) {
-                bool temp = true;
-                for(int i=0; i<no; i++){
-                    temp = temp & args[i].done;
-                }
 
-                if (temp) {
+            auto stopH = high_resolution_clock::now(); 
+            auto durationH = duration_cast<microseconds>(stopH - startH);
+            timeH += durationH.count();
 
-                    break;
-                }
-            }
-            
-            // analysis for all parts is done and done of all is true now
+
+            auto startT = high_resolution_clock::now(); 
+
+            pthread_t tids[no];
 
             for (int i=0; i<no;i++){
-                timeA+=args[i].timeA;
-                QueueDensity += args[i].partialSum;
+                args[i].initialize(birdEye2, width);
+                pthread_attr_t attr;
+                pthread_attr_init(&attr);
+                pthread_create(&tids[i],&attr,show2,&args[i]);
             }
 
-            QueueDensity = QueueDensity/(double)no;
+            for (int i=0; i<no;i++){
+                pthread_join(tids[i],NULL);
+            }
 
+            auto stopT = high_resolution_clock::now(); 
+            auto durationT = duration_cast<microseconds>(stopT- startT);
+            timeT += durationT.count();
 
+            for (int i=0; i<no;i++){
+                QueueDensity += args[i].partialSum;
+            }
+            
+            QueueDensity = QueueDensity/(double)256291;
             myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
             // cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
             
@@ -284,23 +253,16 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
                 cout << "Esc key is pressed by user. Stopping the video" << endl;
                 break;
             }
+
+            
         }
 
-        for (int i=0; i<no;i++){
-            auto start6 = high_resolution_clock::now();            
-            pthread_join(tids[i],NULL);
-            auto stop6= high_resolution_clock::now();
-            auto duration6 = duration_cast<microseconds>(stop6 - start6);
-            timej+=duration6.count();
-        }
-        cout << "Time taken by crop: "<< timeC/1000 << " miliseconds" << endl;
-        cout << "Time taken by abs and gaussian: "<< timeA/1000 << " miliseconds" << endl;
-        cout << "Time taken by homo: "<< timeH/1000000 << " seconds" << endl;
-        cout << "Time taken by join: "<<timej<< " microseconds" << endl;
+        cout<< "Time for homography " << timeH/1000000 << " seconds"<< endl;
+        cout<< "Time for Threads " << timeT/1000000<< " seconds"<< endl;
+
     }
 
     else {
-
         while (true) {
             time+=(1);
             // frame1 = frame2.clone();
@@ -330,7 +292,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
             absdiff(bg, birdEye2,overallDiff);
             GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
             threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY );
-            QueueDensity = (double)countNonZero(overallDiff)/(double)256291;
+            QueueDensity = (double)countNonZero(overallDiff)/(double)pixel;
 
             // imshow(winName[1], overallDiff);
 
@@ -647,17 +609,21 @@ int main(int argc, char** argv) {
         if (argc==3){
             cout<<"No of threads not provided"<<endl;
             return 0;
-        }
+        } 
+
         int no= stoi(argv[3]); 
         int width=bg.cols;
         int heigth=bg.rows;
         mode.noThread =no;
+
+        cout << "Analysing each frame of video in " << no << " threads" << endl;
+
         struct alternate args[no];
         pthread_t tids[no];
         auto starta= high_resolution_clock::now();
         Mat** arr =cut(video,no,width,heigth);
         auto stopa = high_resolution_clock::now();
-        auto durationa = duration_cast<microseconds>(stopa - start1);
+        auto durationa = duration_cast<microseconds>(stopa - starta);
         cout << "Time taken by cut: "<< durationa.count()/1000000 << " seconds" << endl;
         int count=0;
         int start;
