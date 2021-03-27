@@ -73,9 +73,12 @@ Mat changeHom(Mat in) {
     srcPoints.push_back(Point2f(338*xFactor,976*yFactor));
 
     Mat wrapImg = Mat::zeros(in.size(),CV_8UC3);
+    auto start5=high_resolution_clock::now();
     Mat wrapedMatrix = findHomography(srcPoints, mapPoints);
     warpPerspective(in, wrapImg, wrapedMatrix, in.size());
-
+    auto stop5 = high_resolution_clock::now();
+    auto duration5 = duration_cast<microseconds>(stop5 - start5);
+    cout<<"time take "<<duration5.count()<<endl;
     int xdimension=329*xFactor;
     int ydimension=779*yFactor;
 
@@ -366,6 +369,110 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
 }
 
 
+
+
+
+
+
+
+
+
+
+struct alternate{
+    int threadno;
+    Mat** arr;
+    int frameT;
+    Mat bg;
+    map<int,double> data;
+};
+
+Mat** cut(VideoCapture video, int no){
+    Mat frame;
+    bool isOpened = video.read(frame); 
+    int width=changeHom(frame).cols;
+    int heigth=changeHom(frame).rows;
+    cout<<width<<" "<<heigth<<endl;
+    int frameT= (int) video.get(CAP_PROP_FRAME_COUNT);
+    Mat** arr=frame;
+    for (int h=0;h++;h<no){
+        arr[h]=new Mat[frameT];
+        for (int w = 0; w < frameT; w++){
+            arr[h][w] = frame;
+        }
+    }
+    int frameno=0;
+    while (true) {
+        bool isOpened = video.read(frame);
+
+        if (isOpened == false) {
+            cout << "Video has ended" << endl;
+            break;
+        } 
+        
+        cvtColor(frame, frame, COLOR_BGR2GRAY);
+        Mat birdEye2 = changeHom(frame);
+        cout<<birdEye2.cols<<" "<<birdEye2.rows<<endl;
+        int count=0;
+        int start=0;
+        int end=0;
+        for (int i=0; i<no; i++){
+            start=count;
+            count += heigth/no;
+            if (i == no-1){
+                end=heigth;
+            }
+            else{
+                end=count;
+            }
+            cout<<"a\n";
+            cout<<width<<" "<<start<<" "<<end<<endl;
+            arr[i][frameno]=cropImage(birdEye2,width,start,end);
+            cout<<"a\n";
+        }
+        frameno++;    
+        if (waitKey(1) == 27){
+            cout << "Esc key is pressed by user. Stopping the video" << endl;
+            break;
+        }
+    }
+    return arr;
+
+}
+void* showalt(void* arg ) {
+    struct alternate *arg_struct =(struct alternate*) arg;
+
+    double QueueDensity =0;
+
+    Mat** arr = arg_struct->arr;
+    Mat bg = arg_struct->bg;
+    int frameno=0;
+    map <int,double> data;
+    while (frameno<arg_struct->frameT) {
+        Mat birdEye2=arr[arg_struct->threadno][frameno];
+        Mat overallDiff;
+        absdiff(bg, birdEye2,overallDiff);
+        GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
+        threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY );
+
+        QueueDensity=(double)countNonZero(overallDiff)/(double)256291;
+        data.insert({frameno,QueueDensity});
+        if (waitKey(1) == 27){
+            cout << "Esc key is pressed by user. Stopping the video" << endl;
+            break;
+        }
+        frameno++;
+    }
+    arg_struct->data=data;
+    pthread_exit(0);
+}
+
+
+
+
+
+
+
+
 void* show1(void* arg ) {
     struct modefour *arg_struct =(struct modefour*) arg;
 
@@ -545,13 +652,58 @@ int main(int argc, char** argv) {
         return 0;
     }
     else if (modeVal==3){
+        auto start1 = high_resolution_clock::now();
         if (argc==3){
             cout<<"No of threads not provided"<<endl;
             return 0;
         }
-        mode.noThread= stoi(argv[3]);  
-
-        cout << "Analysing every frame of video in " << argv[3] << " threads" << endl;
+        int no= stoi(argv[3]); 
+        mode.noThread =no;
+        struct alternate args[no];
+        pthread_t tids[no];
+        Mat** arr =cut(video,no);
+        int count=0;
+        int width=bg.cols;
+        int heigth=bg.rows;
+        int start;
+        int end;
+        for (int i=0; i<no; i++){
+            start=count;
+            count += heigth/no;
+            if (i == no-1){
+                end=frameT+1;
+            }
+            else{
+                end=count;
+            }
+            args[i].bg=cropImage(bg,width,start,end);
+            args[i].threadno = i;
+            args[i].arr=arr;
+            args[i].frameT=frameT;
+            pthread_attr_t attr;
+            pthread_attr_init(&attr);
+            pthread_create(&tids[i],&attr,showalt,&args[i]);
+        }
+        ofstream myfile;
+        myfile.open ("graph.csv");
+        myfile<<"Frame No.,Queue Density\n";
+        for (int i=0; i<no;i++){
+            pthread_join(tids[i],NULL);
+        }
+        auto stop1 = high_resolution_clock::now();
+        auto duration1 = duration_cast<microseconds>(stop1 - start1);
+        cout << "Time taken by function: "<< duration1.count()/1000000 << " seconds" << endl;
+        for (int i=1; i<no;i++){
+            for (int j=0;j<frameT;j++){
+                args[0].data.at(j)+=args[i].data.at(j);
+            }
+        } 
+        for (int j=0;j<frameT;j++){
+            double k= (double) j /15.0;
+            myfile<<k<<","<<args[0].data.at(j)<<endl;
+        }       
+        myfile.close(); 
+        return 0;   
     }
 
     
