@@ -51,51 +51,136 @@ def read():
                 i += 1
     return -1
 
-def graphInit(xlabel,ylabel,titleStr):
-    plt.grid(True, color = "k")
-    plt.title(titleStr)
-    plt.ylabel(ylabel)
-    plt.xlabel(xlabel)
+def readTest(str):
+
+    with open(str) as varFile:
+        plots = csv.reader(varFile, delimiter = ",")
+        i = 0
+        for rows in plots:
+            if (i ==0):
+                i = 1
+            elif (rows[0] == "$"):
+                return int(rows[1])
+            else :
+                queueVar[i-1] = float(rows[1])
+                i += 1
+    return -1
+
+def graphInit(xlabel,ylabel,titleStr,ax):
+    ax.grid(True, color = "k")
+    ax.set_title(titleStr)
+    ax.set_ylabel(ylabel)
+    ax.set_xlabel(xlabel)
 
 mode = 1
 
-i = 0
-maxSkip =2
-offset=5
+
+
+
 funx = []
 funTime = []
 funError = []
 
-graphInit(xDef, yDef, "Method 1")
-plt.plot(time,queueAsli, "b", linewidth = 1, label = "Base Queue Density")
+figMain,axMain = plt.subplots()
+figAbsDiff,axAbsDiff = plt.subplots()
+figTime,axTime = plt.subplots()
+axError = axTime.twinx()
 
-while (i <= maxSkip):
-    
-    subprocess.run("./optimise ../Subtask2/trafficvideo.mp4 " + str(mode) + " " + str(offset*i), shell = True)
-    funTime.append(read())
-    absDiff, sqrMean = error(queueAsli, queueVar)
-    funError.append(sqrMean)
-    funx.append(i)
-
-    plt.plot(time, queueVar, colour[i+1], linewidth = 1, label = "Skipping " + str(offset*i)+ " frames")
-    # plt.plot(time, absDiff, "r", linewidth = 1, label = "Error")
-
-
-    i+= 1
-    print("\n")
-
-plt.legend()
-plt.show()
-
-graphInit("Skipped Frame", "Time taken", "Analysis method 1")
-
-plt.plot(funx, funTime, "b", linewidth = 1, label = "Time taken for analysis")
-plt.plot(funx, funError, "r", linewidth = 1, label = "Sqaure mean error")
-
-plt.legend()
-plt.show()
+graphInit(xDef, yDef, "Method " + str(mode) + ": Queue Density",axMain)
+graphInit(xDef, "Absolute Difference", "Method " + str(mode) + ": Framewise error",axAbsDiff)
+axError.set_ylabel("Error")
 
 
 
+axMain.plot(time,queueAsli, "b", linewidth = 1, label = "Base Queue Density")
 
 
+def mode1(maxSkip,offset):
+
+    mode = 1
+    graphInit("Skipped Frames", "Time taken","Method " + str(mode) + ": Runtime analysis",axTime)
+    i = 0
+
+    while (i <= maxSkip):
+        
+        subprocess.run("./optimise ../Subtask2/trafficvideo.mp4 " + "1" + " " + str(offset*i), shell = True)
+        funTime.append(read())
+        # funTime.append(readTest("GraphsTesting/graph" + str(mode)  + "-" + str(i) +".csv"))
+        absDiff, sqrMean = error(queueAsli, queueVar)
+        funError.append(sqrMean)
+        funx.append(i)
+
+        axMain.plot(time, queueVar, colour[(i+1)%7], linewidth = 1, label = str(offset*i)+ " frames")
+        axAbsDiff.plot(time, absDiff, colour[(i+1)%7], linewidth = 1, label =  str(offset*i)+ " frames")
+
+
+        i+= 1
+        print("\n")
+
+def mode2(maxDown):
+
+    i = 1
+    mode = 2
+    # graphInit("Size reduction factor", "Time taken","Method " + str(mode) + ": Runtime analysis",axTime)
+
+    while (i <= maxDown):
+        
+        subprocess.run("./optimise ../Subtask2/trafficvideo.mp4 " + "2" + " " + str(1920/i) + " " + str(1080/i), shell = True)
+        funTime.append(read())
+        # funTime.append(readTest("GraphsTesting/graph" + str(mode) + "-" +str(i) +".csv"))
+        absDiff, sqrMean = error(queueAsli, queueVar)
+        funError.append(sqrMean)
+        funx.append(i)
+
+        axMain.plot(time, queueVar, colour[(i+1)%7], linewidth = 1, label = " Size/" + str(i))
+        axAbsDiff.plot(time, absDiff, colour[(i+1)%7], linewidth = 1, label = " Size/" + str(i))
+
+
+        i+= 1
+        print("\n")
+
+def mode34(mode,maxThread):
+
+    i = 1
+    graphInit("Number of threads", "Time taken","Method " + str(mode) + ": Runtime analysis",axTime)
+
+    while (i <= maxThread):
+        
+        subprocess.run("./optimise ../Subtask2/trafficvideo.mp4 " + "3" + " " + str(i), shell = True)
+        funTime.append(read())
+        absDiff, sqrMean = error(queueAsli, queueVar)
+        funError.append(sqrMean)
+        funx.append(i)
+
+        axMain.plot(time, queueVar, colour[(i+1)%7], linewidth = 1, label = str(i) + "-Threads")
+        axAbsDiff.plot(time, absDiff, colour[(i+1)%7], linewidth = 1, label =  str(i) + "-Threads")
+
+
+        i+= 1
+        print("\n")
+
+mode = int(input("Enter method: "))
+if (mode <=0 or mode > 4):
+    print("INVALID Method!!")
+
+else:
+
+    if (mode == 1):
+        maxSkip, offset = input("Enter max frames skipped and offset: ").split(" ")
+        mode1(int(maxSkip), int(offset))
+    elif (mode == 2):
+        maxDown = int(input("Enter maximum down factor of size: "))
+        mode2(maxDown)
+    else:
+        maxThread = int(input("Enter maximum number of threads: "))
+        if (mode == 3): mode34(maxThread, 3)
+        else: mode34(maxThread,4)
+
+    axTime.plot(funx, funTime, "b", linewidth = 1, label = "Time(s)")
+    axError.plot(funx, funError, "r", linewidth = 1, label = "Error")
+
+    axMain.legend()
+    axAbsDiff.legend()
+    axTime.legend()
+    plt.tight_layout()
+    plt.show()
