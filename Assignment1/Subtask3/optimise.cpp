@@ -162,6 +162,9 @@ void* show2(void* arg ) {
 
 
 void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
+
+    auto start = high_resolution_clock::now(); 
+
     // int i = 0;
     // Mat frame1;
     Mat frame2;
@@ -226,7 +229,6 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
 
             if (isOpened == false) {
                 cout << "Video has ended" << endl;
-                myfile.close();
                 
                 for (int i=0; i<no;i++){
                     args[i].finish = true;
@@ -303,7 +305,6 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
 
             if (isOpened == false) {
                 cout << "Video has ended" << endl;
-                myfile.close();
                 break;
             } 
 
@@ -357,6 +358,11 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
             }
         }
     }
+
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(stop - start);
+    cout << "Time taken by function: "<< duration.count()/1000000 << " seconds" << endl;
+    myfile << "$,"<< duration.count()/1000000<<endl;
 }
 
 
@@ -464,7 +470,8 @@ int main(int argc, char** argv) {
             cout<< "Number of frames to skip not provided" << endl;
             return 0;
         }
-        mode.setSkipper(stoi(argv[3] + 1));
+        mode.setSkipper(stoi(argv[3]) + 1);
+        cout<< "Analysing by skipping " << stoi(argv[3])<< " frames"<< endl;
     }
 
     else if (modeVal == 2){
@@ -474,6 +481,8 @@ int main(int argc, char** argv) {
         }
         mode.xDimen = stod(argv[3]);
         mode.yDimen = stod(argv[4]);
+
+        cout << "Analysing by resizing video to "<< argv[3] << "*" << argv[4] <<endl;
     }
 
     Mat bg = getBack(video,emptime, mode);
@@ -484,8 +493,11 @@ int main(int argc, char** argv) {
             cout<<"No of threads not provided"<<endl;
             return 0;
         }
+        
         int no = stoi(argv[3]);
         mode.noThread=no;
+
+        cout << "Analysing video in " << no << " threads" << endl;
 
         struct modefour args[no];
         pthread_t tids[no];
@@ -512,7 +524,7 @@ int main(int argc, char** argv) {
 
         ofstream myfile;
         myfile.open ("graph.csv");
-        myfile<<"Time(s),Queue Density\n";
+        myfile<<"Time(s),Queue Density\n"<<endl;
         for (int i=0; i<no;i++){
             pthread_join(tids[i],NULL);
         }
@@ -526,7 +538,9 @@ int main(int argc, char** argv) {
                     myfile<<k<<","<<args[i].data.at(j)<<endl;
                 }
             }
-        }        
+        }      
+
+        myfile<<"$" <<duration.count()/1000000<<endl;  
         myfile.close(); 
         return 0;
     }
@@ -536,17 +550,14 @@ int main(int argc, char** argv) {
             return 0;
         }
         mode.noThread= stoi(argv[3]);  
+
+        cout << "Analysing every frame of video in " << argv[3] << " threads" << endl;
     }
 
     
     string winName[3] = {"Original Video","Overall Difference","Dynamic Difference"};  
 
-    auto start = high_resolution_clock::now(); 
     show(video,winName,fps,bg, mode);
-
-    auto stop = high_resolution_clock::now();
-    auto duration = duration_cast<microseconds>(stop - start);
-    cout << "Time taken by function: "<< duration.count()/1000000 << " seconds" << endl;
     return 0;
     
 }
