@@ -114,28 +114,44 @@ struct modethree{
     int start;
     int end;
 
+    bool done;
+    bool finish;
+
     void initFirst(Mat bg, int width) {
         bgPart = cropImage(bg, width, start, end);
+        done = true;
+        finish = false;
     }
 
     void init(Mat frame, int width){
         framePart = cropImage(frame, width, start, end);
+        done = false;
     }
 };
 
 void* show2(void* arg ) {
     struct modethree *arg_struct =(struct modethree*) arg;
 
-    double partialSum = 0;
-      
-    Mat overallDiff;
-    absdiff(arg_struct->bgPart, arg_struct->framePart ,overallDiff);
-    GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
-    threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY);
+    while (true) {
 
-    partialSum =(double)countNonZero(overallDiff)/(double)256291;
+        if (arg_struct->done == false){
+            double partialSum = 0;
+            
+            Mat overallDiff;
+            absdiff(arg_struct->bgPart, arg_struct->framePart ,overallDiff);
+            GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
+            threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY);
 
-    arg_struct->partialSum = partialSum;
+            partialSum =(double)countNonZero(overallDiff)/(double)256291;
+
+            arg_struct->partialSum = partialSum;
+            arg_struct->done = true;
+        }
+
+        if (arg_struct->finish == true) {
+            break;
+        }
+    }
     pthread_exit(0);
 }
 
@@ -168,6 +184,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
         int count= 0; 
         int height = bg.rows;
         int width = bg.cols;
+        pthread_t tids[no];
 
         for(int i=0; i<no; i++){
 
@@ -182,34 +199,52 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
             }
 
             args[i].initFirst(bg,width);
+
+            pthread_attr_t attr;
+            pthread_attr_init(&attr);
+            pthread_create(&tids[i],&attr,show2,&args[i]);
         }  
 
         while (true) {
+
+            // done is true for all parts now!!
+
             time+=(1);
-            // frame1 = frame2.clone();
             bool isOpened = video.read(frame2);
 
             if (isOpened == false) {
                 cout << "Video has ended" << endl;
                 myfile.close();
+                
+                for (int i=0; i<no;i++){
+                    args[i].finish = true;
+                }
+
                 break;
             } 
 
             cvtColor(frame2, frame2, COLOR_BGR2GRAY);
             Mat birdEye2 = changeHom(frame2);
-            // imshow(winName[0], birdEye2);
 
             for(int i=0; i<no; i++){
 
                 args[i].init(birdEye2, width);
-                pthread_attr_t attr;
-                pthread_attr_init(&attr);
-                pthread_create(&tids[i],&attr,show2,&args[i]);
             }  
 
-            for (int i=0; i<no;i++){
-                pthread_join(tids[i],NULL);
+            //now for all parts analysis starts and done is false for all parts now!!
+            while (true) {
+                bool temp = true;
+                for(int i=0; i<no; i++){
+                    temp = temp & args[i].done;
+                }
+
+                if (temp) {
+
+                    break;
+                }
             }
+            
+            // analysis for all parts is done and done of all is true now
 
             for (int i=0; i<no;i++){
                 QueueDensity += args[i].partialSum;
@@ -226,6 +261,10 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
                 cout << "Esc key is pressed by user. Stopping the video" << endl;
                 break;
             }
+        }
+
+        for (int i=0; i<no;i++){
+            pthread_join(tids[i],NULL);
         }
     }
 
