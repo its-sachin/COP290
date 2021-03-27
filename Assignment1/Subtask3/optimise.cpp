@@ -113,6 +113,7 @@ struct modethree{
     Mat bgPart;
     int start;
     int end;
+    int timeA;
 
     bool done;
     bool finish;
@@ -138,9 +139,13 @@ void* show2(void* arg ) {
             double partialSum = 0;
             
             Mat overallDiff;
+            auto start5 = high_resolution_clock::now();
             absdiff(arg_struct->bgPart, arg_struct->framePart ,overallDiff);
             GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
             threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY);
+            auto stop5 = high_resolution_clock::now();
+            auto duration5 = duration_cast<microseconds>(stop5 - start5);
+            arg_struct->timeA=duration5.count();
 
             partialSum =(double)countNonZero(overallDiff)/(double)256291;
 
@@ -185,10 +190,15 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
         int height = bg.rows;
         int width = bg.cols;
         pthread_t tids[no];
+        int timeH=0;
+        int timeC=0;
+        int timeA=0;
+        int timej=0;
 
         for(int i=0; i<no; i++){
 
             args[i].start = count;
+            args[i].timeA=0;    
 
             count += height/no;
             if (i == no-1){
@@ -197,9 +207,11 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
             else{
                 args[i].end=count;
             }
-
+            auto start2 = high_resolution_clock::now();
             args[i].initFirst(bg,width);
-
+            auto stop2 = high_resolution_clock::now();
+            auto duration2 = duration_cast<microseconds>(stop2 - start2);
+            timeC+=duration2.count();
             pthread_attr_t attr;
             pthread_attr_init(&attr);
             pthread_create(&tids[i],&attr,show2,&args[i]);
@@ -222,15 +234,20 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
 
                 break;
             } 
-
+            auto start3 = high_resolution_clock::now();
             cvtColor(frame2, frame2, COLOR_BGR2GRAY);
             Mat birdEye2 = changeHom(frame2);
-
+            auto stop3 = high_resolution_clock::now();
+            auto duration3 = duration_cast<microseconds>(stop3 - start3);
+            timeH+=duration3.count();
+            auto start4= high_resolution_clock::now();
             for(int i=0; i<no; i++){
-
+                
                 args[i].init(birdEye2, width);
             }  
-
+            auto stop4 = high_resolution_clock::now();
+            auto duration4 = duration_cast<microseconds>(stop4 - start4);
+            timeC+=duration4.count();
             //now for all parts analysis starts and done is false for all parts now!!
             while (true) {
                 bool temp = true;
@@ -247,6 +264,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
             // analysis for all parts is done and done of all is true now
 
             for (int i=0; i<no;i++){
+                timeA+=args[i].timeA;
                 QueueDensity += args[i].partialSum;
             }
 
@@ -264,8 +282,16 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
         }
 
         for (int i=0; i<no;i++){
+            auto start6 = high_resolution_clock::now();            
             pthread_join(tids[i],NULL);
+            auto stop6= high_resolution_clock::now();
+            auto duration6 = duration_cast<microseconds>(stop6 - start6);
+            timej+=duration6.count();
         }
+        cout << "Time taken by crop: "<< timeC/1000 << " miliseconds" << endl;
+        cout << "Time taken by abs and gaussian: "<< timeA/1000 << " miliseconds" << endl;
+        cout << "Time taken by homo: "<< timeH/1000000 << " seconds" << endl;
+        cout << "Time taken by join: "<<timej<< " microseconds" << endl;
     }
 
     else {
