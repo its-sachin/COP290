@@ -73,12 +73,12 @@ Mat changeHom(Mat in) {
     srcPoints.push_back(Point2f(338*xFactor,976*yFactor));
 
     Mat wrapImg = Mat::zeros(in.size(),CV_8UC3);
-    auto start5=high_resolution_clock::now();
+    // auto start5=high_resolution_clock::now();
     Mat wrapedMatrix = findHomography(srcPoints, mapPoints);
     warpPerspective(in, wrapImg, wrapedMatrix, in.size());
-    auto stop5 = high_resolution_clock::now();
-    auto duration5 = duration_cast<microseconds>(stop5 - start5);
-    cout<<"time take "<<duration5.count()<<endl;
+    // auto stop5 = high_resolution_clock::now();
+    // auto duration5 = duration_cast<microseconds>(stop5 - start5);
+    // cout<<"time take "<<duration5.count()<<endl;
     int xdimension=329*xFactor;
     int ydimension=779*yFactor;
 
@@ -386,21 +386,18 @@ struct alternate{
     map<int,double> data;
 };
 
-Mat** cut(VideoCapture video, int no){
+Mat** cut(VideoCapture video, int no,int width,int height){
     Mat frame;
-    bool isOpened = video.read(frame); 
-    int width=changeHom(frame).cols;
-    int heigth=changeHom(frame).rows;
-    cout<<width<<" "<<heigth<<endl;
     int frameT= (int) video.get(CAP_PROP_FRAME_COUNT);
-    Mat** arr=frame;
-    for (int h=0;h++;h<no){
+    Mat** arr;
+    arr= new Mat*[no];
+    for (int h=0;h<no;h++){
         arr[h]=new Mat[frameT];
-        for (int w = 0; w < frameT; w++){
-            arr[h][w] = frame;
-        }
     }
     int frameno=0;
+    int count=0;
+    int start;
+    int end;
     while (true) {
         bool isOpened = video.read(frame);
 
@@ -410,25 +407,19 @@ Mat** cut(VideoCapture video, int no){
         } 
         
         cvtColor(frame, frame, COLOR_BGR2GRAY);
-        Mat birdEye2 = changeHom(frame);
-        cout<<birdEye2.cols<<" "<<birdEye2.rows<<endl;
-        int count=0;
-        int start=0;
-        int end=0;
+        Mat birdEye2 = changeHom(frame);      
         for (int i=0; i<no; i++){
             start=count;
-            count += heigth/no;
+            count += height/no;
             if (i == no-1){
-                end=heigth;
+                end=height;
             }
             else{
                 end=count;
             }
-            cout<<"a\n";
-            cout<<width<<" "<<start<<" "<<end<<endl;
             arr[i][frameno]=cropImage(birdEye2,width,start,end);
-            cout<<"a\n";
         }
+        count=0;
         frameno++;    
         if (waitKey(1) == 27){
             cout << "Esc key is pressed by user. Stopping the video" << endl;
@@ -658,20 +649,24 @@ int main(int argc, char** argv) {
             return 0;
         }
         int no= stoi(argv[3]); 
+        int width=bg.cols;
+        int heigth=bg.rows;
         mode.noThread =no;
         struct alternate args[no];
         pthread_t tids[no];
-        Mat** arr =cut(video,no);
+        auto starta= high_resolution_clock::now();
+        Mat** arr =cut(video,no,width,heigth);
+        auto stopa = high_resolution_clock::now();
+        auto durationa = duration_cast<microseconds>(stopa - start1);
+        cout << "Time taken by cut: "<< durationa.count()/1000000 << " seconds" << endl;
         int count=0;
-        int width=bg.cols;
-        int heigth=bg.rows;
         int start;
         int end;
         for (int i=0; i<no; i++){
             start=count;
             count += heigth/no;
             if (i == no-1){
-                end=frameT+1;
+                end=heigth;
             }
             else{
                 end=count;
