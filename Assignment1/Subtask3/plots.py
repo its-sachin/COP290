@@ -1,6 +1,6 @@
 from matplotlib import pyplot as plt
 import csv
-
+import subprocess
 
 def error(queueAsli, queueVar):
     i = 0
@@ -15,14 +15,13 @@ def error(queueAsli, queueVar):
 
     return absDiff, sqrMean
 
-
-
 time = []
 queueAsli = []
 queueVar = []
 
 xlabel = ""
 ylabel = ""
+titleStr = ""
 
 with open("asli.csv") as asliFile:
     plots = csv.reader(asliFile, delimiter = ",")
@@ -35,28 +34,50 @@ with open("asli.csv") as asliFile:
         else:
             time.append(float(rows[0]))
             queueAsli.append(float(rows[1]))
-
-with open("graph.csv") as varFile:
-    plots = csv.reader(varFile, delimiter = ",")
-    i = 0
-    for rows in plots:
-        if (i ==0):
-            i = 1
-        else :
             queueVar.append(float(rows[1]))
 
-absDiff, sqrMean = error(queueAsli, queueVar)
+def read():
 
-print("Square root averaged mean error is " + str(sqrMean))
-plt.grid(True, color = "k")
-plt.plot(time,queueAsli, "g", linewidth = 2, label = "Base Queue Density")
-plt.plot(time, queueVar, "b", linewidth = 2, label = "Queue Density")
-plt.plot(time, absDiff, "r", linewidth = 2, label = "Error")
+    with open("graph.csv") as varFile:
+        plots = csv.reader(varFile, delimiter = ",")
+        i = 0
+        for rows in plots:
+            if (i ==0):
+                i = 1
+            else :
+                queueVar[i-1] = float(rows[1])
+                i += 1
 
-plt.title("Runtime Analysis")
-plt.ylabel(ylabel)
-plt.xlabel(xlabel)
-plt.legend()
-plt.show()
+def graphInit():
+    plt.grid(True, color = "k")
+    plt.title(titleStr)
+    plt.ylabel(ylabel)
+    plt.xlabel(xlabel)
+    plt.legend()
+
+mode = 1
+
+i = 0
+
+while (i <= 5):
+    
+    subprocess.run("./optimise ../Subtask2/trafficvideo.mp4 " + str(mode) + " " + str(i))
+    read()
+
+    absDiff, sqrMean = error(queueAsli, queueVar)
+
+    
+    plt.plot(time,queueAsli, "g", linewidth = 1, label = "Base Queue Density")
+    plt.plot(time, queueVar, "b", linewidth = 1, label = labelStr)
+    plt.plot(time, absDiff, "r", linewidth = 1, label = "Error")
+
+    
+    plt.show()
+
+
+    i+= 1
+
+
+
 
 

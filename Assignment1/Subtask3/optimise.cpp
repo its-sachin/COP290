@@ -438,7 +438,7 @@ int main(int argc, char** argv) {
             cout<< "Number of frames to skip not provided" << endl;
             return 0;
         }
-        mode.setSkipper(stoi(argv[3]));
+        mode.setSkipper(stoi(argv[3] + 1));
     }
 
     else if (modeVal == 2){
