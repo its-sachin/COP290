@@ -160,7 +160,6 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
     int width = bg.cols;
 
     int pixel = height*width;
-    cout<< "pixel " << pixel<<endl;
 
     cout<< "Analysis started" << endl;
 
@@ -172,164 +171,63 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
 
     // cout<<"Time(s)"<<","<<"Queue Density"<<","<<"Dynamic Density"<<endl;
 
-    if (mode.getMethod() == 3) {
+    while (true) {
+        time+=(1);
+        // frame1 = frame2.clone();
+        bool isOpened = video.read(frame2);
 
-        int timeH=0;
-        int timeT=0;
-        int timeR =0;
+        if (isOpened == false) {
+            cout << "Video has ended" << endl;
+            break;
+        } 
 
-        
-        int no = mode.noThread;
-        struct modethree args[no];
-
-        int count= 0; 
-
-        for (int i=0; i<no; i++){
-            args[i].start = count;
-
-            // cout<< "start " << start<< endl;
-            count += height/no;
-            if (i == no-1){
-                args[i].end=height;
-            }
-            else{
-                args[i].end=count;
-            }
-            args[i].initFirst(bg,width);
-            
-            // cout<< "end " << end<< endl;
-            // cout<< "width " << width<< endl;
-        }  
-
-        while (true) {
-            QueueDensity =0;
-            time+=(1);
-
-            auto startR = high_resolution_clock::now();
-            bool isOpened = video.read(frame2);
-
-            if (isOpened == false) {
-                cout << "Video has ended" << endl;
-                break;
-            }
-
-            auto stopR = high_resolution_clock::now(); 
-            auto durationR = duration_cast<microseconds>(stopR - startR);
-            timeR += durationR.count();
-
-            auto startH = high_resolution_clock::now(); 
-
-            Mat birdEye2 = changeHom(frame2);
-
-            auto stopH = high_resolution_clock::now(); 
-            auto durationH = duration_cast<microseconds>(stopH - startH);
-            timeH += durationH.count();
-
-
-            auto startT = high_resolution_clock::now(); 
-
-            pthread_t tids[no];
-
-            for (int i=0; i<no;i++){
-                args[i].framePart = birdEye2;
-                pthread_attr_t attr;
-                pthread_attr_init(&attr);
-                pthread_create(&tids[i],&attr,show2,&args[i]);
-            }
-
-            for (int i=0; i<no;i++){
-                pthread_join(tids[i],NULL);
-            }
-
-            auto stopT = high_resolution_clock::now(); 
-            auto durationT = duration_cast<microseconds>(stopT- startT);
-            timeT += durationT.count();
-
-
-            for (int i=0; i<no;i++){
-                QueueDensity += args[i].partialSum;
-            }
-            
-            QueueDensity = QueueDensity/(double)256291;
-
-
-            myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-            // cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-            
-            
-            if (waitKey(1) == 27){
-                cout << "Esc key is pressed by user. Stopping the video" << endl;
-                break;
-            }
-
-            
+        if (mode.getMethod() == 1 && (int)time%mode.getSkipper() != 0) {
+            myfile<<(time)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+            // cout<< (time)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+            continue;
         }
 
-        cout<< "Time for homography " << timeH/1000000 << " seconds"<< endl;
-        cout<< "Time for Threads " << timeT/1000000<< " seconds"<< endl;
-        cout<< "Time for Reading " << timeR/1000000<< " seconds"<< endl;
+        if (mode.getMethod() == 2) {
+            Mat temp = frame2.clone();
+            resize(temp, frame2, Size(mode.xDimen,mode.yDimen), 0,0);
+        }
+        
+        cvtColor(frame2, frame2, COLOR_BGR2GRAY);
+        Mat birdEye2 = changeHom(frame2);
+        // imshow(winName[0], birdEye2);
 
-    }
+        Mat overallDiff;
+        absdiff(bg, birdEye2,overallDiff);
+        GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
+        threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY );
+        QueueDensity = (double)countNonZero(overallDiff)/(double)pixel;
 
-    else {
-        while (true) {
-            time+=(1);
-            // frame1 = frame2.clone();
-            bool isOpened = video.read(frame2);
+        // imshow(winName[1], overallDiff);
 
-            if (isOpened == false) {
-                cout << "Video has ended" << endl;
-                break;
-            } 
+        // if (i == 0) {
+        //     i =1;
+        // }
+        // else {
+            // Mat birdEye1 = changeHom(frame1);  
+            // Mat currDiff;
+            // absdiff(birdEye1, birdEye2,currDiff);
+            // GaussianBlur(currDiff,currDiff, Size(5,5),0);
+            // threshold(currDiff,currDiff, 20, 255, THRESH_BINARY );
 
-            if (mode.getMethod() == 1 && (int)time%mode.getSkipper() != 0) {
-                myfile<<(time)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-                // cout<< (time)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-                continue;
-            }
+            // DynamicDensity=(double)(countNonZero(currDiff))/(double)256291;
 
-            if (mode.getMethod() == 2) {
-                Mat temp = frame2.clone();
-                resize(temp, frame2, Size(mode.xDimen,mode.yDimen), 0,0);
-            }
-            
-            cvtColor(frame2, frame2, COLOR_BGR2GRAY);
-            Mat birdEye2 = changeHom(frame2);
-            // imshow(winName[0], birdEye2);
+            // imshow(winName[2], currDiff);
 
-            Mat overallDiff;
-            absdiff(bg, birdEye2,overallDiff);
-            GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
-            threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY );
-            QueueDensity = (double)countNonZero(overallDiff)/(double)pixel;
-
-            // imshow(winName[1], overallDiff);
-
-            // if (i == 0) {
-            //     i =1;
-            // }
-            // else {
-                // Mat birdEye1 = changeHom(frame1);  
-                // Mat currDiff;
-                // absdiff(birdEye1, birdEye2,currDiff);
-                // GaussianBlur(currDiff,currDiff, Size(5,5),0);
-                // threshold(currDiff,currDiff, 20, 255, THRESH_BINARY );
-
-                // DynamicDensity=(double)(countNonZero(currDiff))/(double)256291;
-
-                // imshow(winName[2], currDiff);
-
-            // }
+        // }
 
 
-            myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-            // cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-            
-            
-            if (waitKey(1) == 27){
-                cout << "Esc key is pressed by user. Stopping the video" << endl;
-                break;
-            }
+        myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+        // cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+        
+        
+        if (waitKey(1) == 27){
+            cout << "Esc key is pressed by user. Stopping the video" << endl;
+            break;
         }
     }
 
@@ -337,6 +235,8 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
     auto duration = duration_cast<microseconds>(stop - start);
     cout << "Time taken by function: "<< duration.count()/1000000 << " seconds" << endl;
     myfile << "$,"<< duration.count()/1000000<<endl;
+
+    myfile.close();
 }
 
 
@@ -429,7 +329,285 @@ void* showalt(void* arg ) {
 }
 
 
+void show3t(VideoCapture video, Mat bg, int no) {
 
+    auto start = high_resolution_clock::now();
+
+    cout<< "Analysis started" << endl;
+
+    string filename="graph.csv";
+    ofstream myfile; 
+
+    myfile.open(filename);
+    myfile<<"Time(s)"<<","<<"Queue Density";
+
+    int width=bg.cols;
+    int height=bg.rows;
+
+    double QueueDensity = 0;
+    Mat frame2;
+
+    int timeH=0;
+    int timeT=0;
+    int timeR =0;
+
+    int time = 0;
+
+    struct modethree args[no];
+
+    int count= 0; 
+
+    for (int i=0; i<no; i++){
+        args[i].start = count;
+
+        // cout<< "start " << start<< endl;
+        count += height/no;
+        if (i == no-1){
+            args[i].end=height;
+        }
+        else{
+            args[i].end=count;
+        }
+        args[i].initFirst(bg,width);
+        
+        // cout<< "end " << end<< endl;
+        // cout<< "width " << width<< endl;
+    }  
+
+    while (true) {
+        QueueDensity =0;
+        time+=(1);
+
+        auto startR = high_resolution_clock::now();
+        bool isOpened = video.read(frame2);
+
+        if (isOpened == false) {
+            cout << "Video has ended" << endl;
+            break;
+        }
+
+        auto stopR = high_resolution_clock::now(); 
+        auto durationR = duration_cast<microseconds>(stopR - startR);
+        timeR += durationR.count();
+
+        auto startH = high_resolution_clock::now(); 
+
+        Mat birdEye2 = changeHom(frame2);
+
+        auto stopH = high_resolution_clock::now(); 
+        auto durationH = duration_cast<microseconds>(stopH - startH);
+        timeH += durationH.count();
+
+
+        auto startT = high_resolution_clock::now(); 
+
+        pthread_t tids[no];
+
+        for (int i=0; i<no;i++){
+            args[i].framePart = birdEye2;
+            pthread_attr_t attr;
+            pthread_attr_init(&attr);
+            pthread_create(&tids[i],&attr,show2,&args[i]);
+        }
+
+        for (int i=0; i<no;i++){
+            pthread_join(tids[i],NULL);
+        }
+
+        auto stopT = high_resolution_clock::now(); 
+        auto durationT = duration_cast<microseconds>(stopT- startT);
+        timeT += durationT.count();
+
+
+        for (int i=0; i<no;i++){
+            QueueDensity += args[i].partialSum;
+        }
+        
+        QueueDensity = QueueDensity/(double)256291;
+
+
+        myfile<<time/15<<","<<QueueDensity<<endl;
+        // cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+        
+        
+        if (waitKey(1) == 27){
+            cout << "Esc key is pressed by user. Stopping the video" << endl;
+            break;
+        }
+
+        
+    }
+
+    cout<< "Time for homography " << timeH/1000000 << " seconds"<< endl;
+    cout<< "Time for Threads " << timeT/1000000<< " seconds"<< endl;
+    cout<< "Time for Reading " << timeR/1000000<< " seconds"<< endl;
+
+
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(stop - start);
+    cout << "Time taken by function: "<< duration.count()/1000000 << " seconds" << endl;
+    myfile << "$,"<< duration.count()/1000000<<endl;
+
+    myfile.close();
+}
+
+
+void show3s(VideoCapture video, Mat bg, int no, int frameT) {
+
+    cout<< "Analysis started" << endl;
+
+    auto start1 = high_resolution_clock::now();
+
+    int width=bg.cols;
+    int heigth=bg.rows;
+
+    struct alternate args[no];
+    pthread_t tids[no];
+    auto starta= high_resolution_clock::now();
+    Mat** arr =cut(video,no,width,heigth);
+    auto stopa = high_resolution_clock::now();
+    auto durationa = duration_cast<microseconds>(stopa - starta);
+    cout << "Time taken by cut: "<< durationa.count()/1000000 << " seconds" << endl;
+    int count=0;
+    int start;
+    int end;
+    for (int i=0; i<no; i++){
+        start=count;
+        count += heigth/no;
+        if (i == no-1){
+            end=heigth;
+        }
+        else{
+            end=count;
+        }
+        args[i].bg=cropImage(bg,width,start,end);
+        args[i].threadno = i;
+        args[i].arr=arr;
+        args[i].frameT=frameT;
+        pthread_attr_t attr;
+        pthread_attr_init(&attr);
+        pthread_create(&tids[i],&attr,showalt,&args[i]);
+    }
+    ofstream myfile;
+    myfile.open ("graph.csv");
+    myfile<<"Frame No.,Queue Density\n";
+    for (int i=0; i<no;i++){
+        pthread_join(tids[i],NULL);
+    }
+    auto stop1 = high_resolution_clock::now();
+    auto duration1 = duration_cast<microseconds>(stop1 - start1);
+    cout << "Time taken by function: "<< duration1.count()/1000000 << " seconds" << endl;
+    for (int i=1; i<no;i++){
+        for (int j=0;j<frameT;j++){
+            args[0].data.at(j)+=args[i].data.at(j);
+        }
+    } 
+    for (int j=0;j<frameT;j++){
+        double k= (double) j /15.0;
+        myfile<<k<<","<<args[0].data.at(j)<<endl;
+    }       
+    myfile.close(); 
+}
+
+
+struct mode4
+{
+    Mat frame;
+    double QueueDensity;
+    double frameNo;
+    Mat bg;
+};
+
+
+void* show4Thread(void* arg) {
+
+    struct mode4 *arg_struct =(struct mode4*) arg;
+
+    Mat frame2 = arg_struct->frame;
+
+    cvtColor(frame2, frame2, COLOR_BGR2GRAY);
+    Mat birdEye2 = changeHom(frame2);
+    // imshow(winName[0], birdEye2);
+
+    Mat overallDiff;
+    absdiff(arg_struct->bg, birdEye2,overallDiff);
+    GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
+    threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY );
+    arg_struct->QueueDensity = (double)countNonZero(overallDiff)/(double)256291;
+
+    pthread_exit(0);
+}
+
+
+void show4t(VideoCapture video, Mat bg, int no) {
+
+    cout<< "Analysis started" << endl;
+
+    auto start = high_resolution_clock::now();
+
+    Mat frame;    
+    double frameCount = 0;
+    string filename="graph.csv";
+    ofstream myfile; 
+
+    myfile.open(filename);
+    myfile<<"Time(s)"<<","<<"Queue Density"<<endl;
+
+    while(true) {
+
+        mode4 args[no];
+        bool done = false;
+
+        for (int i =0; i<no; i++) {
+            bool isOpened = video.read(frame);
+
+            if (isOpened == false){
+                
+                int temp = no;
+                no = i;
+                i = temp;
+                done = true;
+
+            }
+
+            else {
+                frameCount += 1;
+                args[i].frameNo = frameCount;
+                args[i].frame = frame;
+                args[i].bg = bg;
+            }
+        }
+
+        pthread_t tids[no];
+
+        for (int i=0; i<no;i++){
+            
+            pthread_attr_t attr;
+            pthread_attr_init(&attr);
+            pthread_create(&tids[i],&attr,show4Thread,&args[i]);
+        }
+
+        for (int i=0; i<no;i++){
+            pthread_join(tids[i],NULL);
+        }
+
+        for (int i=0; i< no; i++ ){
+            myfile<<args[i].frameNo/15<<","<<args[i].QueueDensity<<endl;
+            // cout<<args[i].frameNo/15<<","<<args[i].QueueDensity<<endl;
+        }
+
+        if (done) {
+            cout<<"Video has ended" << endl;
+            break;
+        }
+
+    }
+
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(stop - start);
+    cout << "Time taken by function: "<< duration.count()/1000000 << " seconds" << endl;
+    myfile << "$,"<< duration.count()/1000000<<endl;
+}
 
 
 
@@ -471,6 +649,54 @@ void* show1(void* arg ) {
     }
     arg_struct->data=data;
     pthread_exit(0);
+}
+
+
+void show4s(String videopath, Mat bg, int no, int frameT) {
+
+    struct modefour args[no];
+    pthread_t tids[no];
+    int count=0;
+
+    cout<< "Analysis started" << endl;
+    auto start = high_resolution_clock::now();
+    for (int i=0; i<no; i++){
+        args[i].start = count;
+        count += frameT/no;
+        if (i == no-1){
+            args[i].end=frameT+1;
+        }
+        else{
+            args[i].end=count;
+        }
+        args[i].bg = bg; 
+        VideoCapture vid(videopath);
+        args[i].video = vid;
+        pthread_attr_t attr;
+        pthread_attr_init(&attr);
+        pthread_create(&tids[i],&attr,show1,&args[i]);
+    }
+
+    ofstream myfile;
+    myfile.open ("graph.csv");
+    myfile<<"Time(s),Queue Density"<<endl;
+    for (int i=0; i<no;i++){
+        pthread_join(tids[i],NULL);
+    }
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(stop - start);
+    cout << "Time taken by function: "<< duration.count()/1000000 << " seconds" << endl;
+    for (int i=0; i<no;i++){
+        for (int j=args[i].start;j<args[i].end;j++){
+            if (j<frameT-2 && j !=0){
+                double k= (double) j /15.0;
+                myfile<<k<<","<<args[i].data.at(j)<<endl;
+            }
+        }
+    }      
+
+    myfile<<"$," <<duration.count()/1000000<<endl;  
+    myfile.close();
 }
 
 
@@ -564,116 +790,29 @@ int main(int argc, char** argv) {
         }
         
         int no = stoi(argv[3]);
-        mode.noThread=no;
 
         cout << "Analysing video in " << no << " threads" << endl;
 
-        struct modefour args[no];
-        pthread_t tids[no];
-        int count=0;
+        // show4t(video, bg, no);
+        show4s(videopath, bg, no, frameT);
 
-        cout<< "Analysis started" << endl;
-        auto start = high_resolution_clock::now();
-        for (int i=0; i<no; i++){
-            args[i].start = count;
-            count += frameT/no;
-            if (i == no-1){
-                args[i].end=frameT+1;
-            }
-            else{
-                args[i].end=count;
-            }
-            args[i].bg = bg; 
-            VideoCapture vid(videopath);
-            args[i].video = vid;
-            pthread_attr_t attr;
-            pthread_attr_init(&attr);
-            pthread_create(&tids[i],&attr,show1,&args[i]);
-        }
-
-        ofstream myfile;
-        myfile.open ("graph.csv");
-        myfile<<"Time(s),Queue Density"<<endl;
-        for (int i=0; i<no;i++){
-            pthread_join(tids[i],NULL);
-        }
-        auto stop = high_resolution_clock::now();
-        auto duration = duration_cast<microseconds>(stop - start);
-        cout << "Time taken by function: "<< duration.count()/1000000 << " seconds" << endl;
-        for (int i=0; i<no;i++){
-            for (int j=args[i].start;j<args[i].end;j++){
-                if (j<frameT-2 && j !=0){
-                    double k= (double) j /15.0;
-                    myfile<<k<<","<<args[i].data.at(j)<<endl;
-                }
-            }
-        }      
-
-        myfile<<"$," <<duration.count()/1000000<<endl;  
-        myfile.close(); 
+         
         return 0;
     }
     else if (modeVal==3){
-        auto start1 = high_resolution_clock::now();
         if (argc==3){
             cout<<"No of threads not provided"<<endl;
             return 0;
         } 
 
-        int no= stoi(argv[3]); 
-        int width=bg.cols;
-        int heigth=bg.rows;
+        int no= stoi(argv[3]);
         mode.noThread =no;
 
         cout << "Analysing each frame of video in " << no << " threads" << endl;
-
-        // struct alternate args[no];
-        // pthread_t tids[no];
-        // auto starta= high_resolution_clock::now();
-        // Mat** arr =cut(video,no,width,heigth);
-        // auto stopa = high_resolution_clock::now();
-        // auto durationa = duration_cast<microseconds>(stopa - starta);
-        // cout << "Time taken by cut: "<< durationa.count()/1000000 << " seconds" << endl;
-        // int count=0;
-        // int start;
-        // int end;
-        // for (int i=0; i<no; i++){
-        //     start=count;
-        //     count += heigth/no;
-        //     if (i == no-1){
-        //         end=heigth;
-        //     }
-        //     else{
-        //         end=count;
-        //     }
-        //     args[i].bg=cropImage(bg,width,start,end);
-        //     args[i].threadno = i;
-        //     args[i].arr=arr;
-        //     args[i].frameT=frameT;
-        //     pthread_attr_t attr;
-        //     pthread_attr_init(&attr);
-        //     pthread_create(&tids[i],&attr,showalt,&args[i]);
-        // }
-        // ofstream myfile;
-        // myfile.open ("graph.csv");
-        // myfile<<"Frame No.,Queue Density\n";
-        // for (int i=0; i<no;i++){
-        //     pthread_join(tids[i],NULL);
-        // }
-        // auto stop1 = high_resolution_clock::now();
-        // auto duration1 = duration_cast<microseconds>(stop1 - start1);
-        // cout << "Time taken by function: "<< duration1.count()/1000000 << " seconds" << endl;
-        // for (int i=1; i<no;i++){
-        //     for (int j=0;j<frameT;j++){
-        //         args[0].data.at(j)+=args[i].data.at(j);
-        //     }
-        // } 
-        // for (int j=0;j<frameT;j++){
-        //     double k= (double) j /15.0;
-        //     myfile<<k<<","<<args[0].data.at(j)<<endl;
-        // }       
-        // myfile.close(); 
-        // return 0;   
+        
+        show3t(video, bg, no);
+        // show3s(video, bg, no, frameT);
+        return 0;   
     }
 
     
