@@ -421,10 +421,6 @@ Mat** cut(VideoCapture video, int no,int width,int height){
         }
         count=0;
         frameno++;    
-        if (waitKey(1) == 27){
-            cout << "Esc key is pressed by user. Stopping the video" << endl;
-            break;
-        }
     }
     return arr;
 
@@ -438,7 +434,8 @@ void* showalt(void* arg ) {
     Mat bg = arg_struct->bg;
     int frameno=0;
     map <int,double> data;
-    while (frameno<arg_struct->frameT) {
+    int frameT=arg_struct->frameT;
+    while (frameno !=frameT) {
         Mat birdEye2=arr[arg_struct->threadno][frameno];
         Mat overallDiff;
         absdiff(bg, birdEye2,overallDiff);
@@ -447,10 +444,7 @@ void* showalt(void* arg ) {
 
         QueueDensity=(double)countNonZero(overallDiff)/(double)256291;
         data.insert({frameno,QueueDensity});
-        if (waitKey(1) == 27){
-            cout << "Esc key is pressed by user. Stopping the video" << endl;
-            break;
-        }
+        // cout<<arg_struct->threadno<<" "<<frameno<<endl;
         frameno++;
     }
     arg_struct->data=data;
@@ -677,13 +671,17 @@ int main(int argc, char** argv) {
             args[i].frameT=frameT;
             pthread_attr_t attr;
             pthread_attr_init(&attr);
+            cout<<"a1\n";
             pthread_create(&tids[i],&attr,showalt,&args[i]);
+            cout<<"a\n";
         }
         ofstream myfile;
         myfile.open ("graph.csv");
         myfile<<"Frame No.,Queue Density\n";
         for (int i=0; i<no;i++){
+            cout<<"b\n";
             pthread_join(tids[i],NULL);
+            cout<<"c\n";
         }
         auto stop1 = high_resolution_clock::now();
         auto duration1 = duration_cast<microseconds>(stop1 - start1);
