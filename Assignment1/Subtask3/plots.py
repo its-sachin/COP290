@@ -102,12 +102,12 @@ def mode1(maxSkip,offset):
     graphInit(xDef, yDef, "Method " + str(mode) + ": Queue Density",axMain)
     graphInit(xDef, "Absolute Difference", "Method " + str(mode) + ": Framewise error",axAbsDiff)
     graphInit("Skipped Frames", "Time taken","Method " + str(mode) + ": Runtime analysis",axTime)
-    i = 0
+    i = maxSkip
 
-    while (i <= maxSkip):
+    while (i >= 0):
         
         if (work ==0 or work == 1):
-            subprocess.run("./optimise ../Subtask2/trafficvideo.mp4 " + str(mode) + " " + str(offset*i), shell = True)
+            subprocess.run("/usr/bin/time -v ./optimise ../Subtask2/trafficvideo.mp4 " + str(mode) + " " + str(offset*i), shell = True)
             if (work == 0):
                 funTime.append(read())
             else:
@@ -125,22 +125,22 @@ def mode1(maxSkip,offset):
         axAbsDiff.plot(time, absDiff, colour[(i+1)%7], linewidth = 1, label =  str(offset*i)+ " frames")
 
 
-        i+= 1
+        i-= 1
         print("")
 
 def mode2(maxDown,gap):
 
-    i = 1
+    i = maxDown
     mode = 2
     a=0
     graphInit(xDef, yDef, "Method " + str(mode) + ": Queue Density",axMain)
     graphInit(xDef, "Absolute Difference", "Method " + str(mode) + ": Framewise error",axAbsDiff)
     graphInit("Size reduction factor", "Time taken","Method " + str(mode) + ": Runtime analysis",axTime)
 
-    while (i <= maxDown):
+    while (i >= 1):
         
         if (work ==0 or work == 1):
-            subprocess.run("./optimise ../Subtask2/trafficvideo.mp4 " + str(mode) + " " + str(1920/i) + " " + str(1080/i), shell = True)
+            subprocess.run("/usr/bin/time -v ./optimise ../Subtask2/trafficvideo.mp4 " + str(mode) + " " + str(1920/i) + " " + str(1080/i), shell = True)
             if (work == 0):
                 funTime.append(read())
             else:
@@ -157,21 +157,21 @@ def mode2(maxDown,gap):
         axAbsDiff.plot(time, absDiff, colour[(a+1)%7], linewidth = 1, label = " Size/" + str(i))
 
 
-        i+= gap
+        i-= gap
         a+=1
         print("")
 
-def mode34(mode,maxThread):
+def mode34(mode,maxThread,offset):
 
-    i = 1
+    i = maxThread
     graphInit(xDef, yDef, "Method " + str(mode) + ": Queue Density",axMain)
     graphInit(xDef, "Absolute Difference", "Method " + str(mode) + ": Framewise error",axAbsDiff)
     graphInit("Number of threads", "Time taken","Method " + str(mode) + ": Runtime analysis",axTime)
 
-    while (i <= maxThread):
+    while (i >= 1):
         
         if (work ==0 or work == 1):
-            subprocess.run("./optimise ../Subtask2/trafficvideo.mp4 " + str(mode) + " " + str(i), shell = True)
+            subprocess.run("/usr/bin/time -v ./optimise ../Subtask2/trafficvideo.mp4 " + str(mode) + " " + str(i), shell = True)
             if (work == 0):
                 funTime.append(read())
             else:
@@ -187,8 +187,9 @@ def mode34(mode,maxThread):
         axMain.plot(time, queueVar, colour[(i+1)%7], linewidth = 1, label = str(i) + "-Threads")
         axAbsDiff.plot(time, absDiff, colour[(i+1)%7], linewidth = 1, label =  str(i) + "-Threads")
 
-
-        i+= 1
+        if (i == 1): break
+        i-= offset
+        if (i <= 0): i = 1
         print("")
 
 work = int(input("Plot saved(-1) or Analyse and plot(0) or Analyse, plot and save data(1): "))
@@ -211,10 +212,10 @@ else :
             print("")
             mode2(float(maxDown),float(gap))
         else:
-            maxThread = int(input("Enter maximum number of threads: "))
+            maxThread, offset = input("Enter maximum number of threads and increment: ").split(" ")
             print("")
-            if (mode == 3): mode34(3,maxThread)
-            else: mode34(4,maxThread)
+            if (mode == 3): mode34(3,int(maxThread),int(offset))
+            else: mode34(4,int(maxThread), int(offset))
 
         axTime.plot(funx, funTime, "b", linewidth = 1, label = "Time(s)")
         axError.plot(funx, funError, "r", linewidth = 1, label = "Error")
