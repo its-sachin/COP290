@@ -9,13 +9,11 @@ using namespace cv;
 using namespace std;
 using namespace std::chrono;
 
-struct modefour{
-    VideoCapture video;
-    map<int,double> data;
-    Mat bg;
-    int start;
-    int end;
-};
+vector<Point2f> mapPoints;
+vector<Point2f> srcPoints;
+double xFactor=1;
+double yFactor=1;
+
 
 
 class Mode
@@ -53,25 +51,29 @@ int skipper;
     
 };
 
-
-Mat changeHom(Mat in) {
-
-    double xFactor = in.size().width/1920.0;
-    double yFactor = in.size().height/1080.0;
-
-
-    vector<Point2f> mapPoints;
+void initialise(Mode m){
+    if (m.getMethod()==2){
+        xFactor = m.xDimen/1920;
+        yFactor = m.yDimen/1080;    
+    }
     mapPoints.push_back(Point2f(472*xFactor,52*yFactor));
     mapPoints.push_back(Point2f(800*xFactor,52*yFactor));
     mapPoints.push_back(Point2f(800*xFactor,830*yFactor));
     mapPoints.push_back(Point2f(472*xFactor,830*yFactor));
-
-    vector<Point2f> srcPoints;
     srcPoints.push_back(Point2f(962*xFactor,213*yFactor));
     srcPoints.push_back(Point2f(1291*xFactor,211*yFactor));
     srcPoints.push_back(Point2f(1558*xFactor,978*yFactor));
     srcPoints.push_back(Point2f(338*xFactor,976*yFactor));
+}
+struct modefour{
+    VideoCapture video;
+    map<int,double> data;
+    Mat bg;
+    int start;
+    int end;
+};
 
+Mat changeHom(Mat in) {
     Mat wrapImg = Mat::zeros(in.size(),CV_8UC3);
     // auto start5=high_resolution_clock::now();
     Mat wrapedMatrix = findHomography(srcPoints, mapPoints);
@@ -766,6 +768,7 @@ int main(int argc, char** argv) {
             return 0;
         }
         mode.setSkipper(stoi(argv[3]) + 1);
+        initialise(mode);
         cout<< "Analysing by skipping " << stoi(argv[3])<< " frames"<< endl;
     }
 
@@ -776,11 +779,12 @@ int main(int argc, char** argv) {
         }
         mode.xDimen = stod(argv[3]);
         mode.yDimen = stod(argv[4]);
+        initialise(mode);
 
         cout << "Analysing by resizing video to "<< argv[3] << "*" << argv[4] <<endl;
     }
 
-    Mat bg = getBack(video,emptime, mode);
+    Mat bg;
 
     if (modeVal == 4){
         
@@ -792,8 +796,9 @@ int main(int argc, char** argv) {
         int no = stoi(argv[3]);
 
         cout << "Analysing video in " << no << " threads" << endl;
-
+        initialise(mode);
         // show4t(video, bg, no);
+        bg = getBack(video,emptime, mode);
         show4s(videopath, bg, no, frameT);
 
          
@@ -807,15 +812,15 @@ int main(int argc, char** argv) {
 
         int no= stoi(argv[3]);
         mode.noThread =no;
+        initialise(mode);
 
         cout << "Analysing each frame of video in " << no << " threads" << endl;
-        
+        bg = getBack(video,emptime, mode);
         show3t(video, bg, no);
         // show3s(video, bg, no, frameT);
         return 0;   
     }
-
-    
+    bg = getBack(video,emptime, mode);
     string winName[3] = {"Original Video","Overall Difference","Dynamic Difference"};  
 
     show(video,winName,fps,bg, mode);
