@@ -632,53 +632,53 @@ int main(int argc, char** argv) {
 
         cout << "Analysing each frame of video in " << no << " threads" << endl;
 
-        struct alternate args[no];
-        pthread_t tids[no];
-        auto starta= high_resolution_clock::now();
-        Mat** arr =cut(video,no,width,heigth);
-        auto stopa = high_resolution_clock::now();
-        auto durationa = duration_cast<microseconds>(stopa - starta);
-        cout << "Time taken by cut: "<< durationa.count()/1000000 << " seconds" << endl;
-        int count=0;
-        int start;
-        int end;
-        for (int i=0; i<no; i++){
-            start=count;
-            count += heigth/no;
-            if (i == no-1){
-                end=heigth;
-            }
-            else{
-                end=count;
-            }
-            args[i].bg=cropImage(bg,width,start,end);
-            args[i].threadno = i;
-            args[i].arr=arr;
-            args[i].frameT=frameT;
-            pthread_attr_t attr;
-            pthread_attr_init(&attr);
-            pthread_create(&tids[i],&attr,showalt,&args[i]);
-        }
-        ofstream myfile;
-        myfile.open ("graph.csv");
-        myfile<<"Frame No.,Queue Density\n";
-        for (int i=0; i<no;i++){
-            pthread_join(tids[i],NULL);
-        }
-        auto stop1 = high_resolution_clock::now();
-        auto duration1 = duration_cast<microseconds>(stop1 - start1);
-        cout << "Time taken by function: "<< duration1.count()/1000000 << " seconds" << endl;
-        for (int i=1; i<no;i++){
-            for (int j=0;j<frameT;j++){
-                args[0].data.at(j)+=args[i].data.at(j);
-            }
-        } 
-        for (int j=0;j<frameT;j++){
-            double k= (double) j /15.0;
-            myfile<<k<<","<<args[0].data.at(j)<<endl;
-        }       
-        myfile.close(); 
-        return 0;   
+        // struct alternate args[no];
+        // pthread_t tids[no];
+        // auto starta= high_resolution_clock::now();
+        // Mat** arr =cut(video,no,width,heigth);
+        // auto stopa = high_resolution_clock::now();
+        // auto durationa = duration_cast<microseconds>(stopa - starta);
+        // cout << "Time taken by cut: "<< durationa.count()/1000000 << " seconds" << endl;
+        // int count=0;
+        // int start;
+        // int end;
+        // for (int i=0; i<no; i++){
+        //     start=count;
+        //     count += heigth/no;
+        //     if (i == no-1){
+        //         end=heigth;
+        //     }
+        //     else{
+        //         end=count;
+        //     }
+        //     args[i].bg=cropImage(bg,width,start,end);
+        //     args[i].threadno = i;
+        //     args[i].arr=arr;
+        //     args[i].frameT=frameT;
+        //     pthread_attr_t attr;
+        //     pthread_attr_init(&attr);
+        //     pthread_create(&tids[i],&attr,showalt,&args[i]);
+        // }
+        // ofstream myfile;
+        // myfile.open ("graph.csv");
+        // myfile<<"Frame No.,Queue Density\n";
+        // for (int i=0; i<no;i++){
+        //     pthread_join(tids[i],NULL);
+        // }
+        // auto stop1 = high_resolution_clock::now();
+        // auto duration1 = duration_cast<microseconds>(stop1 - start1);
+        // cout << "Time taken by function: "<< duration1.count()/1000000 << " seconds" << endl;
+        // for (int i=1; i<no;i++){
+        //     for (int j=0;j<frameT;j++){
+        //         args[0].data.at(j)+=args[i].data.at(j);
+        //     }
+        // } 
+        // for (int j=0;j<frameT;j++){
+        //     double k= (double) j /15.0;
+        //     myfile<<k<<","<<args[0].data.at(j)<<endl;
+        // }       
+        // myfile.close(); 
+        // return 0;   
     }
 
     

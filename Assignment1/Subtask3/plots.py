@@ -1,6 +1,7 @@
 from matplotlib import pyplot as plt
 import csv
 import subprocess
+import shutil
 
 def error(queueAsli, queueVar):
     i = 0
@@ -36,6 +37,8 @@ with open("asli.csv") as asliFile:
             queueAsli.append(float(rows[1]))
             queueVar.append(float(rows[1]))
 
+work = 0
+
 def read():
 
     with open("graph.csv") as varFile:
@@ -53,6 +56,12 @@ def read():
 
 def readTest(str):
 
+    opener = "graph.csv"
+    if (work == -1):
+        opener = str
+    if (work == 1):
+        print("Copying data in " + str)
+        shutil.copy(opener, str)
     with open(str) as varFile:
         plots = csv.reader(varFile, delimiter = ",")
         i = 0
@@ -97,9 +106,17 @@ def mode1(maxSkip,offset):
 
     while (i <= maxSkip):
         
-        subprocess.run("./optimise ../Subtask2/trafficvideo.mp4 " + "1" + " " + str(offset*i), shell = True)
-        funTime.append(read())
-        # funTime.append(readTest("GraphsTesting/graph" + str(mode)  + "-" + str(i) +".csv"))
+        if (work ==0 or work == 1):
+            subprocess.run("./optimise ../Subtask2/trafficvideo.mp4 " + str(mode) + " " + str(offset*i), shell = True)
+            if (work == 0):
+                funTime.append(read())
+            else:
+                funTime.append(readTest("GraphsTesting/graph" + str(mode)  + "-" + str(i) +".csv"))
+
+        else:
+            funTime.append(readTest("GraphsTesting/graph" + str(mode)  + "-" + str(i) +".csv"))
+
+
         absDiff, sqrMean = error(queueAsli, queueVar)
         funError.append(sqrMean)
         funx.append(i)
@@ -109,31 +126,40 @@ def mode1(maxSkip,offset):
 
 
         i+= 1
-        print("\n")
+        print("")
 
-def mode2(maxDown):
+def mode2(maxDown,gap):
 
     i = 1
     mode = 2
+    a=0
     graphInit(xDef, yDef, "Method " + str(mode) + ": Queue Density",axMain)
     graphInit(xDef, "Absolute Difference", "Method " + str(mode) + ": Framewise error",axAbsDiff)
     graphInit("Size reduction factor", "Time taken","Method " + str(mode) + ": Runtime analysis",axTime)
 
     while (i <= maxDown):
         
-        subprocess.run("./optimise ../Subtask2/trafficvideo.mp4 " + "2" + " " + str(1920/i) + " " + str(1080/i), shell = True)
-        funTime.append(read())
-        # funTime.append(readTest("GraphsTesting/graph" + str(mode) + "-" +str(i) +".csv"))
+        if (work ==0 or work == 1):
+            subprocess.run("./optimise ../Subtask2/trafficvideo.mp4 " + str(mode) + " " + str(1920/i) + " " + str(1080/i), shell = True)
+            if (work == 0):
+                funTime.append(read())
+            else:
+                funTime.append(readTest("GraphsTesting/graph" + str(mode)  + "-" + str(i) +".csv"))
+
+        else:
+            funTime.append(readTest("GraphsTesting/graph" + str(mode)  + "-" + str(i) +".csv"))
+
         absDiff, sqrMean = error(queueAsli, queueVar)
         funError.append(sqrMean)
         funx.append(i)
 
-        axMain.plot(time, queueVar, colour[(i+1)%7], linewidth = 1, label = " Size/" + str(i))
-        axAbsDiff.plot(time, absDiff, colour[(i+1)%7], linewidth = 1, label = " Size/" + str(i))
+        axMain.plot(time, queueVar, colour[(a+1)%7], linewidth = 1, label = " Size/" + str(i))
+        axAbsDiff.plot(time, absDiff, colour[(a+1)%7], linewidth = 1, label = " Size/" + str(i))
 
 
-        i+= 1
-        print("\n")
+        i+= gap
+        a+=1
+        print("")
 
 def mode34(mode,maxThread):
 
@@ -144,9 +170,16 @@ def mode34(mode,maxThread):
 
     while (i <= maxThread):
         
-        subprocess.run("./optimise ../Subtask2/trafficvideo.mp4 " + "3" + " " + str(i), shell = True)
-        funTime.append(read())
-        # funTime.append(readTest("GraphsTesting/graph" + str(mode)  + "-" + str(i) +".csv"))
+        if (work ==0 or work == 1):
+            subprocess.run("./optimise ../Subtask2/trafficvideo.mp4 " + str(mode) + " " + str(i), shell = True)
+            if (work == 0):
+                funTime.append(read())
+            else:
+                funTime.append(readTest("GraphsTesting/graph" + str(mode)  + "-" + str(i) +".csv"))
+
+        else:
+            funTime.append(readTest("GraphsTesting/graph" + str(mode)  + "-" + str(i) +".csv"))
+
         absDiff, sqrMean = error(queueAsli, queueVar)
         funError.append(sqrMean)
         funx.append(i)
@@ -156,32 +189,40 @@ def mode34(mode,maxThread):
 
 
         i+= 1
-        print("\n")
+        print("")
 
-mode = int(input("Enter method: "))
-if (mode <=0 or mode > 4):
-    print("INVALID Method!!")
+work = int(input("Plot saved(-1) or Analyse and plot(0) or Analyse, plot and save data(1): "))
 
-else:
+if (work < -1 or work > 1):
+    print("INVALID Value!!")
 
-    if (mode == 1):
-        maxSkip, offset = input("Enter max frames skipped and offset: ").split(" ")
-        mode1(int(maxSkip), int(offset))
-    elif (mode == 2):
-        maxDown = int(input("Enter maximum down factor of size: "))
-        mode2(maxDown)
+else :
+    mode = int(input("Enter method: "))
+    if (mode <=0 or mode > 4):
+        print("INVALID Method!!")
+
     else:
-        maxThread = int(input("Enter maximum number of threads: "))
-        if (mode == 3): mode34(3,maxThread)
-        else: mode34(4,maxThread)
+        if (mode == 1):
+            maxSkip, offset = input("Enter max frames skipped and offset: ").split(" ")
+            print("")
+            mode1(int(maxSkip), int(offset))
+        elif (mode == 2):
+            maxDown,gap = input("Enter maximum down factor of size and increment in factor: ").split(" ")
+            print("")
+            mode2(float(maxDown),float(gap))
+        else:
+            maxThread = int(input("Enter maximum number of threads: "))
+            print("")
+            if (mode == 3): mode34(3,maxThread)
+            else: mode34(4,maxThread)
 
-    axTime.plot(funx, funTime, "b", linewidth = 1, label = "Time(s)")
-    axError.plot(funx, funError, "r", linewidth = 1, label = "Error")
+        axTime.plot(funx, funTime, "b", linewidth = 1, label = "Time(s)")
+        axError.plot(funx, funError, "r", linewidth = 1, label = "Error")
 
-    axError.set_ylabel("Error")
-    axMain.legend()
-    axAbsDiff.legend()
-    axTime.legend()
-    axError.legend()
-    plt.tight_layout()
-    plt.show()
+        axError.set_ylabel("Error")
+        axMain.legend()
+        axAbsDiff.legend()
+        axTime.legend()
+        axError.legend()
+        plt.tight_layout()
+        plt.show()
