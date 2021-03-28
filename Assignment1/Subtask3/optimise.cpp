@@ -82,19 +82,14 @@ Mat changeHom(Mat in) {
     int xdimension=329*xFactor;
     int ydimension=779*yFactor;
 
-    Mat out(ydimension,xdimension,CV_8UC3,Scalar(0,0,0));
+    Rect rec(472*xFactor,52*yFactor, xdimension, ydimension);
 
-    vector<Point2f> cropPoints;
-    cropPoints.push_back(Point2f(0,0));  
-    cropPoints.push_back(Point2f(xdimension-1,0));
-    cropPoints.push_back(Point2f(xdimension-1,ydimension-1));
-    cropPoints.push_back(Point2f(0,ydimension-1));
+    Mat croppedRef(wrapImg, rec);
 
-    wrapedMatrix = findHomography(mapPoints,cropPoints);
+    Mat cropped;
+    croppedRef.copyTo(cropped);
 
-    warpPerspective(wrapImg, out, wrapedMatrix, out.size());
-
-    return out;
+    return cropped;
 
 }
 
@@ -397,6 +392,10 @@ Mat** cut(VideoCapture video, int no,int width,int height){
         }
         count=0;
         frameno++;    
+        if (waitKey(1) == 27){
+            cout << "Esc key is pressed by user. Stopping the video" << endl;
+            break;
+        }
     }
     return arr;
 
@@ -410,8 +409,7 @@ void* showalt(void* arg ) {
     Mat bg = arg_struct->bg;
     int frameno=0;
     map <int,double> data;
-    int frameT=arg_struct->frameT;
-    while (frameno !=frameT) {
+    while (frameno<arg_struct->frameT) {
         Mat birdEye2=arr[arg_struct->threadno][frameno];
         Mat overallDiff;
         absdiff(bg, birdEye2,overallDiff);
@@ -420,7 +418,10 @@ void* showalt(void* arg ) {
 
         QueueDensity=(double)countNonZero(overallDiff)/(double)256291;
         data.insert({frameno,QueueDensity});
-        // cout<<arg_struct->threadno<<" "<<frameno<<endl;
+        if (waitKey(1) == 27){
+            cout << "Esc key is pressed by user. Stopping the video" << endl;
+            break;
+        }
         frameno++;
     }
     arg_struct->data=data;
@@ -592,7 +593,7 @@ int main(int argc, char** argv) {
 
         ofstream myfile;
         myfile.open ("graph.csv");
-        myfile<<"Time(s),Queue Density\n"<<endl;
+        myfile<<"Time(s),Queue Density"<<endl;
         for (int i=0; i<no;i++){
             pthread_join(tids[i],NULL);
         }
@@ -601,14 +602,14 @@ int main(int argc, char** argv) {
         cout << "Time taken by function: "<< duration.count()/1000000 << " seconds" << endl;
         for (int i=0; i<no;i++){
             for (int j=args[i].start;j<args[i].end;j++){
-                if (j<frameT-2){
+                if (j<frameT-2 && j !=0){
                     double k= (double) j /15.0;
                     myfile<<k<<","<<args[i].data.at(j)<<endl;
                 }
             }
         }      
 
-        myfile<<"$" <<duration.count()/1000000<<endl;  
+        myfile<<"$," <<duration.count()/1000000<<endl;  
         myfile.close(); 
         return 0;
     }
@@ -626,7 +627,6 @@ int main(int argc, char** argv) {
 
         cout << "Analysing each frame of video in " << no << " threads" << endl;
 
-<<<<<<< HEAD
         // struct alternate args[no];
         // pthread_t tids[no];
         // auto starta= high_resolution_clock::now();
@@ -674,59 +674,6 @@ int main(int argc, char** argv) {
         // }       
         // myfile.close(); 
         // return 0;   
-=======
-        struct alternate args[no];
-        pthread_t tids[no];
-        auto starta= high_resolution_clock::now();
-        Mat** arr =cut(video,no,width,heigth);
-        auto stopa = high_resolution_clock::now();
-        auto durationa = duration_cast<microseconds>(stopa - starta);
-        cout << "Time taken by cut: "<< durationa.count()/1000000 << " seconds" << endl;
-        int count=0;
-        int start;
-        int end;
-        for (int i=0; i<no; i++){
-            start=count;
-            count += heigth/no;
-            if (i == no-1){
-                end=heigth;
-            }
-            else{
-                end=count;
-            }
-            args[i].bg=cropImage(bg,width,start,end);
-            args[i].threadno = i;
-            args[i].arr=arr;
-            args[i].frameT=frameT;
-            pthread_attr_t attr;
-            pthread_attr_init(&attr);
-            cout<<"a1\n";
-            pthread_create(&tids[i],&attr,showalt,&args[i]);
-            cout<<"a\n";
-        }
-        ofstream myfile;
-        myfile.open ("graph.csv");
-        myfile<<"Frame No.,Queue Density\n";
-        for (int i=0; i<no;i++){
-            cout<<"b\n";
-            pthread_join(tids[i],NULL);
-            cout<<"c\n";
-        }
-        auto stop1 = high_resolution_clock::now();
-        auto duration1 = duration_cast<microseconds>(stop1 - start1);
-        cout << "Time taken by function: "<< duration1.count()/1000000 << " seconds" << endl;
-        for (int i=1; i<no;i++){
-            for (int j=0;j<frameT;j++){
-                args[0].data.at(j)+=args[i].data.at(j);
-            }
-        } 
-        for (int j=0;j<frameT;j++){
-            double k= (double) j /15.0;
-            myfile<<k<<","<<args[0].data.at(j)<<endl;
-        }       
-        myfile.close(); 
-        return 0;   
->>>>>>> 07d3515d28d7d7e5f4df1c52df483e29309eb46a
     }
 
     
