@@ -644,11 +644,11 @@ void* show1(void* arg ) {
     int count=arg_struct->start;
     VideoCapture video = arg_struct->video;
     video.set(CAP_PROP_POS_FRAMES,count);
-
     Mat frame2;
     Mat bg = arg_struct->bg;
     map<int,double> data;
-    while (count != arg_struct->end) {
+    int end=arg_struct->end;
+    while (count !=end) {
         bool isOpened = video.read(frame2);
 
         if (isOpened == false) {
@@ -687,7 +687,7 @@ void show4s(String videopath, Mat bg, int no, int frameT) {
         args[i].start = count;
         count += frameT/no;
         if (i == no-1){
-            args[i].end=frameT+1;
+            args[i].end=frameT;
         }
         else{
             args[i].end=count;
@@ -709,8 +709,8 @@ void show4s(String videopath, Mat bg, int no, int frameT) {
 
     for (int i=0; i<no;i++){
         for (int j=args[i].start;j<args[i].end;j++){
-            if (j<frameT-2 && j !=0){
-                double k= (double) j /15.0;
+            double k= (double) j /15.0;
+            if (j!=frameT-1){
                 myfile<<k<<","<<args[i].data.at(j)<<endl;
             }
         }
