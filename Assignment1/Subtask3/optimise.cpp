@@ -116,14 +116,17 @@ struct modethree{
     Mat bgPart;
     int start;
     int end;
+    int width;
 
-    void initFirst(Mat bg, int width) {
-        bgPart = cropImage(bg, width, start, end);
+    void initFirst(Mat bg, int widthT) {
+        bgPart = cropImage(bg, widthT, start, end);
+        width = widthT;
 
     }
 
-    void initialize(Mat frame, int width){
+    void initialize(Mat frame){
         framePart = cropImage(frame, width, start, end);
+        cvtColor(framePart, framePart, COLOR_BGR2GRAY);
     }
 };
 
@@ -131,6 +134,7 @@ void* show2(void* arg ) {
     struct modethree *arg_struct =(struct modethree*) arg;
 
     double partialSum = 0;
+    arg_struct->initialize(arg_struct->framePart);
     
     Mat overallDiff;
     absdiff(arg_struct->bgPart, arg_struct->framePart ,overallDiff);
@@ -177,6 +181,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
 
         int timeH=0;
         int timeT=0;
+        int timeR =0;
 
         
         int no = mode.noThread;
@@ -204,6 +209,8 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
         while (true) {
             QueueDensity =0;
             time+=(1);
+
+            auto startR = high_resolution_clock::now();
             bool isOpened = video.read(frame2);
 
             if (isOpened == false) {
@@ -211,9 +218,12 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
                 break;
             }
 
+            auto stopR = high_resolution_clock::now(); 
+            auto durationR = duration_cast<microseconds>(stopR - startR);
+            timeR += durationR.count();
+
             auto startH = high_resolution_clock::now(); 
 
-            cvtColor(frame2, frame2, COLOR_BGR2GRAY);
             Mat birdEye2 = changeHom(frame2);
 
             auto stopH = high_resolution_clock::now(); 
@@ -226,7 +236,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
             pthread_t tids[no];
 
             for (int i=0; i<no;i++){
-                args[i].initialize(birdEye2, width);
+                args[i].framePart = birdEye2;
                 pthread_attr_t attr;
                 pthread_attr_init(&attr);
                 pthread_create(&tids[i],&attr,show2,&args[i]);
@@ -240,11 +250,14 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
             auto durationT = duration_cast<microseconds>(stopT- startT);
             timeT += durationT.count();
 
+
             for (int i=0; i<no;i++){
                 QueueDensity += args[i].partialSum;
             }
             
             QueueDensity = QueueDensity/(double)256291;
+
+
             myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
             // cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
             
@@ -259,6 +272,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
 
         cout<< "Time for homography " << timeH/1000000 << " seconds"<< endl;
         cout<< "Time for Threads " << timeT/1000000<< " seconds"<< endl;
+        cout<< "Time for Reading " << timeR/1000000<< " seconds"<< endl;
 
     }
 

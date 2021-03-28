@@ -121,9 +121,9 @@ def mode2(maxDown):
 
     while (i <= maxDown):
         
-        # subprocess.run("./optimise ../Subtask2/trafficvideo.mp4 " + "2" + " " + str(1920/i) + " " + str(1080/i), shell = True)
-        # funTime.append(read())
-        funTime.append(readTest("GraphsTesting/graph" + str(mode) + "-" +str(i) +".csv"))
+        subprocess.run("./optimise ../Subtask2/trafficvideo.mp4 " + "2" + " " + str(1920/i) + " " + str(1080/i), shell = True)
+        funTime.append(read())
+        # funTime.append(readTest("GraphsTesting/graph" + str(mode) + "-" +str(i) +".csv"))
         absDiff, sqrMean = error(queueAsli, queueVar)
         funError.append(sqrMean)
         funx.append(i)
