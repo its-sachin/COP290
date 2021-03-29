@@ -176,7 +176,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
             break;
         } 
 
-        if (mode.getMethod() == 1 && (int)time%mode.getSkipper() != 0) {
+        if (mode.getMethod() == 1 && (int)(time-1)%mode.getSkipper() != 0) {
             myfile<<(time)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
             // cout<< (time)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
             continue;

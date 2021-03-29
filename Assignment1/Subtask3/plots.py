@@ -86,9 +86,9 @@ funx = []
 funTime = []
 funError = []
 
-figMain,axMain = plt.subplots()
-figAbsDiff,axAbsDiff = plt.subplots()
-figTime,axTime = plt.subplots()
+figMain,(axMain, axAbsDiff) = plt.subplots(nrows = 2, ncols = 1, figsize= (15,10))
+# figAbsDiff, = plt.subplots(figsize= (15,7))
+figTime,axTime = plt.subplots(figsize= (8,5))
 axError = axTime.twinx()
 
 
@@ -107,7 +107,7 @@ def mode1(maxSkip,offset):
     while (i >= 0):
         
         if (work ==0 or work == 1):
-            subprocess.run("./optimise ../Subtask2/trafficvideo.mp4 " + str(mode) + " " + str(offset*i), shell = True)
+            subprocess.run("./optimise ../Subtask2/trafficvideo.mp4 " + str(mode) + " " + str(i), shell = True)
             if (work == 0):
                 funTime.append(read())
             else:
@@ -121,11 +121,13 @@ def mode1(maxSkip,offset):
         funError.append(sqrMean)
         funx.append(i)
 
-        axMain.plot(time, queueVar, colour[(i+1)%7], linewidth = 1, label = str(offset*i)+ " frames")
-        axAbsDiff.plot(time, absDiff, colour[(i+1)%7], linewidth = 1, label =  str(offset*i)+ " frames")
+        axMain.plot(time, queueVar, colour[(i+1)%7], linewidth = 1, label = str(i)+ " frames")
+        axAbsDiff.plot(time, absDiff, colour[(i+1)%7], linewidth = 1, label =  str(i)+ " frames")
 
 
-        i-= 1
+        if (i == 0): break
+        i-= offset
+        if (i < 0): i = 0
         print("")
 
 def mode2(maxDown,gap):
@@ -196,7 +198,7 @@ def mode34(mode,maxThread,offset):
     cpuVar = []
     memVar = []
 
-    figCPU,axCPU = plt.subplots()
+    figCPU,axCPU = plt.subplots(figsize= (8,5))
     axMem = axCPU.twinx()
 
     graphInit(xDef, yDef, "Method " + str(mode) + ": Queue Density",axMain)
@@ -234,11 +236,14 @@ def mode34(mode,maxThread,offset):
         if (i <= 0): i = 1
         print("")
 
-    axCPU.plot(funx, cpuVar, "b", linewidth = 2, label = "CPU Usage(%)")
-    axMem.plot(funx, memVar, "c", linewidth = 2, label = "Max Memory(MB)")
+    axCPU.plot(funx, cpuVar, "b", linewidth = 2, marker = 'o', markerfacecolor = "b", label = "CPU Usage(%)")
+    axMem.plot(funx, memVar, "c", linewidth = 2, marker = 'o', markerfacecolor = "c", label = "Max Memory(MB)")
     axMem.set_ylabel("Memory(MB)")
     axCPU.legend(loc="upper left")
     axMem.legend(loc="upper right")
+
+    if (work == 1):
+        figCPU.savefig("GraphsTesting/plot" + str(mode)  + "-" + str(i) +"-cpu.txt")
 
 
 work = int(input("Plot saved(-1) | Analyse and plot(0) | Analyse, plot and save data(1): "))
@@ -266,13 +271,21 @@ else :
             if (mode == 3): mode34(3,int(maxThread),int(offset))
             else: mode34(4,int(maxThread), int(offset))
 
-        axTime.plot(funx, funTime, "b", linewidth = 2, label = "Time(s)")
-        axError.plot(funx, funError, "r", linewidth = 2, label = "Error")
+        axTime.plot(funx, funTime, "b", linewidth = 2, marker = 'o', markerfacecolor = "b", label = "Time(s)")
+        axError.plot(funx, funError, "r", linewidth = 2, marker = 'o', markerfacecolor = "r", label = "Error")
 
-        axMain.legend()
-        axAbsDiff.legend()
+        axMain.legend(loc="upper right")
+        axAbsDiff.legend(loc="upper right")
         axError.set_ylabel("Error")
         axTime.legend(loc="upper left")
         axError.legend(loc="upper right")
         plt.tight_layout()
+
+        if (work == 1):
+            print("Saving graps in folder GraphsTesting/")
+            figMain.savefig("GraphsTesting/plot" + str(mode) +"-queue.png") 
+            # figAbsDiff.savefig("GraphsTesting/plot" + str(mode) + "-error.png") 
+            figTime.savefig("GraphsTesting/plot" + str(mode)  + "-runtime.png")    
+        
+
         plt.show()
