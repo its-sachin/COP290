@@ -107,7 +107,7 @@ def mode1(maxSkip,offset):
     while (i >= 0):
         
         if (work ==0 or work == 1):
-            subprocess.run("/usr/bin/time -v ./optimise ../Subtask2/trafficvideo.mp4 " + str(mode) + " " + str(offset*i), shell = True)
+            subprocess.run("./optimise ../Subtask2/trafficvideo.mp4 " + str(mode) + " " + str(offset*i), shell = True)
             if (work == 0):
                 funTime.append(read())
             else:
@@ -140,7 +140,7 @@ def mode2(maxDown,gap):
     while (i >= 1):
         
         if (work ==0 or work == 1):
-            subprocess.run("/usr/bin/time -v ./optimise ../Subtask2/trafficvideo.mp4 " + str(mode) + " " + str(1920/i) + " " + str(1080/i), shell = True)
+            subprocess.run("./optimise ../Subtask2/trafficvideo.mp4 " + str(mode) + " " + str(1920/i) + " " + str(1080/i), shell = True)
             if (work == 0):
                 funTime.append(read())
             else:
@@ -161,24 +161,66 @@ def mode2(maxDown,gap):
         a+=1
         print("")
 
+
 def mode34(mode,maxThread,offset):
 
+    def readCPU(str) :
+        cpu = ""
+        mem = ""
+        opener = "cpu.txt"
+        if (work == -1):
+            opener = str
+
+        cpu = open(opener,"r+")
+        cpuList = cpu.readlines()
+        for i in cpuList:
+            if (i[1:8] == "Percent"):
+                j = -2
+                while (i[j] != " "):
+                    j -= 1
+                cpu = i[j:-2]
+            elif (i[1:8] == "Maximum"):
+                j = -1
+                while (i[j] != " "):
+                    j -= 1
+                mem = i[j:-1]
+        
+        if (work == 1):
+            print("Copying time output in " + str)
+            shutil.copy(opener, str)
+
+        return int(cpu), float(mem)/1024
+
     i = maxThread
+
+    cpuVar = []
+    memVar = []
+
+    figCPU,axCPU = plt.subplots()
+    axMem = axCPU.twinx()
+
     graphInit(xDef, yDef, "Method " + str(mode) + ": Queue Density",axMain)
     graphInit(xDef, "Absolute Difference", "Method " + str(mode) + ": Framewise error",axAbsDiff)
     graphInit("Number of threads", "Time taken","Method " + str(mode) + ": Runtime analysis",axTime)
+    graphInit("Number of threads", "CPU Usage","Method " + str(mode) +  ": Usage Analysis", axCPU)
 
     while (i >= 1):
         
         if (work ==0 or work == 1):
-            subprocess.run("/usr/bin/time -v ./optimise ../Subtask2/trafficvideo.mp4 " + str(mode) + " " + str(i), shell = True)
+            subprocess.run("{ /usr/bin/time -v ./optimise ../Subtask2/trafficvideo.mp4 " + str(mode) + " " + str(i)+ "; } 2> cpu.txt", shell = True)
             if (work == 0):
                 funTime.append(read())
             else:
                 funTime.append(readTest("GraphsTesting/graph" + str(mode)  + "-" + str(i) +".csv"))
+            
 
         else:
             funTime.append(readTest("GraphsTesting/graph" + str(mode)  + "-" + str(i) +".csv"))
+
+        cpu,memory = readCPU("GraphsTesting/cpu" + str(mode)  + "-" + str(i) +".txt")
+
+        cpuVar.append(cpu)
+        memVar.append(memory)
 
         absDiff, sqrMean = error(queueAsli, queueVar)
         funError.append(sqrMean)
@@ -192,7 +234,14 @@ def mode34(mode,maxThread,offset):
         if (i <= 0): i = 1
         print("")
 
-work = int(input("Plot saved(-1) or Analyse and plot(0) or Analyse, plot and save data(1): "))
+    axCPU.plot(funx, cpuVar, "b", linewidth = 2, label = "CPU Usage(%)")
+    axMem.plot(funx, memVar, "c", linewidth = 2, label = "Max Memory(MB)")
+    axMem.set_ylabel("Memory(MB)")
+    axCPU.legend(loc="upper left")
+    axMem.legend(loc="upper right")
+
+
+work = int(input("Plot saved(-1) | Analyse and plot(0) | Analyse, plot and save data(1): "))
 
 if (work < -1 or work > 1):
     print("INVALID Value!!")
@@ -217,13 +266,13 @@ else :
             if (mode == 3): mode34(3,int(maxThread),int(offset))
             else: mode34(4,int(maxThread), int(offset))
 
-        axTime.plot(funx, funTime, "b", linewidth = 1, label = "Time(s)")
-        axError.plot(funx, funError, "r", linewidth = 1, label = "Error")
+        axTime.plot(funx, funTime, "b", linewidth = 2, label = "Time(s)")
+        axError.plot(funx, funError, "r", linewidth = 2, label = "Error")
 
-        axError.set_ylabel("Error")
         axMain.legend()
         axAbsDiff.legend()
-        axTime.legend()
-        axError.legend()
+        axError.set_ylabel("Error")
+        axTime.legend(loc="upper left")
+        axError.legend(loc="upper right")
         plt.tight_layout()
         plt.show()
