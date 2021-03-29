@@ -65,13 +65,7 @@ void initialise(Mode m){
     srcPoints.push_back(Point2f(1558*xFactor,978*yFactor));
     srcPoints.push_back(Point2f(338*xFactor,976*yFactor));
 }
-struct modefour{
-    VideoCapture video;
-    map<int,double> data;
-    Mat bg;
-    int start;
-    int end;
-};
+
 
 Mat changeHom(Mat in) {
     Mat wrapImg = Mat::zeros(in.size(),CV_8UC3);
@@ -510,7 +504,8 @@ void show3s(VideoCapture video, Mat bg, int no, int frameT) {
 
     auto stop1 = high_resolution_clock::now();
     auto duration1 = duration_cast<microseconds>(stop1 - start1);
-    cout << "Time taken by function: "<< duration1.count()/1000000 << " seconds" << endl;      
+    cout << "Time taken by function: "<< duration1.count()/1000000 << " seconds" << endl;    
+    myfile<<"$,"<<  duration1.count()/1000000 << endl;
     myfile.close(); 
 }
 
@@ -632,7 +627,13 @@ void show4t(VideoCapture video, Mat bg, int no) {
     myfile << "$,"<< duration.count()/1000000<<endl;
 }
 
-
+struct modefour{
+    VideoCapture video;
+    map<int,double> data;
+    Mat bg;
+    int start;
+    int end;
+};
 
 
 
@@ -646,9 +647,8 @@ void* show1(void* arg ) {
     video.set(CAP_PROP_POS_FRAMES,count);
     Mat frame2;
     Mat bg = arg_struct->bg;
-    map<int,double> data;
     int end=arg_struct->end;
-    while (count !=end) {
+    while (count != end) {
         bool isOpened = video.read(frame2);
 
         if (isOpened == false) {
@@ -663,14 +663,13 @@ void* show1(void* arg ) {
         threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY );
 
         QueueDensity=(double)countNonZero(overallDiff)/(double)256291;
-        data.insert({count,QueueDensity});
+        arg_struct->data.insert({count,QueueDensity});
         // if (waitKey(1) == 27){
         //     cout << "Esc key is pressed by user. Stopping the video" << endl;
         //     break;
         // }
         count++;
     }
-    arg_struct->data=data;
     pthread_exit(0);
 }
 
@@ -709,8 +708,8 @@ void show4s(String videopath, Mat bg, int no, int frameT) {
 
     for (int i=0; i<no;i++){
         for (int j=args[i].start;j<args[i].end;j++){
-            double k= (double) j /15.0;
-            if (j!=frameT-1){
+            double k= (double) (j) /15.0;
+            if (j<frameT-1){
                 myfile<<k<<","<<args[i].data.at(j)<<endl;
             }
         }
@@ -821,8 +820,8 @@ int main(int argc, char** argv) {
         cout << "Analysing video in " << no << " threads" << endl;
         initialise(mode);
         bg = getBack(video,emptime, mode);
-        // show4t(video, bg, no);
-        show4s(videopath, bg, no, frameT);
+        show4t(video, bg, no);
+        // show4s(videopath, bg, no, frameT);
 
          
         return 0;
@@ -839,8 +838,8 @@ int main(int argc, char** argv) {
 
         cout << "Analysing each frame of video in " << no << " threads" << endl;
         bg = getBack(video,emptime, mode);
-        // show3t(video, bg, no);
-        show3s(video, bg, no, frameT);
+        show3t(video, bg, no);
+        // show3s(video, bg, no, frameT);
         return 0;   
     }
     bg = getBack(video,emptime, mode);
