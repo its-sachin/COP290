@@ -5,6 +5,7 @@
 #include <fstream>
 #include <map>
 #include <pthread.h>
+#include <cmath>
 using namespace cv;
 using namespace std;
 using namespace std::chrono;
@@ -138,12 +139,16 @@ void* show2(void* arg ) {
 }
 
 
+bool thresD(Point2f a,Point2f b, double threshold){
+    return sqrt(pow((double)(a.x-b.x),2.0)+pow((double)(a.y-b.y),2.0))>threshold;
+}
+
 void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
 
     auto start = high_resolution_clock::now(); 
 
-    // int i = 0;
-    // Mat frame1;
+    int i = 0;
+    Mat frame1;
     Mat frame2;
 
     double QueueDensity =0;
@@ -165,65 +170,169 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
     myfile<<"Time(s)"<<","<<"Queue Density"<<","<<"Dynamic Density"<<endl;
 
     // cout<<"Time(s)"<<","<<"Queue Density"<<","<<"Dynamic Density"<<endl;
+    if (mode.getMethod()==1 || mode.getMethod()==2){
 
-    while (true) {
-        time+=(1);
-        // frame1 = frame2.clone();
-        bool isOpened = video.read(frame2);
+        while (true) {
+            time+=(1);
+            // frame1 = frame2.clone();
+            bool isOpened = video.read(frame2);
 
-        if (isOpened == false) {
-            cout << "Video has ended" << endl;
-            break;
-        } 
+            if (isOpened == false) {
+                cout << "Video has ended" << endl;
+                break;
+            } 
 
-        if (mode.getMethod() == 1 && (int)time%mode.getSkipper() != 0) {
-            myfile<<(time)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-            // cout<< (time)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-            continue;
+            if (mode.getMethod() == 1 && (int)time%mode.getSkipper() != 0) {
+                myfile<<(time)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+                // cout<< (time)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+                continue;
+            }
+
+            if (mode.getMethod() == 2) {
+                Mat temp = frame2.clone();
+                resize(temp, frame2, Size(mode.xDimen,mode.yDimen), 0,0);
+            }
+            
+            cvtColor(frame2, frame2, COLOR_BGR2GRAY);
+            Mat birdEye2 = changeHom(frame2);
+            // imshow(winName[0], birdEye2);
+
+            Mat overallDiff;
+            absdiff(bg, birdEye2,overallDiff);
+            GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
+            threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY );
+            QueueDensity = (double)countNonZero(overallDiff)/(double)pixel;
+
+            // imshow(winName[1], overallDiff);
+
+            // if (i == 0) {
+            //     i =1;
+            // }
+            // else {
+                // Mat birdEye1 = changeHom(frame1);  
+                // Mat currDiff;
+                // absdiff(birdEye1, birdEye2,currDiff);
+                // GaussianBlur(currDiff,currDiff, Size(5,5),0);
+                // threshold(currDiff,currDiff, 20, 255, THRESH_BINARY );
+
+                // DynamicDensity=(double)(countNonZero(currDiff))/(double)256291;
+
+                // imshow(winName[2], currDiff);
+
+            // }
+
+
+            myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+            // cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+            
+            
+            // if (waitKey(1) == 27){
+            //     cout << "Esc key is pressed by user. Stopping the video" << endl;
+            //     break;
+            // }
         }
+    }
+    else {
+        if (mode.getMethod()==5){
+            while (true) {
+                time+=(1);
+                frame1 = frame2.clone();
+                bool isOpened = video.read(frame2);
 
-        if (mode.getMethod() == 2) {
-            Mat temp = frame2.clone();
-            resize(temp, frame2, Size(mode.xDimen,mode.yDimen), 0,0);
+                if (isOpened == false) {
+                    cout << "Video has ended" << endl;
+                    myfile.close();
+                    break;
+                } 
+                cvtColor(frame2, frame2, COLOR_BGR2GRAY);
+                Mat birdEye2 = changeHom(frame2);
+
+                Mat overallDiff;
+                absdiff(bg, birdEye2,overallDiff);
+                GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
+                threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY );
+
+
+                if (i == 0) {
+                    i =1;
+                    myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+                }
+                else {
+                    Mat birdEye1 = changeHom(frame1);
+                    Mat flow(birdEye1.size(), CV_32FC2);
+                    calcOpticalFlowFarneback(birdEye1, birdEye2, flow, 0.5, 3, 15, 3, 5, 1.2, 0);  
+                    // Mat currDiff;
+                    // absdiff(birdEye1, birdEye2,currDiff);
+                    // GaussianBlur(currDiff,currDiff, Size(5,5),0);
+                    // threshold(currDiff,currDiff, 20, 255, THRESH_BINARY );
+                    Mat flow_parts[2];
+                    split(flow, flow_parts);
+                    Mat magnitude, angle, magn_norm;
+                    cartToPolar(flow_parts[0], flow_parts[1], magnitude, angle, true);
+                    normalize(magnitude, magn_norm, 0, 255, NORM_MINMAX);
+                    threshold(magn_norm,magn_norm, 153, 255,THRESH_BINARY );
+                    QueueDensity=(double)countNonZero(overallDiff)/(double)256291;
+                    DynamicDensity=(double)(countNonZero(magn_norm))/(double)256291;
+
+                    myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+                    cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+                }
+            } 
         }
-        
-        cvtColor(frame2, frame2, COLOR_BGR2GRAY);
-        Mat birdEye2 = changeHom(frame2);
-        // imshow(winName[0], birdEye2);
+        else {
+            vector<Point2f> p0,p1;
+            Mat nz;
+            while (true) {
+                time+=(1);
+                frame1 = frame2.clone();
+                bool isOpened = video.read(frame2);
 
-        Mat overallDiff;
-        absdiff(bg, birdEye2,overallDiff);
-        GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
-        threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY );
-        QueueDensity = (double)countNonZero(overallDiff)/(double)pixel;
+                if (isOpened == false) {
+                    cout << "Video has ended" << endl;
+                    myfile.close();
+                    break;
+                } 
+                cvtColor(frame2, frame2, COLOR_BGR2GRAY);
+                Mat birdEye2 = changeHom(frame2);
 
-        // imshow(winName[1], overallDiff);
-
-        // if (i == 0) {
-        //     i =1;
-        // }
-        // else {
-            // Mat birdEye1 = changeHom(frame1);  
-            // Mat currDiff;
-            // absdiff(birdEye1, birdEye2,currDiff);
-            // GaussianBlur(currDiff,currDiff, Size(5,5),0);
-            // threshold(currDiff,currDiff, 20, 255, THRESH_BINARY );
-
-            // DynamicDensity=(double)(countNonZero(currDiff))/(double)256291;
-
-            // imshow(winName[2], currDiff);
-
-        // }
-
-
-        myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-        // cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-        
-        
-        // if (waitKey(1) == 27){
-        //     cout << "Esc key is pressed by user. Stopping the video" << endl;
-        //     break;
-        // }
+                Mat overallDiff;
+                absdiff(bg, birdEye2,overallDiff);
+                GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
+                threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY );
+                findNonZero(overallDiff,p0);
+                // for (int i = 0; i < nz.total(); i++ ) {
+                //     p0.push_back(Point2f(nz.at<Point>(i).x ,nz.at<Point>(i).y));
+                // }
+                if (i == 0) {
+                    i =1;
+                    myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+                }
+                else {
+                    Mat birdEye1 = changeHom(frame1);
+                    vector<uchar> status;
+                    vector<float> err;
+                    TermCriteria criteria = TermCriteria((TermCriteria::COUNT) + (TermCriteria::EPS), 10, 0.03);
+                    int count=0;
+                    if (p0.size()!=0){
+                        calcOpticalFlowPyrLK(birdEye2, birdEye1, p0, p1, status, err, Size(4,4), 2, criteria);
+                        for (int i=0;i<p0.size();i++){
+                            if (status[i]==1){
+                                if (thresD(p0[i],p1[i],1.0)){
+                                    count+=1;
+                                }
+                            }
+                        }
+                    }
+                    QueueDensity=(double)countNonZero(overallDiff)/(double)256291;
+                    DynamicDensity=(double)count/(double)256291;
+                    myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+                    cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+                    p0.clear();
+                    p0=p1;
+                    p1.clear();
+                }
+            }      
+        }      
     }
 
     auto stop = high_resolution_clock::now();
@@ -707,9 +816,9 @@ void show4s(String videopath, Mat bg, int no, int frameT) {
     }
 
     for (int i=0; i<no;i++){
-        for (int j=args[i].start;j<args[i].end;j++){
-            double k= (double) (j) /15.0;
-            if (j<frameT-1){
+        for (double j=(double) args[i].start;j<(double)args[i].end;j++){
+            double k= j /15;
+            if (j!=frameT-1){
                 myfile<<k<<","<<args[i].data.at(j)<<endl;
             }
         }
@@ -783,6 +892,9 @@ int main(int argc, char** argv) {
     mode.setMethod(modeVal);
 
     int emptime=345;
+    if (modeVal==5 || modeVal==6){
+        initialise(mode);
+    }
     
     if (modeVal ==1){
         if (argc == 3) {
