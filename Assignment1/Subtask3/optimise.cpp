@@ -820,8 +820,8 @@ int main(int argc, char** argv) {
         cout << "Analysing video in " << no << " threads" << endl;
         initialise(mode);
         bg = getBack(video,emptime, mode);
-        show4t(video, bg, no);
-        // show4s(videopath, bg, no, frameT);
+        // show4t(video, bg, no);
+        show4s(videopath, bg, no, frameT);
 
          
         return 0;

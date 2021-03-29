@@ -1,21 +1,21 @@
-	Command being timed: "./optimise ../Subtask2/trafficvideo.mp4 3 1"
-	User time (seconds): 388.44
-	System time (seconds): 39.96
-	Percent of CPU this job got: 407%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 1:45.11
+	Command being timed: "./optimise ../Subtask2/trafficvideo.mp4 4 1"
+	User time (seconds): 411.65
+	System time (seconds): 8.13
+	Percent of CPU this job got: 585%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 1:11.73
 	Average shared text size (kbytes): 0
 	Average unshared data size (kbytes): 0
 	Average stack size (kbytes): 0
 	Average total size (kbytes): 0
-	Maximum resident set size (kbytes): 174572
+	Maximum resident set size (kbytes): 178352
 	Average resident set size (kbytes): 0
 	Major (requiring I/O) page faults: 0
-	Minor (reclaiming a frame) page faults: 16730081
-	Voluntary context switches: 218548
-	Involuntary context switches: 753677
+	Minor (reclaiming a frame) page faults: 42295
+	Voluntary context switches: 230677
+	Involuntary context switches: 639759
 	Swaps: 0
 	File system inputs: 0
-	File system outputs: 224
+	File system outputs: 216
 	Socket messages sent: 0
 	Socket messages received: 0
 	Signals delivered: 0
