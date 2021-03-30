@@ -224,13 +224,13 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
                     if ((int)time%6==4){
                         Mat birdEye1 = frame1;
                         Mat flow(birdEye1.size(), CV_32FC2);
-                        calcOpticalFlowFarneback(birdEye1, birdEye2, flow, 0.5, 3, 15, 3, 5, 1.2, 0);  
+                        calcOpticalFlowFarneback(birdEye1, birdEye2, flow, 0.5, 10, 40, 5, 10, 1.5, 0);  
                         Mat flow_parts[2];
                         split(flow, flow_parts);
                         Mat magnitude, angle, magn_norm;
                         cartToPolar(flow_parts[0], flow_parts[1], magnitude, angle, true);
                         normalize(magnitude, magn_norm, 0, 255, NORM_MINMAX);
-                        threshold(magn_norm,magn_norm, 153, 255,THRESH_BINARY );
+                        threshold(magn_norm,magn_norm, 215, 255,THRESH_BINARY );
                         d=(countNonZero(magn_norm));
                     }
                     QueueDensity=(double)countNonZero(overallDiff)/(double)256291;
