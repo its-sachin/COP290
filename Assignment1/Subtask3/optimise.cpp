@@ -743,6 +743,41 @@ struct modefour{
     int end;
 };
 
+Mat** cut2(VideoCapture video, int no, modefour* args){
+    Mat frame;
+    int frameT= (int) video.get(CAP_PROP_FRAME_COUNT);
+    Mat** arr;
+    arr= new Mat*[no];
+    for (int h=0;h<no;h++){
+        arr[h]=new Mat[frameT/no + 1];
+    }
+    int i =0;
+    int num =0;
+    while (true) {
+        bool isOpened = video.read(frame);
+
+        if (isOpened == false) {
+            args[i].end = num;
+            cout << "Video has ended" << endl;
+            break;
+        } 
+            
+        arr[i][num] = frame.clone();
+        num += 1;
+        if (i != no-1 && num == frameT/no)  {
+            args[i].end = num;
+            i +=1;
+            num =0;
+        } 
+        // if (waitKey(1) == 27){
+        //     cout << "Esc key is pressed by user. Stopping the video" << endl;
+        //     break;
+        // }
+    }
+    return arr;
+
+}
+
 
 
 void* show1(void* arg ) {
@@ -755,7 +790,6 @@ void* show1(void* arg ) {
     Mat bg = arg_struct->bg;
     int end = arg_struct->end;
     while (count < end) {
-        cout<< count << endl;
         Mat frame2 = video[count];
         cvtColor(frame2, frame2, COLOR_BGR2GRAY);
         Mat birdEye2 = changeHom(frame2);
@@ -769,7 +803,7 @@ void* show1(void* arg ) {
         // // not found
         // }
         arg_struct->data.push_back(QueueDensity);
-        cout<<QueueDensity<<endl;
+        cout<< QueueDensity<< endl;
         // if (waitKey(1) == 27){
         //     cout << "Esc key is pressed by user. Stopping the video" << endl;
         //     break;
@@ -783,45 +817,16 @@ void* show1(void* arg ) {
 void show4s(VideoCapture video, Mat bg, int no, int frameT) {
 
     struct modefour args[no];
-    pthread_t tids[no];
 
     cout<< "Analysis started" << endl;
     auto start = high_resolution_clock::now();
 
-    Mat** arr;
-    arr= new Mat*[no];
-    for (int i=0; i<no; i++) {
-        arr[i] = new Mat[frameT/no + 1]; 
-    }  
-
-    int i = 0;
-    int num  = 0;
-
-    while (true) {
-        Mat frame2;
-        bool isOpened = video.read(frame2);
-
-        if (isOpened == false) {
-            args[i].end = num;
-            args[i].video = arr[i];
-            cout<< i << "->" << num<<endl;
-            cout << "Video has ended"<<  endl;
-            break;
-        }
-
-        num+= 1;
-
-        if (i != no-1 && num == frameT/no) {
-            cout<< i << "->" << num<<endl;
-            args[i].end = num;
-            args[i].video = arr[i];
-            i += 1;
-            num = 0;
-        }
-    }  
+    Mat** arr = cut2(video, no, args);
+    pthread_t tids[no];
 
     for (int i=0; i<no; i++){        
         args[i].bg = bg; 
+        args[i].video = arr[i];
         pthread_attr_t attr;
         pthread_attr_init(&attr);
         pthread_create(&tids[i],&attr,show1,&args[i]);
