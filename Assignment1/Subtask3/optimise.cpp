@@ -211,40 +211,18 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
             threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY );
             QueueDensity = (double)countNonZero(overallDiff)/(double)pixel;
 
-            // imshow(winName[1], overallDiff);
 
-            // if (i == 0) {
-            //     i =1;
-            // }
-            // else {
-                // Mat birdEye1 = changeHom(frame1);  
-                // Mat currDiff;
-                // absdiff(birdEye1, birdEye2,currDiff);
-                // GaussianBlur(currDiff,currDiff, Size(5,5),0);
-                // threshold(currDiff,currDiff, 20, 255, THRESH_BINARY );
-
-                // DynamicDensity=(double)(countNonZero(currDiff))/(double)256291;
-
-                // imshow(winName[2], currDiff);
-
-            // }
 
 
             myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-            // cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-            
-            
-            // if (waitKey(1) == 27){
-            //     cout << "Esc key is pressed by user. Stopping the video" << endl;
-            //     break;
-            // }
         }
     }
     else {
         if (mode.getMethod()==5){
+            Mat frame11;
+            int d=0;
             while (true) {
                 time+=(1);
-                frame1 = frame2.clone();
                 bool isOpened = video.read(frame2);
 
                 if (isOpened == false) {
@@ -254,7 +232,10 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
                 } 
                 cvtColor(frame2, frame2, COLOR_BGR2GRAY);
                 Mat birdEye2 = changeHom(frame2);
-
+                if ((int)time%3==1 && i!=0){
+                    frame1 = frame11.clone();
+                    frame11=birdEye2.clone();
+                }
                 Mat overallDiff;
                 absdiff(bg, birdEye2,overallDiff);
                 GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
@@ -263,24 +244,24 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
 
                 if (i == 0) {
                     i =1;
+                    frame11=birdEye2.clone();
                     myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
                 }
                 else {
-                    Mat birdEye1 = changeHom(frame1);
-                    Mat flow(birdEye1.size(), CV_32FC2);
-                    calcOpticalFlowFarneback(birdEye1, birdEye2, flow, 0.5, 3, 15, 3, 5, 1.2, 0);  
-                    // Mat currDiff;
-                    // absdiff(birdEye1, birdEye2,currDiff);
-                    // GaussianBlur(currDiff,currDiff, Size(5,5),0);
-                    // threshold(currDiff,currDiff, 20, 255, THRESH_BINARY );
-                    Mat flow_parts[2];
-                    split(flow, flow_parts);
-                    Mat magnitude, angle, magn_norm;
-                    cartToPolar(flow_parts[0], flow_parts[1], magnitude, angle, true);
-                    normalize(magnitude, magn_norm, 0, 255, NORM_MINMAX);
-                    threshold(magn_norm,magn_norm, 153, 255,THRESH_BINARY );
+                    if ((int)time%6==4){
+                        Mat birdEye1 = frame1;
+                        Mat flow(birdEye1.size(), CV_32FC2);
+                        calcOpticalFlowFarneback(birdEye1, birdEye2, flow, 0.5, 3, 15, 3, 5, 1.2, 0);  
+                        Mat flow_parts[2];
+                        split(flow, flow_parts);
+                        Mat magnitude, angle, magn_norm;
+                        cartToPolar(flow_parts[0], flow_parts[1], magnitude, angle, true);
+                        normalize(magnitude, magn_norm, 0, 255, NORM_MINMAX);
+                        threshold(magn_norm,magn_norm, 153, 255,THRESH_BINARY );
+                        d=(countNonZero(magn_norm));
+                    }
                     QueueDensity=(double)countNonZero(overallDiff)/(double)256291;
-                    DynamicDensity=(double)(countNonZero(magn_norm))/(double)256291;
+                    DynamicDensity=(double)d/(double)256291;
 
                     myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
                     cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
@@ -288,11 +269,12 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
             } 
         }
         else {
-            vector<Point2f> p0,p1;
+            vector<Point2f> p0,p1,p00;
             Mat nz;
+            int count=0;
+            Mat frame11;
             while (true) {
                 time+=(1);
-                frame1 = frame2.clone();
                 bool isOpened = video.read(frame2);
 
                 if (isOpened == false) {
@@ -302,42 +284,50 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
                 } 
                 cvtColor(frame2, frame2, COLOR_BGR2GRAY);
                 Mat birdEye2 = changeHom(frame2);
-
+                if ((int)time%3==1 && i!=0){
+                    frame1 = frame11.clone();
+                    frame11=birdEye2.clone();
+                }
                 Mat overallDiff;
                 absdiff(bg, birdEye2,overallDiff);
                 GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
                 threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY );
-                findNonZero(overallDiff,p0);
-                // for (int i = 0; i < nz.total(); i++ ) {
-                //     p0.push_back(Point2f(nz.at<Point>(i).x ,nz.at<Point>(i).y));
-                // }
+
+                if ((int)time%3==1 && i!=0){
+                    p0=p00;
+                    findNonZero(overallDiff,p00);
+                }
                 if (i == 0) {
                     i =1;
+                    findNonZero(overallDiff,p00);
+                    frame11=birdEye2.clone();
                     myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
                 }
                 else {
-                    Mat birdEye1 = changeHom(frame1);
-                    vector<uchar> status;
-                    vector<float> err;
-                    TermCriteria criteria = TermCriteria((TermCriteria::COUNT) + (TermCriteria::EPS), 10, 0.03);
-                    int count=0;
-                    if (p0.size()!=0){
-                        calcOpticalFlowPyrLK(birdEye2, birdEye1, p0, p1, status, err, Size(4,4), 2, criteria);
-                        for (int i=0;i<p0.size();i++){
-                            if (status[i]==1){
-                                if (thresD(p0[i],p1[i],1.0)){
-                                    count+=1;
+                    if ((int)time%6==4){
+                        Mat birdEye1 = frame1;
+                        vector<uchar> status;
+                        vector<float> err;
+                        TermCriteria criteria = TermCriteria((TermCriteria::COUNT) + (TermCriteria::EPS), 10, 0.03);
+                        if (p0.size()!=0){
+                            calcOpticalFlowPyrLK(birdEye2, birdEye1, p0, p1, status, err, Size(10,10), 2, criteria);
+                            count=0;
+                            for (int i=0;i<(int)p0.size();i++){
+                                if (status[i]==1){
+                                    if (thresD(p0[i],p1[i],3.0)){
+                                        count+=1;
+                                    }
                                 }
                             }
+
                         }
+                        p0.clear();
+                        p1.clear();
                     }
                     QueueDensity=(double)countNonZero(overallDiff)/(double)256291;
                     DynamicDensity=(double)count/(double)256291;
                     myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
                     cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-                    p0.clear();
-                    p0=p1;
-                    p1.clear();
                 }
             }      
         }      
