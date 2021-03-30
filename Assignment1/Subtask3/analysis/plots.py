@@ -4,6 +4,8 @@ import subprocess
 import shutil
 import matplotlib.ticker as mticker
 
+video = ""
+
 def error(queueAsli, queueVar):
     i = 0
     absDiff = []
@@ -136,14 +138,14 @@ def mode1(maxSkip,offset):
     while (i >= 0):
         
         if (work ==0 or work == 1):
-            subprocess.run("./optimise ../Subtask2/trafficvideo.mp4 " + str(mode) + " " + str(i), shell = True)
+            subprocess.run("../code/optimise " + video + " " + str(mode) + " " + str(i), shell = True)
             if (work == 0):
                 funTime.append(read())
             else:
-                funTime.append(readTest("GraphsTesting/graph" + str(mode)  + "-" + str(i) +".csv"))
+                funTime.append(readTest("GraphsTesting/GraphValues/graph" + str(mode)  + "-" + str(i) +".csv"))
 
         else:
-            funTime.append(readTest("GraphsTesting/graph" + str(mode)  + "-" + str(i) +".csv"))
+            funTime.append(readTest("GraphsTesting/GraphValues/graph" + str(mode)  + "-" + str(i) +".csv"))
 
 
         absDiff, sqrMean = error(queueAsli, queueVar)
@@ -172,9 +174,9 @@ def mode2(maxDown,gap):
     while (i >= 1):
         
         if (work ==0 or work == 1):
-            subprocess.run("./optimise ../Subtask2/trafficvideo.mp4 " + str(mode) + " " + str(1920/i) + " " + str(1080/i), shell = True)
+            subprocess.run("../code/optimise " + video + " " + str(mode) + " " + str(1920/i) + " " + str(1080/i), shell = True)
             
-        timeT,timeP = readProcess("GraphsTesting/graph" + str(mode)  + "-" + str(i) +".csv")
+        timeT,timeP = readProcess("GraphsTesting/GraphValues/graph" + str(mode)  + "-" + str(i) +".csv")
         funTime.append(timeT)
         timePVar.append(timeP)
 
@@ -236,17 +238,17 @@ def mode34(mode,maxThread,offset):
     while (i >= 1):
         
         if (work ==0 or work == 1):
-            subprocess.run("{ /usr/bin/time -v ./optimise ../Subtask2/trafficvideo.mp4 " + str(mode) + " " + str(i)+ "; } 2> cpu.txt", shell = True)
+            subprocess.run("{ /usr/bin/time -v ../code/optimise " + video  + " " + str(mode) + " " + str(i)+ "; } 2> cpu.txt", shell = True)
             if (work == 0):
                 funTime.append(read())
             else:
-                funTime.append(readTest("GraphsTesting/graph" + str(mode)  + "-" + str(i) +".csv"))
+                funTime.append(readTest("GraphsTesting/GraphValues/graph" + str(mode)  + "-" + str(i) +".csv"))
             
 
         else:
-            funTime.append(readTest("GraphsTesting/graph" + str(mode)  + "-" + str(i) +".csv"))
+            funTime.append(readTest("GraphsTesting/GraphValues/graph" + str(mode)  + "-" + str(i) +".csv"))
 
-        cpu,memory = readCPU("GraphsTesting/cpu" + str(mode)  + "-" + str(i) +".txt")
+        cpu,memory = readCPU("GraphsTesting/cpuData/cpu" + str(mode)  + "-" + str(i) +".txt")
 
         cpuVar.append(cpu)
         memVar.append(memory)
@@ -279,6 +281,8 @@ if (work < -1 or work > 1):
     print("INVALID Value!!")
 
 else :
+    if (work != -1):
+        video = input("Enter video path: ")
     mode = int(input("Enter method: "))
     if (mode <=0 or (mode > 4 and mode !=31 and mode != 41)):
         print("INVALID Method!!")
@@ -309,7 +313,7 @@ else :
         plt.tight_layout()
 
         if (work == 1):
-            print("Saving graps in folder GraphsTesting/")
+            print("Saving plots in folder GraphsTesting/")
             figMain.savefig("GraphsTesting/plot" + str(mode) +"-queue.png") 
             # figAbsDiff.savefig("GraphsTesting/plot" + str(mode) + "-error.png") 
             figTime.savefig("GraphsTesting/plot" + str(mode)  + "-runtime.png")    
