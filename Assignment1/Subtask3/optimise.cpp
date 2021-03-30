@@ -172,7 +172,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
     myfile<<"Time(s)"<<","<<"Queue Density"<<","<<"Dynamic Density"<<endl;
 
     // cout<<"Time(s)"<<","<<"Queue Density"<<","<<"Dynamic Density"<<endl;
-    if (mode.getMethod()==1 || mode.getMethod()==2){
+    if (mode.getMethod()==1 || mode.getMethod()==2 || mode.getMethod() == 0){
 
         while (true) {
             time+=(1);
@@ -900,6 +900,7 @@ int main(int argc, char** argv) {
     
     if (modeVal == 0) {
         cout<< "Analysing normally" << endl;
+        initialise(mode);
     }
     else if (modeVal ==1){
         if (argc == 3) {

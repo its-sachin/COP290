@@ -270,7 +270,7 @@ def mode34(mode,maxThread,offset):
     axMem.legend(loc="upper right")
 
     if (work == 1):
-        figCPU.savefig("GraphsTesting/plot" + str(mode)  + "-" + str(i) +"-cpu.txt")
+        figCPU.savefig("GraphsTesting/plot" + str(mode)  +"-cpu.png")
 
 
 work = int(input("Plot saved(-1) | Analyse and plot(0) | Analyse, plot and save data(1): "))
