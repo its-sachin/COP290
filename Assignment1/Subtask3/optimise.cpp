@@ -737,10 +737,9 @@ void show4t(VideoCapture video, Mat bg, int no) {
 }
 
 struct modefour{
-    VideoCapture video;
-    map<int,double> data;
+    Mat* video;
+    vector<double> data;
     Mat bg;
-    int start;
     int end;
 };
 
@@ -751,19 +750,13 @@ void* show1(void* arg ) {
 
     double QueueDensity =0;
 
-    int count=arg_struct->start;
-    VideoCapture video = arg_struct->video;
-    video.set(CAP_PROP_POS_FRAMES,count);
-    Mat frame2;
+    int count=0;
+    Mat* video = arg_struct->video;
     Mat bg = arg_struct->bg;
-    int end=arg_struct->end;
-    while (count != end) {
-        bool isOpened = video.read(frame2);
-
-        if (isOpened == false) {
-            cout << "Video has ended" << endl;
-            break;
-        } 
+    int end = arg_struct->end;
+    while (count < end) {
+        cout<< count << endl;
+        Mat frame2 = video[count];
         cvtColor(frame2, frame2, COLOR_BGR2GRAY);
         Mat birdEye2 = changeHom(frame2);
         Mat overallDiff;
@@ -772,37 +765,63 @@ void* show1(void* arg ) {
         threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY );
 
         QueueDensity=(double)countNonZero(overallDiff)/(double)256291;
-        arg_struct->data.insert({count,QueueDensity});
+        // if ( m.find("f") == m.end() ) {
+        // // not found
+        // }
+        arg_struct->data.push_back(QueueDensity);
+        cout<<QueueDensity<<endl;
         // if (waitKey(1) == 27){
         //     cout << "Esc key is pressed by user. Stopping the video" << endl;
         //     break;
         // }
-        count++;
+        count+= 1;
     }
     pthread_exit(0);
 }
 
 
-void show4s(String videopath, Mat bg, int no, int frameT) {
+void show4s(VideoCapture video, Mat bg, int no, int frameT) {
 
     struct modefour args[no];
     pthread_t tids[no];
-    int count=0;
 
     cout<< "Analysis started" << endl;
     auto start = high_resolution_clock::now();
-    for (int i=0; i<no; i++){
-        args[i].start = count;
-        count += frameT/no;
-        if (i == no-1){
-            args[i].end=frameT;
+
+    Mat** arr;
+    arr= new Mat*[no];
+    for (int i=0; i<no; i++) {
+        arr[i] = new Mat[frameT/no + 1]; 
+    }  
+
+    int i = 0;
+    int num  = 0;
+
+    while (true) {
+        Mat frame2;
+        bool isOpened = video.read(frame2);
+
+        if (isOpened == false) {
+            args[i].end = num;
+            args[i].video = arr[i];
+            cout<< i << "->" << num<<endl;
+            cout << "Video has ended"<<  endl;
+            break;
         }
-        else{
-            args[i].end=count;
+
+        num+= 1;
+
+        if (i != no-1 && num == frameT/no) {
+            cout<< i << "->" << num<<endl;
+            args[i].end = num;
+            args[i].video = arr[i];
+            i += 1;
+            num = 0;
         }
+    }  
+
+    for (int i=0; i<no; i++){        
         args[i].bg = bg; 
-        VideoCapture vid(videopath);
-        args[i].video = vid;
         pthread_attr_t attr;
         pthread_attr_init(&attr);
         pthread_create(&tids[i],&attr,show1,&args[i]);
@@ -815,12 +834,11 @@ void show4s(String videopath, Mat bg, int no, int frameT) {
         pthread_join(tids[i],NULL);
     }
 
+    double j = 0;
     for (int i=0; i<no;i++){
-        for (double j=(double) args[i].start;j<(double)args[i].end;j++){
-            double k= j /15;
-            if (j!=frameT-1){
-                myfile<<k<<","<<args[i].data.at(j)<<endl;
-            }
+        for (double &x : args[i].data) {
+            j+= 1;
+            myfile << j/15 << ","<< x<<endl;
         }
     }  
 
@@ -933,7 +951,7 @@ int main(int argc, char** argv) {
         initialise(mode);
         bg = getBack(video,emptime, mode);
         // show4t(video, bg, no);
-        show4s(videopath, bg, no, frameT);
+        show4s(video, bg, no, frameT);
 
          
         return 0;

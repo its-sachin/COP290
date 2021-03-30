@@ -231,9 +231,9 @@ def mode34(mode,maxThread,offset):
         axMain.plot(time, queueVar, colour[(i+1)%7], linewidth = 1, label = str(i) + "-Threads")
         axAbsDiff.plot(time, absDiff, colour[(i+1)%7], linewidth = 1, label =  str(i) + "-Threads")
 
-        if (i == 1): break
+        if (i == 12): break
         i-= offset
-        if (i <= 0): i = 1
+        if (i <= 0): i = 12
         print("")
 
     axCPU.plot(funx, cpuVar, "b", linewidth = 2, marker = 'o', markerfacecolor = "b", label = "CPU Usage(%)")
