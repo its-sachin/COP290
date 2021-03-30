@@ -2,6 +2,7 @@ from matplotlib import pyplot as plt
 import csv
 import subprocess
 import shutil
+import matplotlib.ticker as mticker
 
 def error(queueAsli, queueVar):
     i = 0
@@ -49,6 +50,8 @@ def read():
                 i = 1
             elif (rows[0] == "$"):
                 return int(rows[1])
+            elif (rows[0] == "$$"):
+                timeP = int(rows[1])
             else :
                 queueVar[i-1] = float(rows[1])
                 i += 1
@@ -70,10 +73,36 @@ def readTest(str):
                 i = 1
             elif (rows[0] == "$"):
                 return int(rows[1])
+            elif (rows[0] == "$$"):
+                timeP = int(rows[1])
             else :
                 queueVar[i-1] = float(rows[1])
                 i += 1
     return -1
+
+
+def readProcess(str):
+
+    opener = "graph.csv"
+    if (work == -1):
+        opener = str
+    if (work == 1):
+        print("Copying data in " + str)
+        shutil.copy(opener, str)
+    with open(str) as varFile:
+        plots = csv.reader(varFile, delimiter = ",")
+        i = 0
+        timeP =0
+        for rows in plots:
+            if (i ==0):
+                i = 1
+            elif (rows[0] == "$"):
+                return (int(rows[1]), timeP)
+            elif (rows[0] == "$$"):
+                timeP = int(rows[1])
+            else :
+                queueVar[i-1] = float(rows[1])
+                i += 1
 
 def graphInit(xlabel,ylabel,titleStr,ax):
     ax.grid(True, color = "k")
@@ -101,7 +130,7 @@ def mode1(maxSkip,offset):
     mode = 1
     graphInit(xDef, yDef, "Method " + str(mode) + ": Queue Density",axMain)
     graphInit(xDef, "Absolute Difference", "Method " + str(mode) + ": Framewise error",axAbsDiff)
-    graphInit("Skipped Frames", "Time taken","Method " + str(mode) + ": Runtime analysis",axTime)
+    graphInit("Skipped Frames", "Time taken(s)","Method " + str(mode) + ": Runtime analysis",axTime)
     i = maxSkip
 
     while (i >= 0):
@@ -119,7 +148,7 @@ def mode1(maxSkip,offset):
 
         absDiff, sqrMean = error(queueAsli, queueVar)
         funError.append(sqrMean)
-        funx.append(i)
+        funx.append(int(i))
 
         axMain.plot(time, queueVar, colour[(i+1)%7], linewidth = 1, label = str(i)+ " frames")
         axAbsDiff.plot(time, absDiff, colour[(i+1)%7], linewidth = 1, label =  str(i)+ " frames")
@@ -135,21 +164,19 @@ def mode2(maxDown,gap):
     i = maxDown
     mode = 2
     a=0
+    timePVar = []
     graphInit(xDef, yDef, "Method " + str(mode) + ": Queue Density",axMain)
     graphInit(xDef, "Absolute Difference", "Method " + str(mode) + ": Framewise error",axAbsDiff)
-    graphInit("Size reduction factor", "Time taken","Method " + str(mode) + ": Runtime analysis",axTime)
+    graphInit("Size reduction factor", "Time taken(s)","Method " + str(mode) + ": Runtime analysis",axTime)
 
     while (i >= 1):
         
         if (work ==0 or work == 1):
             subprocess.run("./optimise ../Subtask2/trafficvideo.mp4 " + str(mode) + " " + str(1920/i) + " " + str(1080/i), shell = True)
-            if (work == 0):
-                funTime.append(read())
-            else:
-                funTime.append(readTest("GraphsTesting/graph" + str(mode)  + "-" + str(i) +".csv"))
-
-        else:
-            funTime.append(readTest("GraphsTesting/graph" + str(mode)  + "-" + str(i) +".csv"))
+            
+        timeT,timeP = readProcess("GraphsTesting/graph" + str(mode)  + "-" + str(i) +".csv")
+        funTime.append(timeT)
+        timePVar.append(timeP)
 
         absDiff, sqrMean = error(queueAsli, queueVar)
         funError.append(sqrMean)
@@ -158,10 +185,10 @@ def mode2(maxDown,gap):
         axMain.plot(time, queueVar, colour[(a+1)%7], linewidth = 1, label = " Size/" + str(i))
         axAbsDiff.plot(time, absDiff, colour[(a+1)%7], linewidth = 1, label = " Size/" + str(i))
 
-
         i-= gap
         a+=1
         print("")
+    axTime.plot(funx, timePVar, "c",  linewidth = 2,marker = 'o', markerfacecolor = "c", label = "Process time(s)")
 
 
 def mode34(mode,maxThread,offset):
@@ -203,7 +230,7 @@ def mode34(mode,maxThread,offset):
 
     graphInit(xDef, yDef, "Method " + str(mode) + ": Queue Density",axMain)
     graphInit(xDef, "Absolute Difference", "Method " + str(mode) + ": Framewise error",axAbsDiff)
-    graphInit("Number of threads", "Time taken","Method " + str(mode) + ": Runtime analysis",axTime)
+    graphInit("Number of threads", "Time taken(s)","Method " + str(mode) + ": Runtime analysis",axTime)
     graphInit("Number of threads", "CPU Usage","Method " + str(mode) +  ": Usage Analysis", axCPU)
 
     while (i >= 1):
@@ -231,9 +258,9 @@ def mode34(mode,maxThread,offset):
         axMain.plot(time, queueVar, colour[(i+1)%7], linewidth = 1, label = str(i) + "-Threads")
         axAbsDiff.plot(time, absDiff, colour[(i+1)%7], linewidth = 1, label =  str(i) + "-Threads")
 
-        if (i == 12): break
+        if (i == 1): break
         i-= offset
-        if (i <= 0): i = 12
+        if (i <= 0): i = 1
         print("")
 
     axCPU.plot(funx, cpuVar, "b", linewidth = 2, marker = 'o', markerfacecolor = "b", label = "CPU Usage(%)")
@@ -253,7 +280,7 @@ if (work < -1 or work > 1):
 
 else :
     mode = int(input("Enter method: "))
-    if (mode <=0 or mode > 4):
+    if (mode <=0 or (mode > 4 and mode !=31 and mode != 41)):
         print("INVALID Method!!")
 
     else:
@@ -261,6 +288,7 @@ else :
             maxSkip, offset = input("Enter max frames skipped and offset: ").split(" ")
             print("")
             mode1(int(maxSkip), int(offset))
+            plt.gca().xaxis.set_major_locator(mticker.MultipleLocator(1))
         elif (mode == 2):
             maxDown,gap = input("Enter maximum down factor of size and increment in factor: ").split(" ")
             print("")
@@ -268,8 +296,7 @@ else :
         else:
             maxThread, offset = input("Enter maximum number of threads and increment: ").split(" ")
             print("")
-            if (mode == 3): mode34(3,int(maxThread),int(offset))
-            else: mode34(4,int(maxThread), int(offset))
+            mode34(mode,int(maxThread), int(offset))
 
         axTime.plot(funx, funTime, "b", linewidth = 2, marker = 'o', markerfacecolor = "b", label = "Time(s)")
         axError.plot(funx, funError, "r", linewidth = 2, marker = 'o', markerfacecolor = "r", label = "Error")

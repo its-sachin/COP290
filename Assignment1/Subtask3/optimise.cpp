@@ -156,6 +156,8 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
     
     double time=0;
 
+    double timeP = 0;
+
     int height = bg.rows;
     int width = bg.cols;
 
@@ -182,17 +184,23 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
                 break;
             } 
 
-            if (mode.getMethod() == 1 && (int)time%mode.getSkipper() != 0) {
+            if (mode.getMethod() == 1 && (int)(time-1)%mode.getSkipper() != 0) {
                 myfile<<(time)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
                 // cout<< (time)/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
                 continue;
             }
 
+            auto startP = high_resolution_clock::now();
+
             if (mode.getMethod() == 2) {
                 Mat temp = frame2.clone();
                 resize(temp, frame2, Size(mode.xDimen,mode.yDimen), 0,0);
             }
-            
+
+            auto stopP = high_resolution_clock::now();
+            auto durationP = duration_cast<microseconds>(stopP - startP);
+            timeP += durationP.count();
+        
             cvtColor(frame2, frame2, COLOR_BGR2GRAY);
             Mat birdEye2 = changeHom(frame2);
             // imshow(winName[0], birdEye2);
@@ -337,6 +345,12 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
 
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(stop - start);
+
+    if (mode.getMethod() == 2) {
+        cout << "Time taken by process: "<<(int) (duration.count() - timeP)/1000000 << " seconds" << endl;
+        myfile << "$$,"<< (int) (duration.count() - timeP)/1000000<<endl;
+    }
+
     cout << "Time taken by function: "<< duration.count()/1000000 << " seconds" << endl;
     myfile << "$,"<< duration.count()/1000000<<endl;
 
@@ -753,11 +767,11 @@ void* show1(void* arg ) {
 
     int count=arg_struct->start;
     VideoCapture video = arg_struct->video;
-    video.set(CAP_PROP_POS_FRAMES,count);
+    video.set(CAP_PROP_POS_FRAMES,count-1);
     Mat frame2;
     Mat bg = arg_struct->bg;
     int end=arg_struct->end;
-    while (count != end) {
+    while (count <= end) {
         bool isOpened = video.read(frame2);
 
         if (isOpened == false) {
@@ -892,11 +906,12 @@ int main(int argc, char** argv) {
     mode.setMethod(modeVal);
 
     int emptime=345;
-    if (modeVal==5 || modeVal==6){
-        initialise(mode);
-    }
+    Mat bg;
     
-    if (modeVal ==1){
+    if (modeVal == 0) {
+        cout<< "Analysing normally" << endl;
+    }
+    else if (modeVal ==1){
         if (argc == 3) {
             cout<< "Number of frames to skip not provided" << endl;
             return 0;
@@ -918,27 +933,7 @@ int main(int argc, char** argv) {
         cout << "Analysing by resizing video to "<< argv[3] << "*" << argv[4] <<endl;
     }
 
-    Mat bg;
-
-    if (modeVal == 4){
-        
-        if (argc==3){
-            cout<<"No of threads not provided"<<endl;
-            return 0;
-        }
-        
-        int no = stoi(argv[3]);
-
-        cout << "Analysing video in " << no << " threads" << endl;
-        initialise(mode);
-        bg = getBack(video,emptime, mode);
-        // show4t(video, bg, no);
-        show4s(videopath, bg, no, frameT);
-
-         
-        return 0;
-    }
-    else if (modeVal==3){
+    else if (modeVal==3 || modeVal == 31){
         if (argc==3){
             cout<<"No of threads not provided"<<endl;
             return 0;
@@ -950,9 +945,50 @@ int main(int argc, char** argv) {
 
         cout << "Analysing each frame of video in " << no << " threads" << endl;
         bg = getBack(video,emptime, mode);
-        show3t(video, bg, no);
-        // show3s(video, bg, no, frameT);
+        if (modeVal == 3) {
+            show3t(video, bg, no);
+        }
+        else {
+            show3s(video, bg, no, frameT);
+        }
         return 0;   
+    }
+
+    else if (modeVal == 4 || modeVal == 41){
+        
+        if (argc==3){
+            cout<<"No of threads not provided"<<endl;
+            return 0;
+        }
+        
+        int no = stoi(argv[3]);
+
+        cout << "Analysing video in " << no << " threads" << endl;
+        initialise(mode);
+        bg = getBack(video,emptime, mode);
+        if (modeVal == 4) {
+            show4t(video, bg, no);
+        }
+        else {
+            show4s(videopath, bg, no, frameT);
+        }
+         
+        return 0;
+    }
+
+    else if (modeVal==5 || modeVal==6){
+        if (modeVal == 5) {
+            cout<< "Optical Flow: Dense" << endl;
+        }
+        else {
+            cout<< "Optical Flow: Sparse" << endl;
+        }
+        initialise(mode);
+    }
+
+    else {
+        cout<< "INVALID Method!!" << endl;
+        return 0; 
     }
     bg = getBack(video,emptime, mode);
     string winName[3] = {"Original Video","Overall Difference","Dynamic Difference"};  
