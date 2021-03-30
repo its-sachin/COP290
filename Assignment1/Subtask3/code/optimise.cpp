@@ -20,34 +20,34 @@ double yFactor=1;
 class Mode
 {
 
-public:
+    public:
 
-int getMethod() {
-    return method;
-}
-int getSkipper() {
-    return skipper;
-}
+    int getMethod() {
+        return method;
+    }
+    int getSkipper() {
+        return skipper;
+    }
 
-void setMethod(int set_method) {
-    method = set_method;
-}
+    void setMethod(int set_method) {
+        method = set_method;
+    }
 
-void setSkipper(int set_skipper) {
-    skipper = set_skipper;
-}
+    void setSkipper(int set_skipper) {
+        skipper = set_skipper;
+    }
 
-double xDimen;
-double yDimen;
-int noThread;
-private:
+    double xDimen;
+    double yDimen;
+    int noThread;
+    private:
 
-int method;
+    int method;
 
-// skipper is method related variable
-// frames skipped for method 1
-// number of threads for method 3 and 4
-int skipper; 
+    // skipper is method related variable
+    // frames skipped for method 1
+    // number of threads for method 3 and 4
+    int skipper; 
 
     
 };
@@ -102,41 +102,14 @@ Mat cropImage(Mat source,  int width, int start, int end){
     return cropped;
 }
 
-struct modethree{
-    Mat framePart;
-    double partialSum;
-    Mat bgPart;
-    int start;
-    int end;
-    int width;
 
-    void initFirst(Mat bg, int widthT) {
-        bgPart = cropImage(bg, widthT, start, end);
-        width = widthT;
 
-    }
 
-    void initialize(Mat frame){
-        framePart = cropImage(frame, width, start, end);
-    }
-};
 
-void* show2(void* arg ) {
-    struct modethree *arg_struct =(struct modethree*) arg;
+// ------------------------- method 0,1,2,5,6---------------------------------
 
-    double partialSum = 0;
-    arg_struct->initialize(arg_struct->framePart);
-    
-    Mat overallDiff;
-    absdiff(arg_struct->bgPart, arg_struct->framePart ,overallDiff);
-    GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
-    threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY);
 
-    partialSum =(double)countNonZero(overallDiff);
 
-    arg_struct->partialSum = partialSum;
-    pthread_exit(0);
-}
 
 
 bool thresD(Point2f a,Point2f b, double threshold){
@@ -165,7 +138,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
 
     cout<< "Analysis started" << endl;
 
-    string filename="graph.csv";
+    string filename="../analysis/graph.csv";
     ofstream myfile; 
 
     myfile.open(filename);
@@ -352,90 +325,53 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
 
 
 
+// -----------------------------------method 3----------------------------------
 
 
 
 
 
-struct alternate{
-    int threadno;
-    Mat** arr;
-    int frameT;
-    Mat bg;
-    map<int,double> data;
-};
+// method 3-t
 
-Mat** cut(VideoCapture video, int no,int width,int height){
-    Mat frame;
-    int frameT= (int) video.get(CAP_PROP_FRAME_COUNT);
-    Mat** arr;
-    arr= new Mat*[no];
-    for (int h=0;h<no;h++){
-        arr[h]=new Mat[frameT];
-    }
-    int frameno=0;
-    int count=0;
+
+
+
+struct modethree{
+    Mat framePart;
+    double partialSum;
+    Mat bgPart;
     int start;
     int end;
-    while (true) {
-        bool isOpened = video.read(frame);
+    int width;
 
-        if (isOpened == false) {
-            cout << "Video has ended" << endl;
-            break;
-        } 
-        
-        cvtColor(frame, frame, COLOR_BGR2GRAY);
-        Mat birdEye2 = changeHom(frame);      
-        for (int i=0; i<no; i++){
-            start=count;
-            count += height/no;
-            if (i == no-1){
-                end=height;
-            }
-            else{
-                end=count;
-            }
-            arr[i][frameno]=cropImage(birdEye2,width,start,end);
-        }
-        count=0;
-        frameno++;    
-        // if (waitKey(1) == 27){
-        //     cout << "Esc key is pressed by user. Stopping the video" << endl;
-        //     break;
-        // }
+    void initFirst(Mat bg, int widthT) {
+        bgPart = cropImage(bg, widthT, start, end);
+        width = widthT;
+
     }
-    return arr;
 
-}
-void* showalt(void* arg ) {
-    struct alternate *arg_struct =(struct alternate*) arg;
-
-    double QueueDensity =0;
-
-    Mat** arr = arg_struct->arr;
-    Mat bg = arg_struct->bg;
-    int frameno=0;
-    map <int,double> data;
-    int frameT = arg_struct->frameT;
-    while (frameno<frameT) {
-        Mat birdEye2=arr[arg_struct->threadno][frameno];
-        Mat overallDiff;
-        absdiff(bg, birdEye2,overallDiff);
-        GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
-        threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY );
-
-        QueueDensity=(double)countNonZero(overallDiff)/(double)256291;
-        data.insert({frameno,QueueDensity});
-        // if (waitKey(1) == 27){
-        //     cout << "Esc key is pressed by user. Stopping the video" << endl;
-        //     break;
-        // }
-        frameno++;
+    void initialize(Mat frame){
+        framePart = cropImage(frame, width, start, end);
     }
-    arg_struct->data=data;
+};
+
+void* show2(void* arg ) {
+    struct modethree *arg_struct =(struct modethree*) arg;
+
+    double partialSum = 0;
+    arg_struct->initialize(arg_struct->framePart);
+    
+    Mat overallDiff;
+    absdiff(arg_struct->bgPart, arg_struct->framePart ,overallDiff);
+    GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
+    threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY);
+
+    partialSum =(double)countNonZero(overallDiff);
+
+    arg_struct->partialSum = partialSum;
     pthread_exit(0);
 }
+
 
 
 void show3t(VideoCapture video, Mat bg, int no) {
@@ -444,7 +380,7 @@ void show3t(VideoCapture video, Mat bg, int no) {
 
     cout<< "Analysis started" << endl;
 
-    string filename="graph.csv";
+    string filename="../analysis/graph.csv";
     ofstream myfile; 
 
     myfile.open(filename);
@@ -562,6 +498,96 @@ void show3t(VideoCapture video, Mat bg, int no) {
 }
 
 
+
+
+
+
+// method 3-s
+
+
+struct alternate{
+    int threadno;
+    Mat** arr;
+    int frameT;
+    Mat bg;
+    map<int,double> data;
+};
+
+Mat** cut(VideoCapture video, int no,int width,int height){
+    Mat frame;
+    int frameT= (int) video.get(CAP_PROP_FRAME_COUNT);
+    Mat** arr;
+    arr= new Mat*[no];
+    for (int h=0;h<no;h++){
+        arr[h]=new Mat[frameT];
+    }
+    int frameno=0;
+    int count=0;
+    int start;
+    int end;
+    while (true) {
+        bool isOpened = video.read(frame);
+
+        if (isOpened == false) {
+            cout << "Video has ended" << endl;
+            break;
+        } 
+        
+        cvtColor(frame, frame, COLOR_BGR2GRAY);
+        Mat birdEye2 = changeHom(frame);      
+        for (int i=0; i<no; i++){
+            start=count;
+            count += height/no;
+            if (i == no-1){
+                end=height;
+            }
+            else{
+                end=count;
+            }
+            arr[i][frameno]=cropImage(birdEye2,width,start,end);
+        }
+        count=0;
+        frameno++;    
+        // if (waitKey(1) == 27){
+        //     cout << "Esc key is pressed by user. Stopping the video" << endl;
+        //     break;
+        // }
+    }
+    return arr;
+
+}
+void* showalt(void* arg ) {
+    struct alternate *arg_struct =(struct alternate*) arg;
+
+    double QueueDensity =0;
+
+    Mat** arr = arg_struct->arr;
+    Mat bg = arg_struct->bg;
+    int frameno=0;
+    map <int,double> data;
+    int frameT = arg_struct->frameT;
+    while (frameno<frameT) {
+        Mat birdEye2=arr[arg_struct->threadno][frameno];
+        Mat overallDiff;
+        absdiff(bg, birdEye2,overallDiff);
+        GaussianBlur(overallDiff,overallDiff, Size(5,5),0);
+        threshold(overallDiff,overallDiff, 50, 255,THRESH_BINARY );
+
+        QueueDensity=(double)countNonZero(overallDiff)/(double)256291;
+        data.insert({frameno,QueueDensity});
+        // if (waitKey(1) == 27){
+        //     cout << "Esc key is pressed by user. Stopping the video" << endl;
+        //     break;
+        // }
+        frameno++;
+    }
+    arg_struct->data=data;
+    pthread_exit(0);
+}
+
+
+
+
 void show3s(VideoCapture video, Mat bg, int no, int frameT) {
 
     cout<< "Analysis started" << endl;
@@ -599,7 +625,7 @@ void show3s(VideoCapture video, Mat bg, int no, int frameT) {
         pthread_create(&tids[i],&attr,showalt,&args[i]);
     }
     ofstream myfile;
-    myfile.open ("graph.csv");
+    myfile.open ("../analysis/graph.csv");
     myfile<<"Frame No.,Queue Density\n";
     for (int i=0; i<no;i++){
         pthread_join(tids[i],NULL);
@@ -622,6 +648,18 @@ void show3s(VideoCapture video, Mat bg, int no, int frameT) {
     myfile.close(); 
 }
 
+
+
+
+
+
+
+
+// ------------------------------------------method 4---------------------------------
+
+
+
+// method 4-t
 
 struct mode4
 {
@@ -660,7 +698,7 @@ void show4t(VideoCapture video, Mat bg, int no) {
 
     Mat frames[no];    
     double frameCount = 0;
-    string filename="graph.csv";
+    string filename="../analysis/graph.csv";
     ofstream myfile; 
 
     int timeT=0;
@@ -740,6 +778,12 @@ void show4t(VideoCapture video, Mat bg, int no) {
     myfile << "$,"<< duration.count()/1000000<<endl;
 }
 
+
+
+
+
+// method 4-s
+
 struct modefour{
     VideoCapture video;
     map<int,double> data;
@@ -813,7 +857,7 @@ void show4s(String videopath, Mat bg, int no, int frameT) {
     }
 
     ofstream myfile;
-    myfile.open ("graph.csv");
+    myfile.open ("../analysis/graph.csv");
     myfile<<"Time(s),Queue Density"<<endl;
     for (int i=0; i<no;i++){
         pthread_join(tids[i],NULL);
@@ -837,6 +881,11 @@ void show4s(String videopath, Mat bg, int no, int frameT) {
 }
 
 
+
+
+
+
+// --------------------------get the backgorund image-------------------------------------
 
 Mat getBack(VideoCapture video,int emptime, Mode mode) {
     video.set(CAP_PROP_POS_MSEC,emptime*1000) ;
@@ -865,6 +914,8 @@ Mat getBack(VideoCapture video,int emptime, Mode mode) {
     return changed;
 }
 
+
+// ----------------------------------------main function----------------------------------
 
 int main(int argc, char** argv) {
     string videopath,videoname;
