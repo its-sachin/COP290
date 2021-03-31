@@ -236,7 +236,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
                     DynamicDensity=(double)d/(double)256291;
 
                     myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-                    cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+                    // cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
                 }
                 i++;
             } 
@@ -300,7 +300,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
                     QueueDensity=(double)countNonZero(overallDiff)/(double)256291;
                     DynamicDensity=(double)count/(double)256291;
                     myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-                    cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+                    // cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
                 }
             }      
         }      
@@ -973,7 +973,7 @@ int main(int argc, char** argv) {
         try{
             mode.setSkipper(stoi(argv[3]) + 1);
 
-            if (argv[3] < 0){
+            if (stoi(argv[3]) < 0){
                 cout<<"INVALID number of frames to be skipped!!." <<endl;
                 return 0;
             }
@@ -998,8 +998,8 @@ int main(int argc, char** argv) {
             mode.xDimen = stod(argv[3]);
             mode.yDimen = stod(argv[4]);
 
-            if (argv[3] <= 0 || argv[4] <= 0){
-                cout<<"INVALID Dimension!!." <<endl;
+            if (stod(argv[3]) <= 0 || stod(argv[4]) <= 0){
+                cout<<"INVALID Dimension!!" <<endl;
                 return 0;
             }
             
@@ -1007,7 +1007,7 @@ int main(int argc, char** argv) {
 
         catch(exception &err)
         {
-            cout<<"INVALID Dimenions!!." <<endl;
+            cout<<"INVALID Dimenions!!" <<endl;
             return 0;
         }
         initialise(mode);
@@ -1026,14 +1026,14 @@ int main(int argc, char** argv) {
             no= stoi(argv[3]);
 
             if (no<=0){
-                cout<<"INVALID number of threads!!." <<endl;
+                cout<<"INVALID number of threads!!" <<endl;
                 return 0;
             }
         }	
 
         catch(exception &err)
         {
-            cout<<"INVALID number of threads!!." <<endl;
+            cout<<"INVALID number of threads!!" <<endl;
             return 0;
         }
 
@@ -1064,14 +1064,14 @@ int main(int argc, char** argv) {
             no= stoi(argv[3]);
 
             if (no<=0){
-                cout<<"INVALID number of threads!!." <<endl;
+                cout<<"INVALID number of threads!!" <<endl;
                 return 0;
             }
         }	
 
         catch(exception &err)
         {
-            cout<<"INVALID number of threads!!." <<endl;
+            cout<<"INVALID number of threads!!" <<endl;
             return 0;
         }
 

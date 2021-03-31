@@ -20,6 +20,9 @@
     3. [__graph.csv__](./graph.csv)
         * This csv file stores the output of latest run command of the code.
     
+    3. [__cpu.txt__](./cpu.txt)
+        * This text file stores the error output of __usr/bin/time__ of latest run command of the code that is called from [__plots.py__](./plots.py).
+    
     4. [__plots.py__](./plots.py)
         * This python file is used for post processing, this takes as input the mode of work (like __-1__ if you want to just plot the values stored in __cpuData/.__ & __GraphValues/.__ and __0__ if you want to execute the code and plot the graph without saving and __1__ if you want to execute the code and simultaneously overwrite the values stored in __GraphValues/.__ and __cpuData/.__)
         * __NOTE:__ Mode 1 is for our own use for overwriting the values in case we find any error in execution, please try to avoid running it as it will reult in loss of data used for report.
