@@ -192,7 +192,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
     }
     else {
         if (mode.getMethod()==5){
-            Mat frame11;
+            Mat frames[3];
             int d=0;
             while (true) {
                 time+=(1);
@@ -205,7 +205,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
                 } 
                 cvtColor(frame2, frame2, COLOR_BGR2GRAY);
                 Mat birdEye2 = changeHom(frame2);
-                if ((int)time%3==1 && i!=0){
+                if ((int)time%3==1 && i!=0 && i!=4){
                     frame1 = frame11.clone();
                     frame11=birdEye2.clone();
                 }
@@ -216,8 +216,11 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
 
 
                 if (i == 0) {
-                    i =1;
-                    frame11=birdEye2.clone();
+                    frames[0]=birdEye2.clone();
+                    myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
+                }
+                else if (i==4){
+                    frames[1]=birdEye2.clone();
                     myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
                 }
                 else {
@@ -231,7 +234,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
                         cartToPolar(flow_parts[0], flow_parts[1], magnitude, angle, true);
                         normalize(magnitude, magn_norm, 0, 255, NORM_MINMAX);
                         threshold(magn_norm,magn_norm, 215, 255,THRESH_BINARY );
-                        d=(countNonZero(magn_norm));
+                        d=(d+(countNonZero(magn_norm)))/2;
                     }
                     QueueDensity=(double)countNonZero(overallDiff)/(double)256291;
                     DynamicDensity=(double)d/(double)256291;
@@ -239,6 +242,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
                     myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
                     cout<< time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
                 }
+                i++;
             } 
         }
         else {
