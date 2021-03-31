@@ -1,18 +1,71 @@
 # COP290: Project1 (Traffic Density Estimation)
 
-## Part 2 - __Density Estimation__
+## Part 3 - __Tradeoff Analysis__
 
   * ### __How to run:__
     1. Run the makefile.
-    2. An executable file named "density" would be formed. Now run the code as "$ ./cam arg1 arg2 arg3" . Here arg1 is the path of the video on which analysis has to be done (provide path if video is not in the same folder as the code otherwise name with extension is sufficient). If arg1 is not provided console would throw "Please provide an filname/filepath for source video." and return from then code.
-    3. Moreover, arg2 is the speed at which video will be played and analysed, i.e. how fast the frames of the video are checked with the background. (hence higher this value more will be load on the system). \
-    __NOTE :__ this is an optional argument, if not provided by default computation will be done in real time, i.e in fps of video. Also, since domain of this value is positive integers only, fallacious values will be disregarded and deafult value will be taken
-    4. Furthermore, arg3 is the time in seconds which you want to be considered as background frame for density analysis(Background frame is the frame with respect to which changes in the frame are analysed). \
-    __NOTE :__ athis is also an optional input, if not provided the background will be set by default. Moreover in case of wrone input (like negative value and value more than time of video) default value will be take.  
-    5. If terminal says "Unable to open the filename Provided" Check if the file exists in this directory and if path you entered is correct or not.
-    6. The video that you gave as input will now be played in a window named "Original Video".
-    7. The video showing the overall changes will be played in window named "Overall Difference".
-    8. The video showing only the dynamic changes will be played in window named "Dynamic Difference".
-    9. Queue Density and Dynamic density values with time in seconds will be printed in console window, seperated with comma for each frame.
-    10. Press "Esc" if you want to stop the process.
-    11. After termination values printed in console will also be saved in a csv file named "graph.csv".
+    2. Now run the executable with the format for different methods (defined below):
+    3. If any wrong input is provided then corresponding error will be thrown.
+    4. While running the code, appropriate message will be printed in console denoting the present state of code.
+    5. Output will be stored in the file "graph.csv" inside folder "analysis".
+
+
+  * __Method 0:__ 
+    * This  method  runs the code normally without any optimisation  i.e.   it  reads  every  frame  of  of  the  video  in  the  same  size  provided sequentially  and  perform  background  subtraction  of  the  bird  eye  view  of  theframe as a whole.
+    * Time taken by this method is used as baseline for the other methods.
+    * Run the executable with following extra arguments:
+    ``` ./optimise arg1 0```
+    * Where arg1 is the video path.
+
+  * __Method 1:__
+    * This methods runs the code by skipping frames.
+    * Run the executable with following extra arguments:
+    ``` ./optimise arg1 1 arg2```
+    * Where arg1 is the video path and arg2 is number of frames to be skipped.
+
+  * __Method 2:__
+    * This methods runs the code by resizing the frame of video.
+    * Run the executable with following extra arguments:
+    ``` ./optimise arg1 2 arg2 arg3```
+    * Where arg1 is the video path and arg2 & arg3 are width and height of the resized video respectively.
+
+  * __Method 3:__
+    * This methods performs analysis by cropping the frame and giving each part to different threads.
+    * Run the executable with following extra arguments:
+    ``` ./optimise arg1 3 arg2```
+    * Where arg1 is the video path and arg2 is number of threads.
+
+  * __Method 4:__
+    * This methods runs the code on consecutive frames in parallel by giving them to different threads.
+    * Run the executable with following extra arguments:
+    ``` ./optimise arg1 4 arg2```
+    * Where arg1 is the video path and arg2 is number of threads.
+
+  __Following are some extra methods that we performed:__
+
+  * __Method 3(a):__
+    * This methods performs analysis by first cropping all the frames in one go and giving all the subparts to each threads and perform analysis parallely.
+    * Run the executable with following extra arguments:
+    ``` ./optimise arg1 31 arg2```
+    * Where arg1 is the video path and arg2 is number of threads.
+
+  * __Method 4(a):__
+    * This methods runs the code on subparts of video parallely by giving each part to different threads (for eg. its runs first half and second parallely for 2 threads).
+    * Run the executable with following extra arguments:
+    ``` ./optimise arg1 41 arg2```
+    * Where arg1 is the video path and arg2 is number of threads.
+
+  * __Method 5:__
+    * This methods performs the dense optical flow.
+    * Run the executable with following extra arguments:
+    ``` ./optimise arg1 5```
+    * Where arg1 is the video path.
+
+  * __Method 6:__
+    * This methods performs the sparse optical flow.
+    * Run the executable with following extra arguments:
+    ``` ./optimise arg1 6```
+    * Where arg1 is the video path.
+
+ 
+
