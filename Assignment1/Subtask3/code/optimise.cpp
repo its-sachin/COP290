@@ -192,7 +192,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
     }
     else {
         if (mode.getMethod()==5){
-            Mat frames[3];
+            Mat frame11;
             int d=0;
             while (true) {
                 time+=(1);
@@ -216,11 +216,7 @@ void show(VideoCapture video,String winName[],double fps, Mat bg, Mode mode) {
 
 
                 if (i == 0) {
-                    frames[0]=birdEye2.clone();
-                    myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
-                }
-                else if (i==4){
-                    frames[1]=birdEye2.clone();
+                    frame11=birdEye2.clone();
                     myfile<<time/15<<","<<QueueDensity<<","<<DynamicDensity<<endl;
                 }
                 else {

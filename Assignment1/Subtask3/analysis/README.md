@@ -5,7 +5,7 @@
 
 * ### __Following are the files and folders in this folder with their significance :__
 
-    1. [__GraphTesting/__](./GraphTesting/)
+    1. [__GraphsTesting/__](./GraphsTesting/)
         * This subfolder contains all the final results that we got and that are used in the report.
         * All the plots are stored in this folder with names ``` plot(i)-(name).png``` Where i is the method number and name denoting different graphs for same method (like "queue" for queue density and frame wise error, "runtime" for time and error vs parameter, "cpu" for cpu and memory usage vs parameter).
         * Subfolder __cpuData/.__ contains output of command usr/bin/time for every method with names ``` cpu(i)-(j).txt ``` where i is the method and j is number of threads.
