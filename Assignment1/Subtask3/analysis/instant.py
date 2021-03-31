@@ -1,6 +1,8 @@
 from matplotlib import pyplot as plt
 import csv
 
+doDyn = input("Include Dynamic density? (y/n): ")
+
 queueVarA = []
 dynamicVarA = []
 queueVar = []
@@ -25,7 +27,8 @@ with open("asli.csv") as varFile:
             i = 1
         else:
             queueVarA.append(float(rows[1]))
-            dynamicVarA.append(float(rows[2]))
+            if (doDyn == "y"):
+                dynamicVarA.append(float(rows[2]))
             time.append(float(rows[0]))
 
 with open("graph.csv") as varFile:
@@ -38,7 +41,8 @@ with open("graph.csv") as varFile:
             break
         else:
             queueVar.append(float(rows[1]))
-            dynamicVar.append(float(rows[2]))
+            if (doDyn == "y"):
+                dynamicVar.append(float(rows[2]))
             i += 1
 
 
@@ -56,10 +60,11 @@ ax.set_ylabel(ylabel)
 ax.set_xlabel(xlabel)
 
 axAsli.plot(time, queueVarA, "b",  linewidth = 1, label = ylabel1)
-axAsli.plot(time, dynamicVarA, "r",  linewidth = 1, label = ylabel2)
-
 ax.plot(time, queueVar, "b",  linewidth = 1, label = ylabel1)
-ax.plot(time, dynamicVar, "r",  linewidth = 1, label = ylabel2)
+
+if (doDyn == "y") :
+    axAsli.plot(time, dynamicVarA, "r",  linewidth = 1, label = ylabel2)
+    ax.plot(time, dynamicVar, "r",  linewidth = 1, label = ylabel2)
 
 ax.legend()
 axAsli.legend()
