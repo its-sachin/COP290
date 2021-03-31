@@ -8,8 +8,8 @@
     1. [__GraphsTesting/__](./GraphsTesting/)
         * This subfolder contains all the final results that we got and that are used in the report.
         * All the plots are stored in this folder with names ``` plot(i)-(name).png``` Where i is the method number and name denoting different graphs for same method (like "queue" for queue density and frame wise error, "runtime" for time and error vs parameter, "cpu" for cpu and memory usage vs parameter).
-        * Subfolder __cpuData/.__ contains output of command usr/bin/time for every method with names ``` cpu(i)-(j).txt ``` where i is the method and j is number of threads.
-        * Subfolder __GraphValues/.__ contains output of each and every method with different sets of parameters used for report, with names ``` graph(i)-(j).csv``` where i is the method and j is parameter value.
+        * Subfolder [__cpuData/.__](./GraphsTesting/cpuData/) contains output of command usr/bin/time for every method with names ``` cpu(i)-(j).txt ``` where i is the method and j is number of threads.
+        * Subfolder [__GraphValues/.__](./GraphsTesting/GraphValues/) contains output of each and every method with different sets of parameters used for report, with names ``` graph(i)-(j).csv``` where i is the method and j is parameter value.
 
     5. [__report.pdf__](./report.pdf)
         * PDF file containing the report of the subtask.

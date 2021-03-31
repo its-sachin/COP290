@@ -943,6 +943,18 @@ int main(int argc, char** argv) {
         cout<< "Method for optimization not provided" << endl;
         return 0;
     }
+
+    try
+    {
+        stoi(argv[2]);
+    }
+    catch(exception &err)
+    {
+        cout<< "INVALID Method!!" << endl;
+        return 0;
+    }
+    
+
     int modeVal = stoi(argv[2]);
     mode.setMethod(modeVal);
 
@@ -958,7 +970,21 @@ int main(int argc, char** argv) {
             cout<< "Number of frames to skip not provided" << endl;
             return 0;
         }
-        mode.setSkipper(stoi(argv[3]) + 1);
+        try{
+            mode.setSkipper(stoi(argv[3]) + 1);
+
+            if (argv[3] < 0){
+                cout<<"INVALID number of frames to be skipped!!." <<endl;
+                return 0;
+            }
+        }	
+
+        catch(exception &err)
+        {
+            cout<<"INVALID number of frames to be skipped!!." <<endl;
+            return 0;
+        }
+        
         initialise(mode);
         cout<< "Analysing by skipping " << stoi(argv[3])<< " frames"<< endl;
     }
@@ -968,8 +994,22 @@ int main(int argc, char** argv) {
             cout<< "Both dimensions not provided" << endl;
             return 0;
         }
-        mode.xDimen = stod(argv[3]);
-        mode.yDimen = stod(argv[4]);
+        try{
+            mode.xDimen = stod(argv[3]);
+            mode.yDimen = stod(argv[4]);
+
+            if (argv[3] <= 0 || argv[4] <= 0){
+                cout<<"INVALID Dimension!!." <<endl;
+                return 0;
+            }
+            
+        }	
+
+        catch(exception &err)
+        {
+            cout<<"INVALID Dimenions!!." <<endl;
+            return 0;
+        }
         initialise(mode);
 
         cout << "Analysing by resizing video to "<< argv[3] << "*" << argv[4] <<endl;
@@ -980,8 +1020,23 @@ int main(int argc, char** argv) {
             cout<<"No of threads not provided"<<endl;
             return 0;
         } 
+        
+        int no;
+        try{
+            no= stoi(argv[3]);
 
-        int no= stoi(argv[3]);
+            if (no<=0){
+                cout<<"INVALID number of threads!!." <<endl;
+                return 0;
+            }
+        }	
+
+        catch(exception &err)
+        {
+            cout<<"INVALID number of threads!!." <<endl;
+            return 0;
+        }
+
         mode.noThread =no;
         initialise(mode);
 
@@ -1003,7 +1058,22 @@ int main(int argc, char** argv) {
             return 0;
         }
         
-        int no = stoi(argv[3]);
+        int no;
+
+        try{
+            no= stoi(argv[3]);
+
+            if (no<=0){
+                cout<<"INVALID number of threads!!." <<endl;
+                return 0;
+            }
+        }	
+
+        catch(exception &err)
+        {
+            cout<<"INVALID number of threads!!." <<endl;
+            return 0;
+        }
 
         cout << "Analysing video in " << no << " threads" << endl;
         initialise(mode);
