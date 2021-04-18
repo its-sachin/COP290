@@ -1,6 +1,5 @@
 //Using SDL and standard IO
 #include <algorithm>
-#include <functional>
 #include <SDL2/SDL.h>
 #include <iostream>
 
@@ -8,7 +7,7 @@ using namespace std;
 
 class Game
 {
-private:
+protected:
     bool isRunning; 
     SDL_Window *window;
     SDL_Renderer *renderer;
@@ -48,11 +47,6 @@ public:
         }
     }
 
-    void render(function<void ()> doBetween){
-        SDL_RenderClear(renderer);
-        doBetween();
-        SDL_RenderPresent(renderer);
-    }
 
     void clean(){
         SDL_DestroyWindow(window);

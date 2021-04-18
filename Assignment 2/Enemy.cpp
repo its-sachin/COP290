@@ -6,4 +6,4 @@ using namespace std;
 
 class Enemy{
 
-}
+};
