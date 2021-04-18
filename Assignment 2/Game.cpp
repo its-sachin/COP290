@@ -1,7 +1,7 @@
 //Using SDL and standard IO
 #include <algorithm>
+#include <functional>
 #include <SDL2/SDL.h>
-#include <stdio.h>
 #include <iostream>
 
 using namespace std;
@@ -48,14 +48,9 @@ public:
         }
     }
 
-    void update(){
-
-    }
-
-    void render(){
+    void render(function<void ()> doBetween){
         SDL_RenderClear(renderer);
-
-
+        doBetween();
         SDL_RenderPresent(renderer);
     }
 
