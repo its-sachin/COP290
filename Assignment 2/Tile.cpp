@@ -6,18 +6,22 @@ private:
 
     int xpos;
     int ypos;
-    bool isBrick = false;
-    bool isCoin = false;    
+    bool isBrick = false;   
     Texture *texture = NULL;
 
 public:
     
-
+    bool isCoin = false; 
+    
     Tile(int x, int y, bool brick, bool coin) {
         xpos = x;
         ypos = y;
         isBrick = brick;
         isCoin = coin;
+    }
+
+    ~Tile() {
+        texture = NULL;
     }
 
     void setTexture(TextureSet* TextureManager) {
@@ -38,7 +42,7 @@ public:
     int getX() {return xpos;}
     int getY() {return ypos;}
     bool getBrick() {return isBrick;}
-    bool getCoin() {return isCoin;}
+
 
 
 };

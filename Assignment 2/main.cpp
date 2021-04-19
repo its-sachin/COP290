@@ -1,12 +1,19 @@
 #include "Pacman.cpp"
 
+int winHeight = 600;
+int winWidth = 500;
+const char* gameName = "Test";
+
+// Player movement
+int speed = 3;
+
 int main(int argc, char const *argv[])
 {
     Pacman *game = new Pacman();
-    game->init("Test", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 500, 600);
+    game->init(gameName, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, winWidth, winHeight);
 
     while (game->isOn()) {
-        game->eventManager();
+        game->eventManager(&game->event);
         game->render();
     }
 

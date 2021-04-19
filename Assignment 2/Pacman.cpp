@@ -1,7 +1,5 @@
 #include "Game.cpp"
-#include "Player.cpp"
 #include "Enemy.cpp"
-#include "Map.cpp"
 
 
 class Pacman: public Game{
@@ -17,6 +15,9 @@ class Pacman: public Game{
     Map *map = new Map("path of map file");
 
     public:
+
+    SDL_Event event;
+
     void render(){
         SDL_RenderClear(renderer);
         // doBetween;

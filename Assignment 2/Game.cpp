@@ -55,11 +55,10 @@ public:
         cout << "Game closed" << endl;
     }
 
-    void eventManager(){
-        SDL_Event event;
-        SDL_PollEvent(&event);
+    void eventManager(SDL_Event *event){
+        SDL_PollEvent(event);
 
-        switch(event.type) {
+        switch(event->type) {
             case SDL_QUIT :
                 isRunning = false;
                 break;

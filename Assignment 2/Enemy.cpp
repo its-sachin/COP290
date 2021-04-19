@@ -1,5 +1,4 @@
-#include <SDL2/SDL.h>
-#include <iostream>
+#include "Player.cpp"
 
 using namespace std;
 
