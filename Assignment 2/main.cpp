@@ -10,7 +10,7 @@ int speed = 3;
 int main(int argc, char const *argv[])
 {
     Pacman *game = new Pacman();
-    game->init(gameName, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, winWidth, winHeight);
+    game->init(gameName, winWidth, winHeight);
 
     while (game->isOn()) {
         game->eventManager(&game->event);

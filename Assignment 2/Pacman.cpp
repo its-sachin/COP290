@@ -11,12 +11,25 @@ class Pacman: public Game{
     Enemy *Inky ;
     Enemy *Clyde;
 
-    TextureSet *TextureManager = new TextureSet("path of folder");
-    Map *map = new Map("path of map file");
+    TextureSet *textureManager = NULL;
+    Map *map = NULL; 
 
     public:
 
     SDL_Event event;
+
+    void init(string title, int width, int height) {
+
+        const char* temp = title;
+        Game::init(temp,SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,width,height);
+        if (isRunning) {
+            TextureSet::renderer = renderer;
+            textureManager = new TextureSet("path of folder");
+            map = new Map("path of map file");
+            map->genrateMap(textureManager);
+        }
+
+    }
 
     void render(){
         SDL_RenderClear(renderer);

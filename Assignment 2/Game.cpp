@@ -9,8 +9,8 @@ class Game
 {
 protected:
     bool isRunning; 
-    SDL_Window *window;
-    SDL_Renderer *renderer;
+    SDL_Window *window = NULL;
+    SDL_Renderer *renderer = NULL;
 
 public:
     Game(){
@@ -40,9 +40,17 @@ public:
 
                 renderer = SDL_CreateRenderer(window, -1,0);
 
-                SDL_SetRenderDrawColor(renderer, 255,255,255,255);
+                if (renderer == NULL) {
+                    cout << "Renderer could not be created! Error: "<< SDL_GetError() << endl;
+                    isRunning = false;
+                }
+            
 
-                isRunning = true;
+                else {
+                    cout << "Renderer created!" << endl;
+                    SDL_SetRenderDrawColor(renderer, 255,255,255,255);
+                    isRunning = true;
+                }
             }
         }
     }

@@ -22,7 +22,7 @@ public:
         path=pathM;
     }
 
-    bool genrateMap(){
+    bool genrateMap(TextureSet *TextureManager){
         fstream file;
         file.open(path.c_str(), std::ios::in);
         if (file.is_open() == false){
@@ -86,6 +86,7 @@ public:
                         break;
                 }
                 if (tile!=NULL){
+                    tile->setTexture(TextureManager);
                     trow.push_back(tile);
                 }
             }
