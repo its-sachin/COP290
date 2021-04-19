@@ -1,7 +1,4 @@
-#include <iostream>
-#include <fstream>
 #include "Pacman.cpp"
-using namespace std;
 
 int main(int argc, char const *argv[])
 {
