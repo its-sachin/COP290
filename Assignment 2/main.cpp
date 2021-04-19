@@ -2,7 +2,7 @@
 
 int winHeight = 600;
 int winWidth = 500;
-const char* gameName = "Test";
+string gameName = "Test";
 
 // Player movement
 int speed = 3;

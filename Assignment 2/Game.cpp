@@ -38,7 +38,7 @@ public:
             else{
                 cout<< "Game Window created!"<< endl;
 
-                renderer = SDL_CreateRenderer(window, -1,0);
+                renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
                 if (renderer == NULL) {
                     cout << "Renderer could not be created! Error: "<< SDL_GetError() << endl;
@@ -48,7 +48,6 @@ public:
 
                 else {
                     cout << "Renderer created!" << endl;
-                    SDL_SetRenderDrawColor(renderer, 255,255,255,255);
                     isRunning = true;
                 }
             }

@@ -20,26 +20,26 @@ class Pacman: public Game{
 
     void init(string title, int width, int height) {
 
-        const char* temp = title;
+        const char* temp = title.c_str();
         Game::init(temp,SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,width,height);
         if (isRunning) {
-            TextureSet::renderer = renderer;
-            textureManager = new TextureSet("path of folder");
-            map = new Map("path of map file");
+            textureManager = new TextureSet("Assets/Images", renderer);
+            map = new Map("Assets/Maps/map1.txt");
             map->genrateMap(textureManager);
         }
 
     }
 
     void render(){
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
-        // doBetween;
+        textureManager->getTexture("bg")->Draw(renderer, 0, 0);
         SDL_RenderPresent(renderer);
     }
 
     void clean() {
         Game::clean();
-        TextureManager->Free();
+        textureManager->Free();
     }
 
 };
