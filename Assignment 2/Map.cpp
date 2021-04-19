@@ -35,15 +35,14 @@ public:
            count++;
         }
         height=count;
-        file.open(path.c_str(), std::ios::in);
+        fstream file1;
+        file1.open(path.c_str(), std::ios::in);
         string line;
 
         int x=0;
         int y=count-1;
-
-        while (std::getline(file, line)) {
+        while (std::getline(file1, line)) {
             vector<Tile*> trow;
-
             vector<char> chars(line.begin(), line.end());
 
             for (int x = 0; x < chars.size(); x++) {
@@ -95,6 +94,8 @@ public:
         }
         width=tileStruct[0].size();
         file.close();
+        file1.close();
+        return true;
     }
 
     int getHeight() {return height;}

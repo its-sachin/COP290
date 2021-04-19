@@ -40,7 +40,6 @@ public:
     void Free() {
         for (auto &it : Texturehash) {
             it.second->remove();
-            delete it.second;
             Texturehash.erase(it.first);
         }
 
