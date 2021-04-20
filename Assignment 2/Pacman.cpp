@@ -4,7 +4,7 @@
 
 class Pacman: public Game, public TextureSet{
     private:
-    Player *Thanos;
+    Player *Thanos = new Player(&player1);
 
     Enemy *Blinky;
     Enemy *Pinky;
@@ -38,6 +38,9 @@ class Pacman: public Game, public TextureSet{
             map = new Map("Assets/Maps/map1.txt", winWidth, winHeight);
             map->genrateMap();
 
+            Thanos->setBounds(map->getHeight(),map->getWidth());
+            int* curr = map->getPlayerPos();
+            Thanos->setInitTile(map->getTile(curr[0],curr[1]));
         }
 
     }
@@ -46,10 +49,15 @@ class Pacman: public Game, public TextureSet{
     void render(){
         SDL_SetRenderDrawColor(renderer, 0,0,0,255);
         SDL_RenderClear(renderer);
-    
-        renderBricks();
+        renderBack();
+
+        Thanos->render();
 
         SDL_RenderPresent(renderer);
+    }
+
+    void update() {
+        Thanos->update(&event,map);
     }
 
     void clean() {
@@ -58,7 +66,7 @@ class Pacman: public Game, public TextureSet{
     }
 
 
-    void renderBricks() {
+    void renderBack() {
 
         int x,y;
         for (int i=0; i < map->getHeight(); i++) {

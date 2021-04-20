@@ -21,9 +21,9 @@ private:
     bool alive = true;
     bool animating = false;
 
-    Texture *texture = NULL;
     Tile *currTile = NULL;
     Tile *nextTile = NULL;
+    Texture *texture = NULL;
 
     void handleBound(int& x, int bound) {
         if (x >= bound) {
@@ -37,18 +37,19 @@ private:
 
 public: 
 
-    static Map* map;
 
-    Player(Texture *playerTexture, Tile *initTile){
-        texture = playerTexture;
-        currTile = initTile;
-
+    Player(Texture *playerTex){
+        texture = playerTex;
     }
 
     ~Player() {
-        texture = NULL;
         currTile = NULL;
         nextTile = NULL;
+        texture = NULL;
+    }
+
+    void setInitTile(Tile* initTile) {
+        currTile = initTile;
     }
 
     void setBounds(int height, int width) {
@@ -65,7 +66,7 @@ public:
     bool isAlive() {return alive;}
     bool isAnimating() {return animating;}
 
-    void movement(SDL_Event *event) {
+    void movement(SDL_Event *event,Map *map) {
         int currX = currTile->getX();
         int currY = currTile->getY();
 
@@ -79,13 +80,13 @@ public:
             switch (event->key.keysym.sym){
                 case SDLK_UP:
 
-                    nextY += 1; 
+                    nextY -= 1; 
                     handleBound(nextY, yBound);                
                     break;
 
                 case SDLK_DOWN:
                     
-                    nextY -= 1;
+                    nextY += 1;
                     handleBound(nextY, yBound);
                     break;
 
@@ -118,7 +119,7 @@ public:
         
     }
 
-    void update() {
+    void update(SDL_Event *event, Map *map) {
 
         if (animating) {
 
@@ -126,21 +127,15 @@ public:
 
         else  {
             if (visible) {
+                movement(event, map);
             }
         }
     }
 
     void render() {
 
-        if (visible) {
-            if (animating) {
-
-            }
-            else {
-
-            }
-        }
-
+        texture->render(currTile->getX(),currTile->getY());
     }
+
 
 };

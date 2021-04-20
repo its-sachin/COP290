@@ -57,11 +57,26 @@ public:
 
     void render(int x, int y) {
         if (renderer == NULL){
-            cout << "render null" << endl;
+            cout << "Cant render on NULL renderer" << endl;
             return;
         }
         SDL_Rect dest = {x,y,width,height};
         SDL_RenderCopy(renderer, texture, NULL,&dest);
+    }
+
+    void render(int x, int y, SDL_Rect *clip) {
+
+        if (renderer == NULL){
+            cout << "Cant render on NULL renderer" << endl;
+            return;
+        }
+        SDL_Rect dest = {x,y,width,height};
+
+        if (clip != NULL) {
+            dest.w = clip->w;
+            dest.h = clip->h;
+        }
+        SDL_RenderCopy(renderer, texture, clip,&dest);
     }
 
     void free() {
