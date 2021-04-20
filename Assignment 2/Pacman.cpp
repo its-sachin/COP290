@@ -64,10 +64,18 @@ class Pacman: public Game, public TextureSet{
         for (int i=0; i < map->getHeight(); i++) {
 
             for (int j=0; j< map->getWidth(); j++) {
-                if ((map->getTile(i,j) != NULL) && map->getTile(i,j)->getBrick()) {
+                Tile *currTile = map->getTile(i,j);
+                if ((currTile != NULL)) {
                     x = tileWidth*j;
                     y = tileHeight*i;
-                    brick.render(x,y);
+
+                    if (currTile->getBrick()) {
+                        brick.render(x,y);
+                    }
+
+                    else if (currTile->isCoin) {
+                        coin.render(x,y);
+                    }
                 }
             }
         }
