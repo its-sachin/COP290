@@ -92,7 +92,7 @@ public:
                     trow.push_back(tile);
                 }
             }
-            tileStruct.insert(tileStruct.begin(),trow);
+            tileStruct.push_back(trow);
             y--;
         }
         width=tileStruct[0].size();
@@ -111,7 +111,7 @@ public:
     int* getClydePos(){return clydePos;}
 
     Tile* getTile(int x, int y) {
-        if (x<width && y<height){
+        if (x<height && y<width){
             return tileStruct[x][y];
         }
         else {

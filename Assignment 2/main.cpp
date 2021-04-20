@@ -1,7 +1,7 @@
 #include "Pacman.cpp"
 
-int winHeight = 600;
-int winWidth = 450;
+int winHeight = 450;
+int winWidth = 600;
 string gameName = "Test";
 
 // Player movement
