@@ -44,7 +44,7 @@ public:
         string line;
 
         int x=0;
-        int y=count-1;
+        int y=0;
         while (std::getline(file1, line)) {
             vector<Tile*> trow;
             vector<char> chars(line.begin(), line.end());
@@ -88,7 +88,7 @@ public:
                 }
             }
             tileStruct.push_back(trow);
-            y--;
+            y++;
         }
         width=tileStruct[0].size();
         file.close();

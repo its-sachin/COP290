@@ -50,7 +50,7 @@ class Pacman: public Game, public TextureSet{
         SDL_RenderClear(renderer);
         renderBack();
 
-        Thanos->render();
+        Thanos->render(tileWidth, tileHeight);
 
         SDL_RenderPresent(renderer);
     }

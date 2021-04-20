@@ -50,6 +50,8 @@ public:
 
     void setInitTile(Tile* initTile) {
         currTile = initTile;
+        cout << "init x" << currTile->getX() << " init y " << currTile->getY()<<endl;
+        nextTile = NULL;
     }
 
     void setBounds(int height, int width) {
@@ -75,37 +77,50 @@ public:
 
         SDL_PollEvent(event);
 
-        if (event->type == SDL_KEYDOWN) {
+        if (event->type == SDL_KEYDOWN && event->key.repeat == 0) {
 
             switch (event->key.keysym.sym){
                 case SDLK_UP:
 
+                    cout<<"up"<<endl;
+                    cout<< "before y:" << nextY << endl;
                     nextY -= 1; 
                     handleBound(nextY, yBound);                
+                    cout<<"after y:" << nextY<<endl;                    
                     break;
 
                 case SDLK_DOWN:
                     
+                    cout<<"doen"<<endl;
+                    cout<< "before y:" << nextY << endl;
                     nextY += 1;
                     handleBound(nextY, yBound);
+                    cout<<"after y:" << nextY<<endl;                    
                     break;
 
                 case SDLK_RIGHT:
                     
+                    cout<<"right"<<endl;
+                    cout<< "before x:" << nextX << endl;
                     nextX += 1;
                     handleBound(nextX, xBound);
+                    cout<<"after x:" << nextX<<endl;                    
                     break;
 
                 case SDLK_LEFT:
                     
+                    cout<<"left"<<endl;
+                    cout<< "before x:" << nextX << endl;
                     nextX -= 1;
                     handleBound(nextX, xBound);
+                    cout<<"after x:" << nextX<<endl;                    
                     break;
             }
+            nextTile = map->getTile(nextX,nextY);
 	    }
-        nextTile = map->getTile(nextX,nextY);
 
         if (nextTile != NULL) {
+            cout << "nextTile not null" << endl;
 
             if (nextTile->isCoin) {
                 score+= 1;
@@ -113,8 +128,11 @@ public:
             }
             
             if (nextTile->getBrick() == false) {
+                cout << "changing current tile" << endl;
                 currTile = nextTile;
             }
+
+            nextTile = NULL;
         }
         
     }
@@ -132,9 +150,11 @@ public:
         }
     }
 
-    void render() {
+    void render(int tileWidth, int tileHeight) {
 
-        texture->render(currTile->getX(),currTile->getY());
+        SDL_Rect src = {0,0,25,25};
+
+        texture->render(currTile->getX()*tileWidth,currTile->getY()*tileHeight,&src);
     }
 
 
