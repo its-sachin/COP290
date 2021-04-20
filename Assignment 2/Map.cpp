@@ -26,7 +26,7 @@ public:
         Screeny = winHeight;
     }
 
-    bool genrateMap(TextureSet *TextureManager){
+    bool genrateMap(){
         fstream file;
         file.open(path.c_str(), std::ios::in);
         if (file.is_open() == false){

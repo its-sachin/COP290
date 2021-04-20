@@ -2,7 +2,7 @@
 
 
 
-class Pacman: public Game{
+class Pacman: public Game, public TextureSet{
     private:
     Player *Thanos;
 
@@ -17,10 +17,8 @@ class Pacman: public Game{
     int tileWidth = 30;
     int tileHeight = 30;
 
-    TextureSet *textureManager = NULL;
     Map *map = NULL; 
 
-    Texture a;
 
     public:
 
@@ -34,13 +32,12 @@ class Pacman: public Game{
             winWidth = width;
             winHeight = height;
 
-            a.Load("Assets/Images/brick.bmp");
+            // a.Load("Assets/Images/brick.bmp");
 
-            textureManager = new TextureSet("Assets/Images");
+            loadTex("Assets/Images");
             map = new Map("Assets/Maps/map1.txt", winWidth, winHeight);
-            map->genrateMap(textureManager);
+            map->genrateMap();
 
-            // a = textureManager->getTexture("brick");
         }
 
     }
@@ -49,9 +46,7 @@ class Pacman: public Game{
     void render(){
         SDL_SetRenderDrawColor(renderer, 0,0,0,255);
         SDL_RenderClear(renderer);
-        
-        a.render(0,0);
-        textureManager->render("brick", 10,10);
+    
         renderBricks();
 
         SDL_RenderPresent(renderer);
@@ -59,13 +54,11 @@ class Pacman: public Game{
 
     void clean() {
         Game::clean();
-        textureManager->~TextureSet();
-        a.free();
+        freeTex();
     }
 
 
     void renderBricks() {
-        Texture tex = textureManager->getTexture("brick");
 
         int x,y;
         for (int i=0; i < map->getHeight(); i++) {
@@ -74,7 +67,7 @@ class Pacman: public Game{
                 if ((map->getTile(i,j) != NULL) && map->getTile(i,j)->getBrick()) {
                     x = tileWidth*j;
                     y = tileHeight*i;
-                    tex.render(x,y);
+                    brick.render(x,y);
                 }
             }
         }

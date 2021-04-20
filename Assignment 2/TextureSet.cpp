@@ -3,41 +3,36 @@
 
 class TextureSet{
 
-private:
+protected:
 
-    int numOfEntity = 8;
 
     Texture player1,player2,blinky,pinky, inky, clyde, brick, coin;
-
-    unordered_map<string, Texture> hash = {{"player1",player1},{"player2",player2},{"blinky",blinky},{"pinky",pinky},{"inky",inky},{"clyde",clyde},{"brick",brick},{"coin",coin}};
 
 
 public:
 
 
-    TextureSet(string path) {
+    void loadTex(string path) {
 
         
-        for (auto& it: hash) {
-
-            it.second.Load(path + "/" + it.first + ".bmp");
-        }
+        player1.Load(path + "/" + "player1.bmp");
+        player2.Load(path + "/" + "player2.bmp");
+        blinky.Load(path + "/" + "blinky.bmp");
+        pinky.Load(path + "/" + "pinky.bmp");
+        inky.Load(path + "/" + "inky.bmp");
+        clyde.Load(path + "/" + "clyde.bmp");
+        brick.Load(path + "/" + "brick.bmp");
+        coin.Load(path + "/" + "coin.bmp");
     }
 
-    Texture getTexture(string object) {
-        return hash.at(object);
-    }
-
-    void render(string object, int x, int y) {
-        hash.at(object).render(x,y);
-    }
-
-    ~TextureSet() {
-        for (auto it = hash.cbegin(); it != hash.cend();) {
-            it->second.~Texture();
-            hash.erase(it++);
-        }
-
-        hash.clear();
+    void freeTex() {
+        player1.free();
+        player2.free();
+        blinky.free();
+        pinky.free();
+        inky.free();
+        clyde.free();
+        brick.free();
+        coin.free();
     }
 };

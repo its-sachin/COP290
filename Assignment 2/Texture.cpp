@@ -56,6 +56,10 @@ public:
     }
 
     void render(int x, int y) {
+        if (renderer == NULL){
+            cout << "render null" << endl;
+            return;
+        }
         SDL_Rect dest = {x,y,width,height};
         SDL_RenderCopy(renderer, texture, NULL,&dest);
     }
