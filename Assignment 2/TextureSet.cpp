@@ -5,44 +5,39 @@ class TextureSet{
 
 private:
 
-    unordered_map<string, Texture*> Texturehash;
+    int numOfEntity = 8;
+
+    Texture player1,player2,blinky,pinky, inky, clyde, brick, coin;
+
+    unordered_map<string, Texture> hash = {{"player1",player1},{"player2",player2},{"blinky",blinky},{"pinky",pinky},{"inky",inky},{"clyde",clyde},{"brick",brick},{"coin",coin}};
 
 
 public:
 
 
-    TextureSet(string path, SDL_Renderer *renderer) {
+    TextureSet(string path) {
 
-        int numOfEntity = 9;
-        string gameEntity[numOfEntity] = {"player1", "player2", "blinky", "pinky", "inky", "clyde", "brick", "coin", "bg"};
+        
+        for (auto& it: hash) {
 
-        for (int i=0; i< numOfEntity; i++) {
-
-            Texture curr;
-            bool isDone = curr.Load(path+"/" +gameEntity[i]+".bmp", renderer);
-            if (isDone) {
-                Texturehash[gameEntity[i]] = &curr;
-            }
+            it.second.Load(path + "/" + it.first + ".bmp");
         }
     }
 
-    Texture* getTexture(string object) {
-        try {
-            Texture* out = Texturehash.at(object);
-            return out;
-        } 
-    
-        catch(const out_of_range &e){
-            return NULL;
-        } 
+    Texture getTexture(string object) {
+        return hash.at(object);
     }
 
-    void Free() {
-        for (auto it = Texturehash.cbegin(); it != Texturehash.cend();) {
-            it->second->remove();
-            Texturehash.erase(it++);
+    void render(string object, int x, int y) {
+        hash.at(object).render(x,y);
+    }
+
+    ~TextureSet() {
+        for (auto it = hash.cbegin(); it != hash.cend();) {
+            it->second.~Texture();
+            hash.erase(it++);
         }
 
-        Texturehash.clear();
+        hash.clear();
     }
 };

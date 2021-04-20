@@ -1,16 +1,18 @@
 //Using SDL and standard IO
 #include <algorithm>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include <iostream>
 
 using namespace std;
+
+SDL_Renderer *renderer = NULL;
 
 class Game
 {
 protected:
     bool isRunning; 
     SDL_Window *window = NULL;
-    SDL_Renderer *renderer = NULL;
 
 public:
     Game(){

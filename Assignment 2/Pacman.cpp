@@ -1,5 +1,5 @@
-#include "Game.cpp"
 #include "Enemy.cpp"
+
 
 
 class Pacman: public Game{
@@ -20,6 +20,8 @@ class Pacman: public Game{
     TextureSet *textureManager = NULL;
     Map *map = NULL; 
 
+    Texture a;
+
     public:
 
     SDL_Event event;
@@ -31,22 +33,52 @@ class Pacman: public Game{
         if (isRunning) {
             winWidth = width;
             winHeight = height;
-            textureManager = new TextureSet("Assets/Images", renderer);
-            map = new Map("Assets/Maps/map1.txt", tileWidth, tileHeight, winWidth, winHeight);
+
+            a.Load("Assets/Images/brick.bmp");
+
+            textureManager = new TextureSet("Assets/Images");
+            map = new Map("Assets/Maps/map1.txt", winWidth, winHeight);
             map->genrateMap(textureManager);
+
+            // a = textureManager->getTexture("brick");
         }
 
     }
 
+
     void render(){
-        // textureManager->getTexture("brick")->Draw(renderer, 0, 0);
-        map->setBricks(renderer);
+        SDL_SetRenderDrawColor(renderer, 0,0,0,255);
+        SDL_RenderClear(renderer);
+        
+        a.render(0,0);
+        textureManager->render("brick", 10,10);
+        renderBricks();
+
         SDL_RenderPresent(renderer);
     }
 
     void clean() {
         Game::clean();
-        textureManager->Free();
+        textureManager->~TextureSet();
+        a.free();
+    }
+
+
+    void renderBricks() {
+        Texture tex = textureManager->getTexture("brick");
+
+        int x,y;
+        for (int i=0; i < map->getHeight(); i++) {
+
+            for (int j=0; j< map->getWidth(); j++) {
+                if ((map->getTile(i,j) != NULL) && map->getTile(i,j)->getBrick()) {
+                    x = tileWidth*j;
+                    y = tileHeight*i;
+                    tex.render(x,y);
+                }
+            }
+        }
+        
     }
 
 };

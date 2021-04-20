@@ -7,7 +7,6 @@ private:
     int xpos;
     int ypos;
     bool isBrick = false;   
-    Texture *texture = NULL;
 
 public:
     
@@ -20,24 +19,6 @@ public:
         isCoin = coin;
     }
 
-    ~Tile() {
-        texture = NULL;
-    }
-
-    void setTexture(TextureSet* TextureManager) {
-
-        if (isBrick) {
-            texture = TextureManager->getTexture("brick");
-        }
-
-        if (isCoin) {
-            texture = TextureManager->getTexture("coin");
-        }
-
-        else {
-            texture = NULL;
-        }
-    }
 
     int getX() {return xpos;}
     int getY() {return ypos;}

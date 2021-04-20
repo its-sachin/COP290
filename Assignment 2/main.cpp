@@ -9,6 +9,7 @@ int speed = 3;
 
 int main(int argc, char const *argv[])
 {
+
     Pacman *game = new Pacman();
     game->init(gameName, winWidth, winHeight );
 
