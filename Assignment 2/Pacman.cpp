@@ -39,8 +39,7 @@ class Pacman: public Game, public TextureSet{
             map->genrateMap();
 
             Thanos->setBounds(map->getHeight(),map->getWidth());
-            int* curr = map->getPlayerPos();
-            Thanos->setInitTile(map->getTile(curr[0],curr[1]));
+            Thanos->setInitTile(map->getPlayerInit());
         }
 
     }

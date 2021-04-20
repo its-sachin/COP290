@@ -12,11 +12,11 @@ private:
     int Screenx;
     int Screeny;
 
-    int playerPos[2];
-    int blinkyPos[2];
-    int inkyPos[2];
-    int pinkyPos[2]; 
-    int clydePos[2];
+    Tile *playerInit = NULL;
+    Tile *blinkyInit = NULL;
+    Tile *inkyInit = NULL;
+    Tile *pinkyInit = NULL; 
+    Tile *clydeInit = NULL;
 
 public:
 
@@ -61,28 +61,23 @@ public:
                         break;
                     case 'p':
                         tile=new Tile(x,y,false,false);
-                        playerPos[0]=x;
-                        playerPos[1]=y;
+                        playerInit = tile;
                         break;
                     case 'b':
                         tile=new Tile(x,y,false,false);
-                        blinkyPos[0]=x;
-                        blinkyPos[1]=y;
+                        blinkyInit = tile;
                         break;
                     case 'i':
                         tile=new Tile(x,y,false,false);
-                        inkyPos[0]=x;
-                        inkyPos[1]=y;
+                        inkyInit = tile;
                         break;
                     case 'n':
                         tile= new Tile(x,y,false,false);
-                        pinkyPos[0]=x;
-                        pinkyPos[1]=y;
+                        pinkyInit = tile;
                         break;
                     case 'c':
                         tile= new Tile(x,y,false,false);
-                        clydePos[0]=x;
-                        clydePos[1]=y;
+                        clydeInit = tile;
                         break;
                     case ' ':
                         tile= new Tile(x,y,false,false);
@@ -104,11 +99,11 @@ public:
     int getHeight() {return height;}
     int getWidth() {return width;}
 
-    int* getPlayerPos(){return playerPos;}
-    int* getBlinkyPos(){return blinkyPos;}
-    int* getInkyPos(){return inkyPos;}
-    int* getPinkyPos(){return pinkyPos;}
-    int* getClydePos(){return clydePos;}
+    Tile* getPlayerInit(){return playerInit;}
+    Tile* getBlinkInits(){return blinkyInit;}
+    Tile* getInkyInit(){return inkyInit;}
+    Tile* getPinkyInit(){return pinkyInit;}
+    Tile* getClydeInit(){return clydeInit;}
 
     Tile* getTile(int x, int y) {
         if (x<height && y<width){
