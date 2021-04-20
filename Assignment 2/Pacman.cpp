@@ -11,6 +11,12 @@ class Pacman: public Game{
     Enemy *Inky ;
     Enemy *Clyde;
 
+    int winWidth; 
+    int winHeight;
+
+    int tileWidth = 30;
+    int tileHeight = 30;
+
     TextureSet *textureManager = NULL;
     Map *map = NULL; 
 
@@ -23,17 +29,18 @@ class Pacman: public Game{
         const char* temp = title.c_str();
         Game::init(temp,SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,width,height);
         if (isRunning) {
+            winWidth = width;
+            winHeight = height;
             textureManager = new TextureSet("Assets/Images", renderer);
-            map = new Map("Assets/Maps/map1.txt");
+            map = new Map("Assets/Maps/map1.txt", tileWidth, tileHeight, winWidth, winHeight);
             map->genrateMap(textureManager);
         }
 
     }
 
     void render(){
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        SDL_RenderClear(renderer);
-        textureManager->getTexture("bg")->Draw(renderer, 0, 0);
+        // textureManager->getTexture("brick")->Draw(renderer, 0, 0);
+        map->setBricks(renderer);
         SDL_RenderPresent(renderer);
     }
 

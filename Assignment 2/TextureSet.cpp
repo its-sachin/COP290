@@ -38,9 +38,9 @@ public:
     }
 
     void Free() {
-        for (auto &it : Texturehash) {
-            it.second->remove();
-            Texturehash.erase(it.first);
+        for (auto it = Texturehash.cbegin(); it != Texturehash.cend();) {
+            it->second->remove();
+            Texturehash.erase(it++);
         }
 
         Texturehash.clear();

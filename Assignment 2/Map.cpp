@@ -10,6 +10,11 @@ private:
     string path;
     vector<vector<Tile*>> tileStruct;
 
+    int tilex;
+    int tiley;
+    int Screenx;
+    int Screeny;
+
     int playerPos[2];
     int blinkyPos[2];
     int inkyPos[2];
@@ -18,8 +23,13 @@ private:
 
 public:
 
-    Map(string pathM) {
+    Map(string pathM, int tileWidth, int tileHeight, int winWidth, int winHeight) {
         path=pathM;
+
+        tilex = tileWidth;
+        tiley= tileHeight;
+        Screenx = winWidth;
+        Screeny = winHeight;
     }
 
     bool genrateMap(TextureSet *TextureManager){
@@ -114,6 +124,39 @@ public:
         else {
             return NULL;
         }
+    }
+
+    void setBricks(SDL_Renderer *renderer) {
+        SDL_Surface *surface = SDL_LoadBMP("Assets/Images/brick.bmp");
+        SDL_Texture *map_texture;
+        SDL_Rect rect;
+        rect.w = tilex;
+        rect.h = tiley;
+        SDL_Texture *tex = NULL;
+        
+        tex = SDL_CreateTextureFromSurface(renderer, surface);
+
+        map_texture = SDL_CreateTexture(renderer,SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, Screenx, Screeny);
+        SDL_SetRenderTarget(renderer, map_texture);
+
+        for (int i=0; i < height; i++) {
+
+            for (int j=0; j< width; j++) {
+                if ((getTile(i,j) != NULL) && getTile(i,j)->getBrick()) {
+                    rect.x = tilex*j;
+                    rect.y = tiley*i;
+                    SDL_RenderCopy(renderer, tex, NULL, &rect);
+                }
+            }
+        }
+        
+        SDL_SetRenderTarget(renderer, NULL);
+
+        SDL_RenderClear(renderer);
+
+        SDL_RenderCopy(renderer, tex, NULL, NULL);
+        SDL_RenderPresent(renderer);
+        
     }
 
 
