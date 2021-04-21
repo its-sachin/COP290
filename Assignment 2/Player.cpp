@@ -77,6 +77,9 @@ public:
     int getLifeLeft() {return lifeLeft;}
     bool isAlive() {return alive;}
     bool isAnimating() {return animating;}
+    Tile* getcurrTile(){
+        return currTile;
+    }
 
     void movement(SDL_Event *event,Map *map) {
         int currX = currTile->getX();
