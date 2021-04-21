@@ -170,31 +170,20 @@ public:
 
         else {
 
-            Uint32 start;
-            int spend;
+            Uint32 start1;
+            int spend1;
 
-            start = SDL_GetTicks();
+            start1 = SDL_GetTicks();
 
             SDL_Rect *src =NULL;
-            src = sprite->getRect(currDir);
-
-            texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
-
-            spend = SDL_GetTicks() - start;
-
-            if (FRAME_DELAY > spend) {
-                SDL_Delay(FRAME_DELAY- spend);
-            }
-
-            start = SDL_GetTicks();
             
             src = sprite->getRect(0);
             texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
 
-            spend = SDL_GetTicks() - start;
+            spend1 = SDL_GetTicks() - start1;
 
-            if (FRAME_DELAY > spend) {
-                SDL_Delay(FRAME_DELAY- spend);
+            if (FRAME_DELAY > spend1) {
+                SDL_Delay(FRAME_DELAY- spend1);
             }
 
             src = sprite->getRect(nextDir);
