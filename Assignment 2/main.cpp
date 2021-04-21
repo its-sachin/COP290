@@ -7,8 +7,6 @@ int main(int argc, char const *argv[])
     Pacman *game = new Pacman();
     game->init();
 
-    const int frameDelay = 1000/FPS;
-
     Uint32 start;
     int spend;
 
@@ -22,8 +20,8 @@ int main(int argc, char const *argv[])
 
         spend = SDL_GetTicks() - start;
 
-        if (frameDelay > spend) {
-            SDL_Delay(frameDelay- spend);
+        if (FRAME_DELAY > spend) {
+            SDL_Delay(FRAME_DELAY- spend);
         }
     }
 

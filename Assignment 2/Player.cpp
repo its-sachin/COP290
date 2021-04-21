@@ -1,6 +1,4 @@
-#include "Map.cpp"
-
-using namespace std;
+#include "Sprites.cpp"
 
 
 class Player{
@@ -20,9 +18,20 @@ private:
     bool alive = true;
     bool animating = false;
 
+    int currDir=3;
+    int nextDir=0;
+    //1-down
+    //2-up
+    //3-left
+    //4-right
+
+    Uint32 start;
+    int spend;
+
     Tile *currTile = NULL;
     Tile *nextTile = NULL;
     Texture *texture = NULL;
+    Sprites *sprite = NULL;
 
     void handleBound(int& x, int bound) {
         if (x >= bound) {
@@ -39,12 +48,16 @@ public:
 
     Player(Texture *playerTex){
         texture = playerTex;
+        sprite = new Sprites(playerTex);
     }
 
     ~Player() {
         currTile = NULL;
         nextTile = NULL;
         texture = NULL;
+
+        sprite->~Sprites();
+        sprite = NULL;
     }
 
     void setInitTile(Tile* initTile) {
@@ -74,30 +87,35 @@ public:
 
         SDL_PollEvent(event);
 
-        if (event->type == SDL_KEYDOWN && event->key.repeat == 0) {
+        if (event->type == SDL_KEYDOWN) {
+
 
             switch (event->key.keysym.sym){
                 case SDLK_UP:
 
                     nextY -= 1; 
+                    nextDir = 2;
                     handleBound(nextY, yBound);                                   
                     break;
 
                 case SDLK_DOWN:
                     
                     nextY += 1;
+                    nextDir = 1;
                     handleBound(nextY, yBound);                    
                     break;
 
                 case SDLK_RIGHT:
                     
                     nextX += 1;
+                    nextDir = 4;
                     handleBound(nextX, xBound);                   
                     break;
 
                 case SDLK_LEFT:
                     
                     nextX -= 1;
+                    nextDir = 3;
                     handleBound(nextX, xBound);                    
                     break;
             }
@@ -118,6 +136,7 @@ public:
             }
 
             nextTile = NULL;
+            animating = true;
         }
         
     }
@@ -125,11 +144,16 @@ public:
     void update(SDL_Event *event, Map *map) {
 
         if (animating) {
+            spend = SDL_GetTicks() - start;
 
+            if (FRAME_DELAY*SPEED <= spend) {
+                animating = false;
+            }
         }
 
         else  {
             if (visible) {
+                start = SDL_GetTicks();
                 movement(event, map);
             }
         }
@@ -137,9 +161,50 @@ public:
 
     void render() {
 
-        SDL_Rect src = {0,0,25,25};
+        if (nextDir == 0) {
 
-        texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,&src);
+            SDL_Rect *src = sprite->getRect(currDir);
+
+            texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
+        }
+
+        else {
+
+            Uint32 start;
+            int spend;
+
+            start = SDL_GetTicks();
+
+            SDL_Rect *src =NULL;
+            src = sprite->getRect(currDir);
+
+            texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
+
+            spend = SDL_GetTicks() - start;
+
+            if (FRAME_DELAY > spend) {
+                SDL_Delay(FRAME_DELAY- spend);
+            }
+
+            start = SDL_GetTicks();
+            
+            src = sprite->getRect(0);
+            texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
+
+            spend = SDL_GetTicks() - start;
+
+            if (FRAME_DELAY > spend) {
+                SDL_Delay(FRAME_DELAY- spend);
+            }
+
+            src = sprite->getRect(nextDir);
+            texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
+
+            currDir = nextDir;
+            nextDir= 0;
+        }
+
+
     }
 
 
