@@ -1,23 +1,16 @@
 #include "Pacman.cpp"
 
-int winHeight = 450;
-int winWidth = 600;
-string gameName = "Test";
-
-const int fps =10;
-const int frameDelay = 1000/fps;
-
-Uint32 start;
-int spend;
-
-// Player movement
-int speed = 3;
 
 int main(int argc, char const *argv[])
 {
 
     Pacman *game = new Pacman();
-    game->init(gameName, winWidth, winHeight );
+    game->init();
+
+    const int frameDelay = 1000/FPS;
+
+    Uint32 start;
+    int spend;
 
     while (game->isOn()) {
         

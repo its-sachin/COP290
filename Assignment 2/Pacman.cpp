@@ -2,6 +2,7 @@
 
 
 
+
 class Pacman: public Game, public TextureSet{
     private:
     Player *Thanos = new Player(&player1);
@@ -11,12 +12,6 @@ class Pacman: public Game, public TextureSet{
     Enemy *Inky ;
     Enemy *Clyde;
 
-    int winWidth; 
-    int winHeight;
-
-    int tileWidth = 30;
-    int tileHeight = 30;
-
     Map *map = NULL; 
 
 
@@ -24,18 +19,14 @@ class Pacman: public Game, public TextureSet{
 
     SDL_Event event;
 
-    void init(string title, int width, int height) {
+    void init() {
 
-        const char* temp = title.c_str();
-        Game::init(temp,SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,width,height);
+        const char* temp = WIN_NAME.c_str();
+        Game::init(temp,SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,WIN_WIDTH,WIN_HEIGHT);
         if (isRunning) {
-            winWidth = width;
-            winHeight = height;
-
-            // a.Load("Assets/Images/brick.bmp");
 
             loadTex("Assets/Images");
-            map = new Map("Assets/Maps/map1.txt", winWidth, winHeight);
+            map = new Map("Assets/Maps/map1.txt");
             map->genrateMap();
 
             Thanos->setBounds(map->getHeight(),map->getWidth());
@@ -50,7 +41,7 @@ class Pacman: public Game, public TextureSet{
         SDL_RenderClear(renderer);
         renderBack();
 
-        Thanos->render(tileWidth, tileHeight);
+        Thanos->render();
 
         SDL_RenderPresent(renderer);
     }
@@ -60,21 +51,25 @@ class Pacman: public Game, public TextureSet{
     }
 
     void clean() {
-        Game::clean();
         freeTex();
+        cout << "Score " << Thanos->getScore() << endl;
+        Thanos->~Player();
+        map->~Map();
+
+        Game::clean();
     }
 
 
     void renderBack() {
 
         int x,y;
-        for (int i=0; i < map->getHeight(); i++) {
+        for (int j=0; j < map->getHeight(); j++) {
 
-            for (int j=0; j< map->getWidth(); j++) {
+            for (int i=0; i< map->getWidth(); i++) {
                 Tile *currTile = map->getTile(i,j);
                 if ((currTile != NULL)) {
-                    x = tileWidth*j;
-                    y = tileHeight*i;
+                    x = TILE_WIDTH*i;
+                    y = TILE_HEIGHT*j;
 
                     if (currTile->getBrick()) {
                         brick.render(x,y);

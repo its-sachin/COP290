@@ -6,7 +6,7 @@ private:
 
     int xpos;
     int ypos;
-    bool isBrick = false;   
+    bool isBrick;   
 
 public:
     

@@ -7,7 +7,6 @@ class Player{
 
 private:
 
-    int speed = 3;
     int score = 0;
     int maxLife = 3;
     int lifeLeft = 3;
@@ -50,7 +49,6 @@ public:
 
     void setInitTile(Tile* initTile) {
         currTile = initTile;
-        cout << "init x" << currTile->getX() << " init y " << currTile->getY()<<endl;
         nextTile = NULL;
     }
 
@@ -60,7 +58,6 @@ public:
     }
 
     void setMaxLife(int max) {maxLife = max;}
-    void setSpeed(int s) {speed = s;}
     void setWASD() {playMode =1;}
 
     int getScore() {return score;}
@@ -82,53 +79,41 @@ public:
             switch (event->key.keysym.sym){
                 case SDLK_UP:
 
-                    cout<<"up"<<endl;
-                    cout<< "before y:" << nextY << endl;
                     nextY -= 1; 
-                    handleBound(nextY, yBound);                
-                    cout<<"after y:" << nextY<<endl;                    
+                    handleBound(nextY, yBound);                                   
                     break;
 
                 case SDLK_DOWN:
                     
-                    cout<<"doen"<<endl;
-                    cout<< "before y:" << nextY << endl;
                     nextY += 1;
-                    handleBound(nextY, yBound);
-                    cout<<"after y:" << nextY<<endl;                    
+                    handleBound(nextY, yBound);                    
                     break;
 
                 case SDLK_RIGHT:
                     
-                    cout<<"right"<<endl;
-                    cout<< "before x:" << nextX << endl;
                     nextX += 1;
-                    handleBound(nextX, xBound);
-                    cout<<"after x:" << nextX<<endl;                    
+                    handleBound(nextX, xBound);                   
                     break;
 
                 case SDLK_LEFT:
                     
-                    cout<<"left"<<endl;
-                    cout<< "before x:" << nextX << endl;
                     nextX -= 1;
-                    handleBound(nextX, xBound);
-                    cout<<"after x:" << nextX<<endl;                    
+                    handleBound(nextX, xBound);                    
                     break;
             }
             nextTile = map->getTile(nextX,nextY);
 	    }
 
         if (nextTile != NULL) {
-            cout << "nextTile not null" << endl;
 
             if (nextTile->isCoin) {
                 score+= 1;
                 nextTile->isCoin = false;
+
+                currTile = nextTile;
             }
             
-            if (nextTile->getBrick() == false) {
-                cout << "changing current tile" << endl;
+            else if (nextTile->getBrick() == false) {
                 currTile = nextTile;
             }
 
@@ -150,11 +135,11 @@ public:
         }
     }
 
-    void render(int tileWidth, int tileHeight) {
+    void render() {
 
         SDL_Rect src = {0,0,25,25};
 
-        texture->render(currTile->getX()*tileWidth,currTile->getY()*tileHeight,&src);
+        texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,&src);
     }
 
 

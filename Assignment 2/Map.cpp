@@ -9,8 +9,6 @@ private:
     int width;
     string path;
     vector<vector<Tile*>> tileStruct;
-    int Screenx;
-    int Screeny;
 
     Tile *playerInit = NULL;
     Tile *blinkyInit = NULL;
@@ -20,10 +18,22 @@ private:
 
 public:
 
-    Map(string pathM, int winWidth, int winHeight) {
+    Map(string pathM) {
         path=pathM;
-        Screenx = winWidth;
-        Screeny = winHeight;
+    }
+
+    ~Map() {
+        height = 0;
+        width = 0;
+        path = "";
+
+        playerInit = NULL;
+        blinkyInit = NULL;
+        inkyInit = NULL;
+        pinkyInit = NULL;
+        clydeInit = NULL;
+
+        tileStruct.clear();
     }
 
     bool genrateMap(){
@@ -106,8 +116,8 @@ public:
     Tile* getClydeInit(){return clydeInit;}
 
     Tile* getTile(int x, int y) {
-        if (x<height && y<width){
-            return tileStruct[x][y];
+        if (x<width && y<height){
+            return tileStruct[y][x];
         }
         else {
             return NULL;
