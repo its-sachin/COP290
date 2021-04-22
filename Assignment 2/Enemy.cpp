@@ -16,7 +16,8 @@ private:
 
     bool moving=false;
 
-    int currdirection=-1;
+    int currDir=1;
+    int nextDir=0;
 
 public: 
 
@@ -55,7 +56,7 @@ public:
             if (prevstate==0){
                 int i=rand()%4;
                 while(true) {
-                    if (i!=3-currdirection){
+                    if (i!=3-currDir){
                         nextX=nextXX[i];
                         nextY=nextYY[i];
                         nextTile=map->getTile(nextX,nextY);
@@ -63,7 +64,7 @@ public:
                             currTile = nextTile;
                             nextTile = NULL;
                             animating=true;
-                            currdirection=i;
+                            nextDir=i;
                             break;
                         }
                     }
@@ -72,7 +73,7 @@ public:
                 }
             }
             else{
-                int i=3-currdirection;
+                int i=3-currDir;
                 nextX=nextXX[i];
                 nextY=nextYY[i];
                 nextTile=map->getTile(nextX,nextY);
@@ -80,7 +81,7 @@ public:
                     currTile = nextTile;
                     nextTile = NULL;
                     animating=true;
-                    currdirection=i;       
+                    nextDir=i;       
                 }
             }
         }
@@ -97,7 +98,7 @@ public:
                     currTile = nextTile;
                     nextTile = NULL;
                     animating=true;
-                    currdirection=i;
+                    nextDir=i;
                     break;
                 }
                 j++;
@@ -111,35 +112,41 @@ public:
             int a=currTile->getX()-nextTile->getX();
             int b=currTile->getY()-nextTile->getY();
             if (a==-1){
-                currdirection=0;
+                nextDir=0;
             }
             else if (a==1){
-                currdirection=3;
+                nextDir=3;
             }
             else if (b==-1){
-                currdirection=1;
+                nextDir=1;
             }
             else if (b==1){
-                currdirection=2;
+                nextDir=2;
             }
             currTile=nextTile;
             nextTile=NULL;
         }
+        dirConfig(nextDir,true);
     }
 
     void update( Map *map,Player* P) {
 
-        if (animating) {
 
+        if (animating) {
+            spend = SDL_GetTicks() - start;
+
+            if (FRAME_DELAY*SPEED <= spend) {
+                animating = false;
+            }
         }
 
         else  {
             if (visible) {
+                start = SDL_GetTicks();
                 movement(map,P);
             }
         }
     }
-
 
     vector<int> priorty(){
         //setting priorities in movement
@@ -235,4 +242,53 @@ public:
         return abs(a->getX() - b->getX()) + abs(a->getY() - b->getY());
     }
 
+
+    void dirConfig(int& Dir, bool flag){
+        if (flag){
+            if (Dir==0){
+                Dir=4;
+            }
+        }
+        else {
+            if (Dir==4){
+                Dir=0;
+            }
+        }
+    }
+
+    void render(){
+
+        if (nextDir == 0) {
+
+            SDL_Rect *src = sprite->getRect(currDir);
+
+            texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
+        }
+
+        else {
+
+            Uint32 start1;
+            int spend1;
+
+            start1 = SDL_GetTicks();
+
+            SDL_Rect *src =NULL;
+            
+            src = sprite->getRect(0);
+            texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
+
+            spend1 = SDL_GetTicks() - start1;
+
+            if (FRAME_DELAY > spend1) {
+                SDL_Delay(FRAME_DELAY- spend1);
+            }
+
+            src = sprite->getRect(nextDir);
+            texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
+            dirConfig(nextDir,false);
+            currDir = nextDir;
+            nextDir= 0;
+        }
+
+    }
 };
