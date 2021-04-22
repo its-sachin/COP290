@@ -16,8 +16,11 @@ private:
 
     bool moving=false;
     int pr[4]={4,3,1,2};
-    int currDir=3;
+    int currDir=-1;
     int nextDir=0;
+
+    int xCorner;
+    int yCorner;
 
 public: 
 
@@ -34,6 +37,41 @@ public:
     }
 
     void setState(int s) {currstate = s;}
+
+    void init(Map *map) {
+
+        setBounds(map->getWidth(), map->getHeight());
+
+        if (id == "blinky") {
+            setInitTile(map->getBlinkyInit());
+
+            xCorner = xBound-2;
+            yCorner = -2;
+        }
+
+        else if (id == "pinky") {
+            setInitTile(map->getPinkyInit());
+
+            xCorner = 1;
+            yCorner = -2;
+        }
+
+        else if (id == "inky") {
+            setInitTile(map->getInkyInit());
+
+            xCorner = 0;
+            yCorner = yBound;
+            currDir = 1;
+        }
+
+        else if (id == "clyde") {
+            setInitTile(map->getClydeInit());
+
+            xCorner = xBound -1;
+            yCorner = yBound;
+            currDir = 1;
+        }
+    }
 
 
     void movement(Map *map,Player* P) {
@@ -91,9 +129,9 @@ public:
         }
         //scatter
         else if (currstate==1){
-            nextDir= nextDirg(map->getTile(23,1),nextXX,nextYY,map);
+            nextDir= nextDirg(xCorner,yCorner,nextXX,nextYY,map);
             nextX=nextXX[nextDir];
-            nextY=nextYY[nextDir];                
+            nextY=nextYY[nextDir];    
             nextTile=map->getTile(nextX,nextY);
             currTile = nextTile;
             nextTile = NULL;
@@ -121,6 +159,8 @@ public:
         //     nextTile=NULL;
         // }
         dirConfig(nextDir,true);
+        currDir = nextDir;
+        nextDir = 0;
     }
 
     void update( Map *map,Player* P) {
@@ -161,19 +201,18 @@ public:
     }
 
 
-    int nextDirg(Tile* Target,int X[],int Y[],Map* map){
-        int a=Target->getX();
-        int b=Target->getY();
+    int nextDirg(int a, int b,int X[],int Y[],Map* map){
         int dir;
         double minn=INFINITY;
         for(int i=0;i<4;i++){              
             nextTile=map->getTile(X[i],Y[i]);      
             if (nextTile!=NULL && nextTile->getBrick()== false && i!=3-currDir){
-                if (minn>distance(a,X[i],b,Y[i])){
-                    minn=distance(a,X[i],b,Y[i]);
+                double dist = distance(a,X[i],b,Y[i]);
+                if (minn>dist){
+                    minn=dist;
                     dir=i;
                 }
-                else if (minn=distance(a,X[i],b,Y[i])){
+                else if (minn==dist){
                     if (pr[i]<pr[dir]){
                         dir=i;
                     }
@@ -184,7 +223,7 @@ public:
     }
 
     double distance(int a,int b,int c,int d){
-        return sqrt((double)((a-b)*(a-b)+(c-d)*(c-d)));
+        return sqrt((double)(((a-b)*(a-b))+((c-d)*(c-d))));
     }
 
 
