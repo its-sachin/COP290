@@ -20,6 +20,7 @@ public:
 
     Enemy(Texture *enemyTex,string s){
         texture = enemyTex;
+        sprite = new Sprites(enemyTex);
         id=s;
         currstate = 1;
         prevstate = 1;
@@ -152,10 +153,10 @@ public:
         //setting priorities in movement
         vector<int> arr;
         if (id=="blinky"){
-            arr={0,1,3,2};
+            arr={0,2,3,1};
         }
         else if (id=="pinky"){
-            arr={0,2,3,1};
+            arr={0,1,3,2};
         }
         else if (id=="inky"){
             arr={3,1,0,2};

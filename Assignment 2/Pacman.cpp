@@ -31,6 +31,8 @@ class Pacman: public Game, public TextureSet{
 
             Thanos->setBounds(map->getHeight(),map->getWidth());
             Thanos->setInitTile(map->getPlayerInit());
+            Blinky->setBounds(map->getHeight(),map->getWidth());
+            Blinky->setInitTile(map->getBlinkInits());
         }
 
     }
