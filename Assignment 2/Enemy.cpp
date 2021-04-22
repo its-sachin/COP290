@@ -16,14 +16,13 @@ private:
 
     bool moving=false;
 
-    int currDir=1;
-    int nextDir=0;
-
 public: 
 
     Enemy(Texture *enemyTex,string s){
         texture = enemyTex;
         id=s;
+        currstate = 1;
+        prevstate = 1;
     }
 
     ~Enemy(){
@@ -34,6 +33,7 @@ public:
 
 
     void movement(Map *map,Player* P) {
+        dirConfig(nextDir,false);
         int currX = currTile->getX();
         int currY = currTile->getY();
         int nextX = currX;
@@ -254,41 +254,5 @@ public:
                 Dir=0;
             }
         }
-    }
-
-    void render(){
-
-        if (nextDir == 0) {
-
-            SDL_Rect *src = sprite->getRect(currDir);
-
-            texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
-        }
-
-        else {
-
-            Uint32 start1;
-            int spend1;
-
-            start1 = SDL_GetTicks();
-
-            SDL_Rect *src =NULL;
-            
-            src = sprite->getRect(0);
-            texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
-
-            spend1 = SDL_GetTicks() - start1;
-
-            if (FRAME_DELAY > spend1) {
-                SDL_Delay(FRAME_DELAY- spend1);
-            }
-
-            src = sprite->getRect(nextDir);
-            texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
-            dirConfig(nextDir,false);
-            currDir = nextDir;
-            nextDir= 0;
-        }
-
     }
 };

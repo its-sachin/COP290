@@ -5,9 +5,9 @@
 
 class Pacman: public Game, public TextureSet{
     private:
-    Player *Thanos = new Player(&player1);
+    Player *Thanos = new Player(&player1Tex);
 
-    Enemy *Blinky;
+    Enemy *Blinky = new Enemy(&blinkyTex, "blinky");
     Enemy *Pinky;
     Enemy *Inky ;
     Enemy *Clyde;
@@ -26,7 +26,7 @@ class Pacman: public Game, public TextureSet{
         if (isRunning) {
 
             loadTex("Assets/Images");
-            map = new Map("Assets/Maps/map1.txt");
+            map = new Map("Assets/Maps/map2.txt");
             map->genrateMap();
 
             Thanos->setBounds(map->getHeight(),map->getWidth());
@@ -42,12 +42,14 @@ class Pacman: public Game, public TextureSet{
         renderBack();
 
         Thanos->render();
+        Blinky->render();
 
         SDL_RenderPresent(renderer);
     }
 
     void update() {
         Thanos->update(&event,map);
+        Blinky->update(map, Thanos);
     }
 
     void clean() {
@@ -55,6 +57,7 @@ class Pacman: public Game, public TextureSet{
         cout << "Score " << Thanos->getScore() << endl;
         Thanos->~Player();
         map->~Map();
+        Blinky->~Enemy();
 
         Game::clean();
     }
@@ -72,11 +75,11 @@ class Pacman: public Game, public TextureSet{
                     y = TILE_HEIGHT*j;
 
                     if (currTile->getBrick()) {
-                        brick.render(x,y);
+                        brickTex.render(x,y);
                     }
 
                     else if (currTile->isCoin) {
-                        coin.render(x,y);
+                        coinTex.render(x,y);
                     }
                 }
             }

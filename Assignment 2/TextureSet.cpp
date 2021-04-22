@@ -5,7 +5,7 @@ class TextureSet{
 protected:
 
 
-    Texture player1,player2,blinky,pinky, inky, clyde, brick, coin;
+    Texture player1Tex,player2Tex,blinkyTex,pinkyTex, inkyTex, clydeTex, brickTex, coinTex;
 
 
 public:
@@ -14,24 +14,24 @@ public:
     void loadTex(string path) {
 
         
-        player1.Load(path + "/" + "player1.bmp");
-        player2.Load(path + "/" + "player2.bmp");
-        blinky.Load(path + "/" + "blinky.bmp");
-        pinky.Load(path + "/" + "pinky.bmp");
-        inky.Load(path + "/" + "inky.bmp");
-        clyde.Load(path + "/" + "clyde.bmp");
-        brick.Load(path + "/" + "brick.bmp");
-        coin.Load(path + "/" + "coin.bmp");
+        player1Tex.Load(path + "/" + "player1.bmp");
+        player2Tex.Load(path + "/" + "player2.bmp");
+        blinkyTex.Load(path + "/" + "blinky.bmp");
+        pinkyTex.Load(path + "/" + "pinky.bmp");
+        inkyTex.Load(path + "/" + "inky.bmp");
+        clydeTex.Load(path + "/" + "clyde.bmp");
+        brickTex.Load(path + "/" + "brick.bmp");
+        coinTex.Load(path + "/" + "coin.bmp");
     }
 
     void freeTex() {
-        player1.free();
-        player2.free();
-        blinky.free();
-        pinky.free();
-        inky.free();
-        clyde.free();
-        brick.free();
-        coin.free();
+        player1Tex.free();
+        player2Tex.free();
+        blinkyTex.free();
+        pinkyTex.free();
+        inkyTex.free();
+        clydeTex.free();
+        brickTex.free();
+        coinTex.free();
     }
 };

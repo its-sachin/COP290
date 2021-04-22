@@ -7,8 +7,8 @@
 const int FPS = 60;
 const int FRAME_DELAY = 1000/FPS;
 
-const int WIN_HEIGHT = 450;
-const int WIN_WIDTH = 600;
+const int WIN_HEIGHT = 750;
+const int WIN_WIDTH = 750;
 
 const std::string WIN_NAME = "TEST";
 
