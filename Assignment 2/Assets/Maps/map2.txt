@@ -5,7 +5,7 @@ x......x....x....x......x
 x.xxx..xxxx.x.xxxx..xxx.x
 x.x.........x.........x.x
 x.x.xxxx xxxxxxx xxxx.x.x
- ......     b    .......x
+ ......     b    ....... 
 x.xxx..x xxx xxx x..xxx.x
 x.xxx..x x     x x..xxx.x
 x.xxx..x x cin x x..xxx.x
