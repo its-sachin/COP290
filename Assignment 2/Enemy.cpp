@@ -5,39 +5,19 @@
 using namespace std;
 
 
-class Enemy{
+class Enemy : public Gamer{
 
 private: 
-    int speed=2;
 
-    int xbound;
-    int ybound;
     string id;
-
-    bool visible=true;
 
     int currstate;
     int prevstate;
-
-    bool animating=false;
 
     bool moving=false;
 
     int currdirection=-1;
 
-    Tile *currTile=NULL;
-    Tile *nextTile=NULL;
-    Texture *texture=NULL;
-
-    void handleBound(int &x, int bound) {
-    if (x >= bound) {
-            x = x%bound;
-        }
-        
-    else if (x < 0) {
-            x = (x+bound)%bound;
-        }
-    }
 public: 
 
     Enemy(Texture *enemyTex,string s){
@@ -46,22 +26,10 @@ public:
     }
 
     ~Enemy(){
-        currTile=NULL;
-        nextTile=NULL;
-        texture=NULL;
-    }
-    void setInitTile(Tile* initTile) {
-        currTile = initTile;
-        nextTile = NULL;
+        Gamer::free();
     }
 
-    void setBounds(int height, int width) {
-        xbound = width;
-        ybound = height;
-    }
-    void setSpeed(int s) {speed = s;}
     void setState(int s) {currstate = s;}
-    bool isAnimating() {return animating;}
 
 
     void movement(Map *map,Player* P) {
@@ -75,10 +43,10 @@ public:
         int temp3=currY-1;
         int temp4=currX-1;
 
-        handleBound(temp1,xbound);
-        handleBound(temp2,ybound);
-        handleBound(temp3,ybound);
-        handleBound(temp4,xbound);
+        handleBound(temp1,xBound);
+        handleBound(temp2,yBound);
+        handleBound(temp3,yBound);
+        handleBound(temp4,xBound);
 
         int nextXX[4]={temp1,currX,currX,temp4};
         int nextYY[4]={currY,temp2,temp3,currY};
@@ -172,12 +140,6 @@ public:
         }
     }
 
-    void render(int tileWidth, int tileHeight) {
-
-        SDL_Rect src = {0,0,25,25};
-
-        texture->render(currTile->getX()*tileWidth,currTile->getY()*tileHeight,&src);
-    }
 
     vector<int> priorty(){
         //setting priorities in movement

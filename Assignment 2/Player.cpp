@@ -1,7 +1,7 @@
-#include "Sprites.cpp"
+#include "Gamer.cpp"
 
 
-class Player{
+class Player : public Gamer{
 
 private:
 
@@ -9,14 +9,9 @@ private:
     int maxLife = 3;
     int lifeLeft = 3;
 
-    int xBound;
-    int yBound;
-
-    bool visible = true;
     int playMode = 0;
 
     bool alive = true;
-    bool animating = false;
 
     int currDir=3;
     int nextDir=0;
@@ -25,23 +20,7 @@ private:
     //3-left
     //4-right
 
-    Uint32 start;
-    int spend;
 
-    Tile *currTile = NULL;
-    Tile *nextTile = NULL;
-    Texture *texture = NULL;
-    Sprites *sprite = NULL;
-
-    void handleBound(int& x, int bound) {
-        if (x >= bound) {
-            x = x%bound;
-        }
-        
-        else if (x < 0) {
-            x = (x+bound)%bound;
-        }
-    }
 
 public: 
 
@@ -52,23 +31,9 @@ public:
     }
 
     ~Player() {
-        currTile = NULL;
-        nextTile = NULL;
-        texture = NULL;
-
-        sprite->~Sprites();
-        sprite = NULL;
+        free();
     }
 
-    void setInitTile(Tile* initTile) {
-        currTile = initTile;
-        nextTile = NULL;
-    }
-
-    void setBounds(int height, int width) {
-        xBound = width;
-        yBound = height;
-    }
 
     void setMaxLife(int max) {maxLife = max;}
     void setWASD() {playMode =1;}
@@ -76,7 +41,6 @@ public:
     int getScore() {return score;}
     int getLifeLeft() {return lifeLeft;}
     bool isAlive() {return alive;}
-    bool isAnimating() {return animating;}
     Tile* getcurrTile(){
         return currTile;
     }
