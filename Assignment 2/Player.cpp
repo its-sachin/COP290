@@ -40,6 +40,7 @@ public:
     int getScore() {return score;}
     int getLifeLeft() {return lifeLeft;}
     bool isAlive() {return alive;}
+    int getCurr() {return currDir;}
     Tile* getcurrTile(){
         return currTile;
     }

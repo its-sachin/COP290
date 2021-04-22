@@ -28,8 +28,8 @@ public:
         texture = enemyTex;
         sprite = new Sprites(enemyTex);
         id=s;
-        currstate = 1;
-        prevstate = 1;
+        currstate = 2;
+        prevstate = 2;
     }
 
     ~Enemy(){
@@ -37,7 +37,7 @@ public:
     }
 
     void setState(int s) {currstate = s;}
-
+    string getId() {return id;}
     void init(Map *map) {
 
         setBounds(map->getWidth(), map->getHeight());
@@ -74,7 +74,7 @@ public:
     }
 
 
-    void movement(Map *map,Player* P) {
+    void movement(Map *map,Player* P,Enemy* E) {
         dirConfig(currDir,false);
         int currX = currTile->getX();
         int currY = currTile->getY();
@@ -125,6 +125,16 @@ public:
                     animating=true;
                     nextDir=i;       
                 }
+                else {
+                    nextX=nextXX[currDir];
+                    nextY=nextYY[currDir];
+                    nextTile=map->getTile(nextX,nextY);  
+                    nextTile=map->getTile(nextX,nextY);  
+                    currTile = nextTile;
+                    nextTile = NULL;
+                    animating=true;
+                    nextDir=currDir;                 
+                }
             }
         }
         //scatter
@@ -137,33 +147,29 @@ public:
             nextTile = NULL;
             animating=true;       
         }
-        // else if (currstate==2){
+        else if (currstate==2){
+            cout<<"a\n";
+            vector<int> v= chhoseTarget(P,E,map);
+            cout<<"c\n";
+            currDir=3-currDir;
+            cout<<"d\n";
+            nextDir= nextDirg(v[0],v[1],nextXX,nextYY,map); 
+            cout<<"d "<<nextDir<<endl;
+            nextX=nextXX[nextDir];
+            nextY=nextYY[nextDir];    
+            nextTile=map->getTile(nextX,nextY);
+            currTile = nextTile;
+            nextTile = NULL;
+            animating=true;   
+            cout<<"b\n";
 
-        //     vector<Tile*> path=calcRoute(currTile,P->getcurrTile(),map);
-        //     nextTile=path[1];
-        //     int a=currTile->getX()-nextTile->getX();
-        //     int b=currTile->getY()-nextTile->getY();
-        //     if (a==-1){
-        //         nextDir=0;
-        //     }
-        //     else if (a==1){
-        //         nextDir=3;
-        //     }
-        //     else if (b==-1){
-        //         nextDir=1;
-        //     }
-        //     else if (b==1){
-        //         nextDir=2;
-        //     }
-        //     currTile=nextTile;
-        //     nextTile=NULL;
-        // }
+        }
         dirConfig(nextDir,true);
         currDir = nextDir;
         nextDir = 0;
     }
 
-    void update( Map *map,Player* P) {
+    void update( Map *map,Player* P,Enemy* E) {
 
 
         if (animating) {
@@ -177,27 +183,9 @@ public:
         else  {
             if (visible) {
                 start = SDL_GetTicks();
-                movement(map,P);
+                movement(map,P,E);
             }
         }
-    }
-
-    vector<int> priorty(){
-        //setting priorities in movement
-        vector<int> arr;
-        if (id=="blinky"){
-            arr={0,2,3,1};
-        }
-        else if (id=="pinky"){
-            arr={0,1,3,2};
-        }
-        else if (id=="inky"){
-            arr={3,1,0,2};
-        }
-        else if (id=="clyde"){
-            arr={3,2,0,1};
-        }
-        return arr;
     }
 
 
@@ -226,6 +214,61 @@ public:
         return sqrt((double)(((a-b)*(a-b))+((c-d)*(c-d))));
     }
 
+    vector<int> chhoseTarget(Player* P,Enemy* B,Map* map){
+        int x= P->getcurrTile()->getX();
+        int y= P->getcurrTile()->getY();
+
+        int direction=P->getCurr();
+
+        if (id=="blinky"){
+            vector<int> v={x,y};
+            return v;           
+        }
+        int x1=B->getcurrTile()->getX();
+        int y1=B->getcurrTile()->getY();
+        if (id=="pinky"){
+            switch (direction){
+                case 1:
+                y=y+2;
+                case 2:
+                x=x-2;
+                y=y-2;
+                case 3:
+                x=x-2;
+                case 4:
+                x=x+2;
+            }
+        }
+        else if (id=="inky"){
+            switch (direction){
+                case 1:
+                y=y+2;
+                case 2:
+                x=x-2;
+                y=y-2;
+                case 3:
+                x=x-2;
+                case 4:
+                x=x+2;
+            }
+            inkyTile(x,y,x1,y1);
+        }
+        else {
+            if (distance(x,currTile->getX(),y,currTile->getY())<8){
+                x=xCorner;
+                y=yCorner;
+            }
+        }
+        handleBound(x,xBound);
+        handleBound(y,yBound);
+        vector<int> v={x,y};
+        return v;
+    }
+
+    void inkyTile(int& a,int& b,int& c,int& d){
+        a=a+(a-c);
+        b=b+(b-d);
+    }
 
     void dirConfig(int& Dir, bool flag){
         if (flag){
