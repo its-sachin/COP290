@@ -11,12 +11,16 @@ protected:
     bool visible = true;
     bool animating = false;
 
-    int currDir=3;
-    int nextDir=0;
+    int currUD=0;
+    int nextUD=0;
+    //0-front
     //1-down
     //2-up
-    //3-left
-    //4-right
+
+    int currLR =0;
+    int nextLR =0;
+    //0-left
+    //1-right
 
 
     Uint32 start;
@@ -66,23 +70,49 @@ public:
 
     void render() {
 
-        if (nextDir == 0) {
+        Uint32 start1;
+        int spend1;
 
-            SDL_Rect *src = sprite->getRect(currDir);
+        if (nextLR == currLR) {
 
-            texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
+            if (currUD == nextUD) {
+
+                SDL_Rect *src = sprite->getRect(currUD,currLR);
+
+                texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
+
+            }
+
+            else {
+                
+                start1 = SDL_GetTicks();
+
+                SDL_Rect *src =NULL;
+                
+                src = sprite->getRect(0,currLR);
+                texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
+
+                spend1 = SDL_GetTicks() - start1;
+
+                if (FRAME_DELAY > spend1) {
+                    SDL_Delay(FRAME_DELAY- spend1);
+                }
+
+                src = sprite->getRect(nextUD ,currLR);
+                currUD = nextUD;
+                texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
+            }
         }
 
         else {
 
-            Uint32 start1;
-            int spend1;
-
+                
             start1 = SDL_GetTicks();
 
             SDL_Rect *src =NULL;
             
-            src = sprite->getRect(0);
+            src = sprite->getRect(nextUD,currLR);
+            currUD = nextUD;
             texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
 
             spend1 = SDL_GetTicks() - start1;
@@ -91,11 +121,10 @@ public:
                 SDL_Delay(FRAME_DELAY- spend1);
             }
 
-            src = sprite->getRect(nextDir);
+            src = sprite->getRect(currUD ,nextLR);
+            currLR = nextLR;
             texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
 
-            currDir = nextDir;
-            nextDir= 0;
         }
 
 

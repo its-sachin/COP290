@@ -4,26 +4,29 @@ class Sprites{
 
 private:
     Texture *mtexture;
-    SDL_Rect Rectviews[5];
+    SDL_Rect Rectviews[3][2];
 
-    //0-front
-    //1-down
-    //2-up
-    //3-left
-    //4-right
+    //00-leftfront
+    //01-rightfront
+    //10-leftdown
+    //11-rightdown
+    //20-leftup
+    //21-rightup
 
     void setSize(int width, int height) {
         
-        for (int i =0; i < 5; i++) {
-            Rectviews[i].w = width;
-            Rectviews[i].h = height;
+        for (int i =0; i < 3; i++) {
+
+            for (int j=0; j<2; j++ ){
+                Rectviews[i][j].w = width;
+                Rectviews[i][j].h = height;
+
+                Rectviews[i][j].x = j*width;
+                Rectviews[i][j].y = i*height;
+            }
         }
     }
 
-    void setDimen(int index, int x, int y) {
-        Rectviews[index].x = x;
-        Rectviews[index].y = y;
-    }
 
 public:
 
@@ -31,11 +34,7 @@ public:
         mtexture = texture;
 
         setSize(25,25);
-        setDimen(0,0,50);
-        setDimen(1,50,0);
-        setDimen(2,50,25);
-        setDimen(3,0,0);
-        setDimen(4,0,25);
+        
 
     }
 
@@ -43,7 +42,7 @@ public:
         mtexture = NULL;
     }
 
-    SDL_Rect *getRect(int index) {return &Rectviews[index]; }
+    SDL_Rect *getRect(int UD, int LR) {return &Rectviews[UD][LR]; }
 
 
 };

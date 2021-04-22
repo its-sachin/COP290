@@ -110,7 +110,7 @@ public:
     int getWidth() {return width;}
 
     Tile* getPlayerInit(){return playerInit;}
-    Tile* getBlinkInits(){return blinkyInit;}
+    Tile* getBlinkyInit(){return blinkyInit;}
     Tile* getInkyInit(){return inkyInit;}
     Tile* getPinkyInit(){return pinkyInit;}
     Tile* getClydeInit(){return clydeInit;}

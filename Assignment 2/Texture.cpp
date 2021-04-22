@@ -23,6 +23,9 @@ public:
         free();
     }
 
+    int getHeight() {return height;}
+    int getWidth() {return width;}
+
     bool Load(string image) {
 
         free();

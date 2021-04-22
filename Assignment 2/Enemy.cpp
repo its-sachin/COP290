@@ -16,6 +16,9 @@ private:
 
     bool moving=false;
 
+    int currDir=3;
+    int nextDir=0;
+
 public: 
 
     Enemy(Texture *enemyTex,string s){
@@ -256,4 +259,12 @@ public:
             }
         }
     }
+
+    void render() {
+
+        SDL_Rect src = {0,0,texture->getWidth(),texture->getHeight()};
+
+        texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,&src);
+    }
+
 };

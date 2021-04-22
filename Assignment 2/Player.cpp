@@ -60,28 +60,30 @@ public:
                 case SDLK_UP:
 
                     nextY -= 1; 
-                    nextDir = 2;
+                    nextUD = 2;
                     handleBound(nextY, yBound);                                   
                     break;
 
                 case SDLK_DOWN:
                     
                     nextY += 1;
-                    nextDir = 1;
+                    nextUD = 1;
                     handleBound(nextY, yBound);                    
                     break;
 
                 case SDLK_RIGHT:
                     
                     nextX += 1;
-                    nextDir = 4;
+                    nextLR = 1;
+                    nextUD = 0;
                     handleBound(nextX, xBound);                   
                     break;
 
                 case SDLK_LEFT:
                     
                     nextX -= 1;
-                    nextDir = 3;
+                    nextLR = 0;
+                    nextUD = 0;
                     handleBound(nextX, xBound);                    
                     break;
             }
@@ -123,43 +125,6 @@ public:
                 movement(event, map);
             }
         }
-    }
-
-    void render() {
-
-        if (nextDir == 0) {
-
-            SDL_Rect *src = sprite->getRect(currDir);
-
-            texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
-        }
-
-        else {
-
-            Uint32 start1;
-            int spend1;
-
-            start1 = SDL_GetTicks();
-
-            SDL_Rect *src =NULL;
-            
-            src = sprite->getRect(0);
-            texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
-
-            spend1 = SDL_GetTicks() - start1;
-
-            if (FRAME_DELAY > spend1) {
-                SDL_Delay(FRAME_DELAY- spend1);
-            }
-
-            src = sprite->getRect(nextDir);
-            texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
-
-            currDir = nextDir;
-            nextDir= 0;
-        }
-
-
     }
 
 

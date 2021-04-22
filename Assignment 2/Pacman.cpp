@@ -8,9 +8,9 @@ class Pacman: public Game, public TextureSet{
     Player *Thanos = new Player(&player1Tex);
 
     Enemy *Blinky = new Enemy(&blinkyTex, "blinky");
-    Enemy *Pinky;
-    Enemy *Inky ;
-    Enemy *Clyde;
+    Enemy *Pinky = new Enemy(&pinkyTex, "pinky");
+    Enemy *Inky  = new Enemy(&inkyTex, "inky");
+    Enemy *Clyde = new Enemy(&clydeTex, "clyde");
 
     Map *map = NULL; 
 
@@ -31,20 +31,33 @@ class Pacman: public Game, public TextureSet{
 
             Thanos->setBounds(map->getHeight(),map->getWidth());
             Thanos->setInitTile(map->getPlayerInit());
+
             Blinky->setBounds(map->getHeight(),map->getWidth());
-            Blinky->setInitTile(map->getBlinkInits());
+            Blinky->setInitTile(map->getBlinkyInit());
+
+            Pinky->setBounds(map->getHeight(),map->getWidth());
+            Pinky->setInitTile(map->getPinkyInit());
+
+            Inky->setBounds(map->getHeight(),map->getWidth());
+            Inky->setInitTile(map->getInkyInit());
+
+            Clyde->setBounds(map->getHeight(),map->getWidth());
+            Clyde->setInitTile(map->getClydeInit());
         }
 
     }
 
 
     void render(){
-        SDL_SetRenderDrawColor(renderer, 0,0,0,255);
+        SDL_SetRenderDrawColor(renderer, 0255,0255,0255,255);
         SDL_RenderClear(renderer);
         renderBack();
 
         Thanos->render();
         Blinky->render();
+        Pinky->render();
+        Inky->render();
+        Clyde->render();
 
         SDL_RenderPresent(renderer);
     }
@@ -52,6 +65,9 @@ class Pacman: public Game, public TextureSet{
     void update() {
         Thanos->update(&event,map);
         Blinky->update(map, Thanos);
+        Pinky->update(map, Thanos);
+        Inky->update(map, Thanos);
+        Clyde->update(map, Thanos);
     }
 
     void clean() {
