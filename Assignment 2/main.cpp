@@ -4,7 +4,7 @@
 int main(int argc, char const *argv[])
 {
 
-    Pacman *game = new Pacman();
+    Pacman *game = new Pacman(Doffline);
     game->init();
 
     Uint32 start;

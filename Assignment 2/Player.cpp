@@ -9,7 +9,7 @@ private:
     int maxLife = 3;
     int lifeLeft = 3;
 
-    int playMode = 0;
+    MoveType mode = ULDR;
 
     bool alive = true;
 
@@ -28,7 +28,6 @@ public:
 
     void setMaxLife(int max) {maxLife = max;}
     void setWASD() {playMode =1;}
-
     int getScore() {return score;}
     int getLifeLeft() {return lifeLeft;}
     bool isAlive() {return alive;}
@@ -45,6 +44,8 @@ public:
         return currTile;
     }
 
+    void setWASD() {mode = WASD;}
+
     void movement(SDL_Event *event,Map *map) {
         int currX = currTile->getX();
         int currY = currTile->getY();
@@ -56,38 +57,82 @@ public:
 
         if (event->type == SDL_KEYDOWN) {
 
+            int currEvent = event->key.keysym.sym;
 
-            switch (event->key.keysym.sym){
-                case SDLK_UP:
+            switch (mode) {
 
-                    nextY -= 1; 
-                    nextUD = 2;
-                    handleBound(nextY, yBound);                                   
-                    break;
+                case(ULDR):
+                    switch (currEvent){
+                    case (SDLK_UP):
 
-                case SDLK_DOWN:
-                    
-                    nextY += 1;
-                    nextUD = 1;
-                    handleBound(nextY, yBound);                    
-                    break;
+                        nextY -= 1; 
+                        nextUD = UP;
+                        handleBound(nextY, yBound);                                   
+                        break;
 
-                case SDLK_RIGHT:
-                    
-                    nextX += 1;
-                    nextLR = 1;
-                    nextUD = 0;
-                    handleBound(nextX, xBound);                   
-                    break;
+                    case SDLK_DOWN:
+                        
+                        nextY += 1;
+                        nextUD = DOWN;
+                        handleBound(nextY, yBound);                    
+                        break;
 
-                case SDLK_LEFT:
-                    
-                    nextX -= 1;
-                    nextLR = 0;
-                    nextUD = 0;
-                    handleBound(nextX, xBound);                    
-                    break;
+                    case SDLK_RIGHT:
+                        
+                        nextX += 1;
+                        nextLR = RIGHT;
+                        nextUD = FRONT;
+                        handleBound(nextX, xBound);                   
+                        break;
+
+                    case SDLK_LEFT:
+                        
+                        nextX -= 1;
+                        nextLR = LEFT;
+                        nextUD = FRONT;
+                        handleBound(nextX, xBound);                    
+                        break;
+                    }
+                break;
+
+                case(WASD):
+
+                    switch (currEvent){
+                    case (SDLK_w):
+
+                        nextY -= 1; 
+                        nextUD = UP;
+                        handleBound(nextY, yBound);                                   
+                        break;
+
+                    case SDLK_s:
+                        
+                        nextY += 1;
+                        nextUD = DOWN;
+                        handleBound(nextY, yBound);                    
+                        break;
+
+                    case SDLK_d:
+                        
+                        nextX += 1;
+                        nextLR = RIGHT;
+                        nextUD = FRONT;
+                        handleBound(nextX, xBound);                   
+                        break;
+
+                    case SDLK_a:
+                        
+                        nextX -= 1;
+                        nextLR = LEFT;
+                        nextUD = FRONT;
+                        handleBound(nextX, xBound);                    
+                        break;
+                    }
+                break;
+
             }
+
+            
             nextTile = map->getTile(nextX,nextY);
 	    }
 

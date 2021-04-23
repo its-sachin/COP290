@@ -6,6 +6,7 @@
 class Pacman: public Game, public TextureSet{
     private:
     Player *Thanos = new Player(&player1Tex);
+    Player *ThanosPast = new Player(&player2Tex);
 
     Enemy *Blinky = new Enemy(&blinkyTex, "blinky");
     Enemy *Pinky = new Enemy(&pinkyTex, "pinky");
@@ -14,10 +15,21 @@ class Pacman: public Game, public TextureSet{
 
     Map *map = NULL; 
 
+    PlayMode mode = Single;
+
 
     public:
 
     SDL_Event event;
+
+    Pacman(PlayMode m) {
+        //0 for singke player
+        //1 for multiplayer offline
+        //2 for multiplayer online
+
+        mode = m;
+
+    }
 
     void init() {
 
@@ -31,6 +43,18 @@ class Pacman: public Game, public TextureSet{
 
             Thanos->setBounds(map->getHeight(),map->getWidth());
             Thanos->setInitTile(map->getPlayerInit());
+
+            if (mode == Doffline || mode == Donline) {
+                ThanosPast->setBounds(map->getHeight(),map->getWidth());
+                ThanosPast->setInitTile(map->getPlayerInit());
+
+                if (mode == Doffline) {
+                    ThanosPast->setWASD();
+                }
+
+                Inky->setID("blinky");
+                Clyde->setID("pinky");
+            }
 
             Blinky->init(map);
             Pinky->init(map);
@@ -46,28 +70,49 @@ class Pacman: public Game, public TextureSet{
         SDL_RenderClear(renderer);
         renderBack();
 
-        Pinky->render();
-        Blinky->render();       
+        Blinky->render(); 
+        Pinky->render();      
         Inky->render();
         Clyde->render();
         Thanos->render();
+
+        if (mode == Donline || mode == Doffline) {
+            ThanosPast->render();
+        }
 
         SDL_RenderPresent(renderer);
     }
 
     void update() {
+
         Thanos->update(&event,map);
         Blinky->update(map, Thanos,NULL);
         Pinky->update(map, Thanos,Blinky);
-        Inky->update(map, Thanos,Blinky);
-        Clyde->update(map, Thanos,Blinky);
+
+        if (mode ==Single) {
+            Inky->update(map, Thanos,Blinky);
+            Clyde->update(map, Thanos,Blinky);
+        }
+        else if (mode == Doffline|| mode == Donline) {
+            ThanosPast->update(&event,map);
+            Inky->update(map, ThanosPast,NULL);
+            Clyde->update(map, ThanosPast,Inky);
+        }
+        
     }
 
     void clean() {
         freeTex();
+
         Thanos->~Player();
+        ThanosPast->~Player();
+
         map->~Map();
+
         Blinky->~Enemy();
+        Pinky->~Enemy();
+        Inky->~Enemy();
+        Clyde->~Enemy();
 
         Game::clean();
     }

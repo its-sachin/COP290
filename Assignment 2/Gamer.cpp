@@ -1,4 +1,5 @@
 #include "Sprites.cpp"
+#include "Enum.cpp"
 
 class Gamer{
 
@@ -11,14 +12,14 @@ protected:
     bool visible = true;
     bool animating = false;
 
-    int currUD=0;
-    int nextUD=0;
+    UD currUD=FRONT;
+    UD nextUD=FRONT;
     //0-front
     //1-down
     //2-up
 
-    int currLR =0;
-    int nextLR =0;
+    LR currLR =LEFT;
+    LR nextLR =LEFT;
     //0-left
     //1-right
 
@@ -89,7 +90,7 @@ public:
 
                 SDL_Rect *src =NULL;
                 
-                src = sprite->getRect(0,currLR);
+                src = sprite->getRect(FRONT,currLR);
                 texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
 
                 spend1 = SDL_GetTicks() - start1;

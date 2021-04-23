@@ -37,6 +37,7 @@ public:
     }
 
     void setState(int s) {currstate = s;}
+    void setID(string newId) {id =newId;}
     string getId() {return id;}
     void init(Map *map) {
 
