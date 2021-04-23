@@ -135,6 +135,7 @@ public:
                     animating=true;
                     nextDir=currDir;                 
                 }
+                prevstate=0;
             }
         }
         //scatter
@@ -148,20 +149,20 @@ public:
             animating=true;       
         }
         else if (currstate==2){
-            cout<<"a\n";
-            vector<int> v= chhoseTarget(P,E,map);
-            cout<<"c\n";
-            currDir=3-currDir;
-            cout<<"d\n";
-            nextDir= nextDirg(v[0],v[1],nextXX,nextYY,map); 
-            cout<<"d "<<nextDir<<endl;
+            if (prevstate!=2){
+                nextDir=3-currDir;
+                prevstate=2;
+            }
+            else{
+                vector<int> v= chhoseTarget(P,E,map);
+                nextDir= nextDirg(v[0],v[1],nextXX,nextYY,map); 
+            }
             nextX=nextXX[nextDir];
             nextY=nextYY[nextDir];    
             nextTile=map->getTile(nextX,nextY);
             currTile = nextTile;
             nextTile = NULL;
             animating=true;   
-            cout<<"b\n";
 
         }
         dirConfig(nextDir,true);
@@ -229,14 +230,14 @@ public:
         if (id=="pinky"){
             switch (direction){
                 case 1:
-                y=y+2;
+                y=y+4;
                 case 2:
-                x=x-2;
-                y=y-2;
+                x=x-4;
+                y=y-4;
                 case 3:
-                x=x-2;
+                x=x-4;
                 case 4:
-                x=x+2;
+                x=x+4;
             }
         }
         else if (id=="inky"){

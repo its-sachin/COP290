@@ -58,7 +58,6 @@ class Pacman: public Game, public TextureSet{
     void update() {
         Thanos->update(&event,map);
         Blinky->update(map, Thanos,NULL);
-        cout<<Blinky->getcurrTile()->getX()<<endl;
         Pinky->update(map, Thanos,Blinky);
         Inky->update(map, Thanos,Blinky);
         Clyde->update(map, Thanos,Blinky);
