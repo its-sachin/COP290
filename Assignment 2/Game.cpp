@@ -1,12 +1,7 @@
-//Using SDL and standard IO
-#include <algorithm>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include "constants.hpp"
-
-using namespace std;
+#include "Sound.cpp"
 
 SDL_Renderer *renderer = NULL;
+Sound *sound = new Sound();
 
 class Game
 {
@@ -21,7 +16,7 @@ public:
     }
 
     void init(const char* title, int xpos, int ypos, int width, int height){
-        if( SDL_Init( SDL_INIT_VIDEO ) < 0 ){
+        if( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0 ){
             cout<< "Game Subsystem could not initialize! Error: "<<  SDL_GetError() << endl;
             isRunning = false;
         }
@@ -51,6 +46,7 @@ public:
                 else {
                     cout << "Renderer created!" << endl;
                     isRunning = true;
+                    sound->startBGM();
                 }
             }
         }
@@ -60,7 +56,9 @@ public:
     void clean(){
         SDL_DestroyWindow(window);
         SDL_DestroyRenderer(renderer);
+        sound->~Sound();
         SDL_Quit();
+        IMG_Quit();
         cout << "Game closed" << endl;
     }
 

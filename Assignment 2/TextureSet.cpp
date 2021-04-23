@@ -5,7 +5,7 @@ class TextureSet{
 protected:
 
 
-    Texture player1Tex,player2Tex,blinkyTex,pinkyTex, inkyTex, clydeTex, brickTex, coinTex;
+    Texture player1Tex,player2Tex,blinkyTex,pinkyTex, inkyTex, clydeTex, brickTex, coinTex, frightTex, dieTex;
 
 
 public:
@@ -22,6 +22,8 @@ public:
         clydeTex.Load(path + "/" + "clyde.bmp");
         brickTex.Load(path + "/" + "brick.bmp");
         coinTex.Load(path + "/" + "coin.bmp");
+        frightTex.Load(path + "/" + "frightened.bmp");
+        dieTex.Load(path + "/" + "die.bmp");
     }
 
     void freeTex() {
@@ -32,6 +34,9 @@ public:
         inkyTex.free();
         clydeTex.free();
         brickTex.free();
-        coinTex.free();
+        coinTex.free(); 
+        frightTex.free();
+        dieTex.free();
+
     }
 };

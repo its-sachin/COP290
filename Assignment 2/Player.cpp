@@ -13,14 +13,6 @@ private:
 
     bool alive = true;
 
-    int currDir=3;
-    int nextDir=0;
-    //1-down
-    //2-up
-    //3-left
-    //4-right
-
-
 public: 
 
 
@@ -40,7 +32,15 @@ public:
     int getScore() {return score;}
     int getLifeLeft() {return lifeLeft;}
     bool isAlive() {return alive;}
-    int getCurr() {return currDir;}
+    int getCurr() {
+        if (nextUD == 0) {
+            return nextLR;
+        }
+
+        else {
+            return nextUD;
+        }
+    }
     Tile* getcurrTile(){
         return currTile;
     }
@@ -95,6 +95,7 @@ public:
 
             if (nextTile->isCoin) {
                 score+= 1;
+                sound->playCoin();
                 nextTile->isCoin = false;
 
                 currTile = nextTile;

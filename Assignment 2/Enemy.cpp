@@ -283,4 +283,11 @@ public:
             }
         }
     }
+
+    void render() {
+
+        SDL_Rect src = {0,0,TILE_WIDTH,TILE_HEIGHT};
+
+        texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,&src);
+    }
 };

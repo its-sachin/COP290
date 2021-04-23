@@ -33,9 +33,8 @@ public:
     Sprites(Texture *texture) {
         mtexture = texture;
 
-        setSize(25,25);
+        setSize(TILE_WIDTH,TILE_HEIGHT);
         
-
     }
 
     ~Sprites() {

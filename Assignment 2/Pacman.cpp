@@ -25,8 +25,8 @@ class Pacman: public Game, public TextureSet{
         Game::init(temp,SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,WIN_WIDTH,WIN_HEIGHT);
         if (isRunning) {
 
-            loadTex("Assets/Images");
-            map = new Map("Assets/Maps/map2.txt");
+            loadTex(IMAGES_PATH);
+            map = new Map(MAPS_PATH + "/map2.txt");
             map->genrateMap();
 
             Thanos->setBounds(map->getHeight(),map->getWidth());
@@ -42,15 +42,15 @@ class Pacman: public Game, public TextureSet{
 
 
     void render(){
-        SDL_SetRenderDrawColor(renderer, 0255,0255,0255,255);
+        SDL_SetRenderDrawColor(renderer, 0,0,0,255);
         SDL_RenderClear(renderer);
         renderBack();
 
-        Thanos->render();
-        Blinky->render();
         Pinky->render();
+        Blinky->render();       
         Inky->render();
         Clyde->render();
+        Thanos->render();
 
         SDL_RenderPresent(renderer);
     }
