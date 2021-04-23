@@ -12,6 +12,7 @@ private:
     MoveType mode = ULDR;
 
     bool alive = true;
+    string stone="";
 
 public: 
 
@@ -25,7 +26,8 @@ public:
         free();
     }
 
-
+    void setStone(string s){stone =s;}
+    string getStone(){return stone;}
     void setMaxLife(int max) {maxLife = max;}
     void setWASD() {playMode =1;}
     int getScore() {return score;}

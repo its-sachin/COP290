@@ -15,6 +15,7 @@ private:
     Tile *inkyInit = NULL;
     Tile *pinkyInit = NULL; 
     Tile *clydeInit = NULL;
+    Tile *homeTile =NULL;
 
 public:
 
@@ -92,6 +93,9 @@ public:
                     case ' ':
                         tile= new Tile(x,y,false,false);
                         break;
+                    case 'h':
+                        tile =new Tile(x,y,false,false);
+                        homeTile=tile;
                 }
                 if (tile!=NULL){
                     trow.push_back(tile);
@@ -114,6 +118,7 @@ public:
     Tile* getInkyInit(){return inkyInit;}
     Tile* getPinkyInit(){return pinkyInit;}
     Tile* getClydeInit(){return clydeInit;}
+    Tile* getHomeTile (){return homeTile;}
 
     Tile* getTile(int x, int y) {
         if (x<width && y<height){
