@@ -121,5 +121,27 @@ public:
         }
     }
 
+    void render() {
+        if (visible) {
+            Gamer::render();
+        }
+    }
+
+    void die() {
+
+        if (lifeLeft == 0 ) {
+            alive = false;
+            visible = false;
+        }
+        else {
+            lifeLeft -=1;
+        }
+        sound->playDie();
+        currTile = initTile;
+        currUD = FRONT;
+        currLR = LEFT;
+        animating  = false;
+    }
+
 
 };

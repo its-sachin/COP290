@@ -17,6 +17,7 @@ class Pacman: public Game, public TextureSet{
 
     PlayMode mode = Single;
 
+    SDL_Rect lifeRect = {0,0,30,30};
 
     public:
 
@@ -81,6 +82,14 @@ class Pacman: public Game, public TextureSet{
 
     void update() {
 
+        if (Thanos->getcurrTile() == Blinky->getcurrTile() || Thanos->getcurrTile() == Pinky->getcurrTile() || Thanos->getcurrTile() == Inky->getcurrTile() || Thanos->getcurrTile() == Clyde->getcurrTile()){
+            Thanos->die();
+        }
+
+        if (mode == Doffline || mode == Donline || ThanosPast->getcurrTile() == Blinky->getcurrTile() || ThanosPast->getcurrTile() == Pinky->getcurrTile() || ThanosPast->getcurrTile() == Inky->getcurrTile() || ThanosPast->getcurrTile() == Clyde->getcurrTile()){
+            ThanosPast->die();
+        }
+
         setMovement();
         Blinky->update(map, Thanos,NULL);
         Pinky->update(map, Thanos,Blinky);
@@ -89,7 +98,7 @@ class Pacman: public Game, public TextureSet{
             Inky->update(map, Thanos,Blinky);
             Clyde->update(map, Thanos,Blinky);
         }
-        if (mode == Doffline|| mode == Donline) {
+        else if (mode == Doffline|| mode == Donline) {
             Inky->update(map, ThanosPast,NULL);
             Clyde->update(map, ThanosPast,Inky);
         }
@@ -134,7 +143,17 @@ class Pacman: public Game, public TextureSet{
                 }
             }
         }
-        
+        scoreBackTex.renderWM(5,10);
+        renderScore2(Thanos->getScore(), 85,60);
+
+        for (int i=0; i< Thanos->getLifeLeft(); i++) {
+            player1Tex.renderWM(40*i +150,37,&lifeRect);
+        }
+
+        if (mode ==Doffline || mode == Donline) {
+            scoreBackTex.renderWM(WIN_WIDTH - (scoreBackTex.getWidth() +5) ,10, NULL, SDL_FLIP_HORIZONTAL);
+            renderScore2(ThanosPast->getScore(), WIN_WIDTH - 110,60);
+        }
     }
 
     void setMovement() {

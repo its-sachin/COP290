@@ -29,6 +29,7 @@ protected:
 
     Tile *currTile = NULL;
     Tile *nextTile = NULL;
+    Tile *initTile = NULL;
     Texture *texture = NULL;
     Sprites *sprite = NULL;
 
@@ -49,12 +50,14 @@ public:
         currTile = NULL;
         nextTile = NULL;
         texture = NULL;
+        initTile = NULL;
 
         sprite->~Sprites();
         sprite = NULL;
     }
 
-    void setInitTile(Tile* initTile) {
+    void setInitTile(Tile* initialTile) {
+        initTile = initialTile;
         currTile = initTile;
         nextTile = NULL;
     }

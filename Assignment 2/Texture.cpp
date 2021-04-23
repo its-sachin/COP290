@@ -1,8 +1,9 @@
 #include "Game.cpp"
+#include <SDL2/SDL_ttf.h>
 
 class Texture{
 
-private:
+protected:
 
     SDL_Texture *texture;
     int height;
@@ -36,7 +37,7 @@ public:
 
         if (surface == NULL) {
 
-            cout << "Not able to load image " << image << " Error: " << SDL_GetError() << endl;
+            cout << "Not able to load image " << image << " Error: " << IMG_GetError() << endl;
             return false;
         }
 
@@ -58,22 +59,51 @@ public:
 
     }
 
-    void render(int x, int y) {
-        if (renderer == NULL){
-            cout << "Cant render on NULL renderer" << endl;
-            return;
+    bool Load(string text, TTF_Font *font, SDL_Colour colour) {
+
+        free();
+
+        SDL_Surface *surface = TTF_RenderText_Solid(font, text.c_str(), colour);
+        if (surface == NULL) {
+            cout << "Not able to load text surface Error: " << TTF_GetError() << endl;
+            return false;
         }
-        SDL_Rect dest = {x,y,width,height};
-        SDL_RenderCopy(renderer, texture, NULL,&dest);
+
+        texture = SDL_CreateTextureFromSurface(renderer, surface);
+
+        if (texture == NULL) {
+
+            cout << "Not able to create texture from text: " << text << " Error: " << SDL_GetError() << endl;
+            SDL_FreeSurface(surface);
+            return false;
+        }
+
+        width = surface->w;
+        height = surface->h;
+        SDL_FreeSurface(surface);
+        return true;
     }
 
-    void render(int x, int y, SDL_Rect *clip) {
-
+    void renderWM(int x, int y, SDL_Rect *clip = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE) {
         if (renderer == NULL){
             cout << "Cant render on NULL renderer" << endl;
             return;
         }
         SDL_Rect dest = {x,y,width,height};
+        if (clip != NULL) {
+            dest.w = clip->w;
+            dest.h = clip->h;
+        }
+        SDL_RenderCopyEx(renderer, texture, clip,&dest, 0.0, NULL, flip);
+    }
+
+    void render(int x, int y, SDL_Rect *clip = NULL) {
+
+        if (renderer == NULL){
+            cout << "Cant render on NULL renderer" << endl;
+            return;
+        }
+        SDL_Rect dest = {x+X_MARGIN,y+Y_MARGIN,width,height};
 
         if (clip != NULL) {
             dest.w = clip->w;
