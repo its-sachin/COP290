@@ -9,8 +9,6 @@ private:
     int maxLife = 3;
     int lifeLeft = 3;
 
-    MoveType mode = ULDR;
-
     bool alive = true;
     Stone stone = NONE;
 
@@ -45,97 +43,45 @@ public:
         return currTile;
     }
 
-    void setWASD() {mode = WASD;}
-
-    void movement(SDL_Event *event,Map *map) {
+    void movement(Move dir,Map *map) {
         int currX = currTile->getX();
         int currY = currTile->getY();
 
         int nextX = currX;
         int nextY = currY;
 
-        SDL_PollEvent(event);
+        switch (dir){
+        case MOVE_UP:
 
-        if (event->type == SDL_KEYDOWN) {
+            nextY -= 1; 
+            nextUD = UP;
+            handleBound(nextY, yBound);                                   
+            break;
 
-            int currEvent = event->key.keysym.sym;
-
-            switch (mode) {
-
-                case(ULDR):
-                    switch (currEvent){
-                    case (SDLK_UP):
-
-                        nextY -= 1; 
-                        nextUD = UP;
-                        handleBound(nextY, yBound);                                   
-                        break;
-
-                    case SDLK_DOWN:
-                        
-                        nextY += 1;
-                        nextUD = DOWN;
-                        handleBound(nextY, yBound);                    
-                        break;
-
-                    case SDLK_RIGHT:
-                        
-                        nextX += 1;
-                        nextLR = RIGHT;
-                        nextUD = FRONT;
-                        handleBound(nextX, xBound);                   
-                        break;
-
-                    case SDLK_LEFT:
-                        
-                        nextX -= 1;
-                        nextLR = LEFT;
-                        nextUD = FRONT;
-                        handleBound(nextX, xBound);                    
-                        break;
-                    }
-                break;
-
-                case(WASD):
-
-                    switch (currEvent){
-                    case (SDLK_w):
-
-                        nextY -= 1; 
-                        nextUD = UP;
-                        handleBound(nextY, yBound);                                   
-                        break;
-
-                    case SDLK_s:
-                        
-                        nextY += 1;
-                        nextUD = DOWN;
-                        handleBound(nextY, yBound);                    
-                        break;
-
-                    case SDLK_d:
-                        
-                        nextX += 1;
-                        nextLR = RIGHT;
-                        nextUD = FRONT;
-                        handleBound(nextX, xBound);                   
-                        break;
-
-                    case SDLK_a:
-                        
-                        nextX -= 1;
-                        nextLR = LEFT;
-                        nextUD = FRONT;
-                        handleBound(nextX, xBound);                    
-                        break;
-                    }
-                break;
-
-            }
-
+        case MOVE_DOWN:
             
-            nextTile = map->getTile(nextX,nextY);
-	    }
+            nextY += 1;
+            nextUD = DOWN;
+            handleBound(nextY, yBound);                    
+            break;
+
+        case MOVE_RIGHT:
+            
+            nextX += 1;
+            nextLR = RIGHT;
+            nextUD = FRONT;
+            handleBound(nextX, xBound);                   
+            break;
+
+        case MOVE_LEFT:
+            
+            nextX -= 1;
+            nextLR = LEFT;
+            nextUD = FRONT;
+            handleBound(nextX, xBound);                    
+            break;
+        }
+        nextTile = map->getTile(nextX,nextY);
 
         if (nextTile != NULL) {
 
@@ -157,7 +103,7 @@ public:
         
     }
 
-    void update(SDL_Event *event, Map *map) {
+    void update(Move dir, Map *map) {
 
         if (animating) {
             spend = SDL_GetTicks() - start;
@@ -170,7 +116,7 @@ public:
         else  {
             if (visible) {
                 start = SDL_GetTicks();
-                movement(event, map);
+                movement(dir, map);
             }
         }
     }
