@@ -22,5 +22,16 @@ enum MoveType: unsigned char{
 
 };
 
+enum Stone: unsigned char{
+
+    MIND,
+    SPACE,
+    TIME,
+    POWER,
+    REALITY,
+    SOUL,
+    NONE
+};
+
 
 

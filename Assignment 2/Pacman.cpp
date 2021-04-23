@@ -93,7 +93,7 @@ class Pacman: public Game, public TextureSet{
             Inky->update(map, Thanos,Blinky);
             Clyde->update(map, Thanos,Blinky);
         }
-        else if (mode == Doffline|| mode == Donline) {
+        if (mode == Doffline|| mode == Donline) {
             ThanosPast->update(&event,map);
             Inky->update(map, ThanosPast,NULL);
             Clyde->update(map, ThanosPast,Inky);

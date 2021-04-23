@@ -297,7 +297,7 @@ public:
 
     void updateState(Player* P,Map* map){
         int state=currstate;
-        if (P->getStone()=="mind") {
+        if (P->getStone()==MIND) {
             if (P->getcurrTile()==this->getcurrTile()){
                 state=3;       
             }
@@ -332,7 +332,7 @@ public:
                     levels++;
                 }
             }
-            if (P->getStone()== "mind"){
+            if (P->getStone()== MIND){
                 if (P->getcurrTile()==this->getcurrTile()){
                     state=3;       
                 }
