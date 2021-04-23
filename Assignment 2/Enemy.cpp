@@ -21,6 +21,13 @@ private:
 
     int xCorner;
     int yCorner;
+    int st=0;//timer for scatter
+    int ct=0;//timer for chase 
+    int stime[4]={7,7,5,5};//time for various levels 
+    int ctime[4]={20,20,20,INFINITY};//chase time for various levels 
+    int xHome;//x cordinate of home tile
+    int yHome;//y cordinate of home tile 
+    int levels=0;//level of the operation of enemy
 
 public: 
 
@@ -28,8 +35,8 @@ public:
         texture = enemyTex;
         sprite = new Sprites(enemyTex);
         id=s;
-        currstate = 2;
-        prevstate = 2;
+        currstate = 1;
+        prevstate = -1;
     }
 
     ~Enemy(){
@@ -41,6 +48,8 @@ public:
     void init(Map *map) {
 
         setBounds(map->getWidth(), map->getHeight());
+        xHome=map->getHomeTile()->getX();
+        yHome=map->getHomeTile()->getY();   
 
         if (id == "blinky") {
             setInitTile(map->getBlinkyInit());
@@ -76,6 +85,7 @@ public:
 
     void movement(Map *map,Player* P,Enemy* E) {
         dirConfig(currDir,false);
+        updateState(P,map);
         int currX = currTile->getX();
         int currY = currTile->getY();
         int nextX = currX;
@@ -135,7 +145,6 @@ public:
                     animating=true;
                     nextDir=currDir;                 
                 }
-                prevstate=0;
             }
         }
         //scatter
@@ -148,10 +157,10 @@ public:
             nextTile = NULL;
             animating=true;       
         }
+        //chase mode
         else if (currstate==2){
             if (prevstate!=2){
                 nextDir=3-currDir;
-                prevstate=2;
             }
             else{
                 vector<int> v= chhoseTarget(P,E,map);
@@ -284,6 +293,56 @@ public:
         }
     }
 
+
+    void updateState(Player* P,Map* map){
+        int state=currstate;
+        if (P->getStone()=="mind") {
+            if (P->getcurrTile()==this->getcurrTile()){
+                state=3;       
+            }
+            else {
+                state=0;
+            }
+        }
+        else{
+            if (currstate==3){
+                if (this->getcurrTile()==map->getHomeTile()){
+                    if (ctime!=0){
+                        state=2;
+                    }
+                    else{
+                        state=1;
+                    }
+                }
+            }
+            else if (currstate==1){
+                cout<<st<<endl;
+                st+=SDL_GetTicks()/1000;
+                if (st==stime[levels]){
+                    state=2;
+                    st=0;
+                }
+            }
+            else if (currstate==2){
+                ct+=SDL_GetTicks()/1000;
+                if (ct==ctime[levels]){
+                    state=1;
+                    ct=0;
+                    levels++;
+                }
+            }
+            if (P->getStone()== "mind"){
+                if (P->getcurrTile()==this->getcurrTile()){
+                    state=3;       
+                }
+                else {
+                    state=0;
+                }           
+            }
+        }
+        prevstate=currstate;
+        currstate=state;
+    }
     void render() {
 
         SDL_Rect src = {0,0,TILE_WIDTH,TILE_HEIGHT};
