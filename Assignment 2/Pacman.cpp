@@ -48,10 +48,6 @@ class Pacman: public Game, public TextureSet{
                 ThanosPast->setBounds(map->getHeight(),map->getWidth());
                 ThanosPast->setInitTile(map->getPlayerInit());
 
-                if (mode == Doffline) {
-                    ThanosPast->setWASD();
-                }
-
                 Inky->setID("blinky");
                 Clyde->setID("pinky");
             }
@@ -85,7 +81,7 @@ class Pacman: public Game, public TextureSet{
 
     void update() {
 
-        Thanos->update(&event,map);
+        setMovement();
         Blinky->update(map, Thanos,NULL);
         Pinky->update(map, Thanos,Blinky);
 
@@ -94,7 +90,6 @@ class Pacman: public Game, public TextureSet{
             Clyde->update(map, Thanos,Blinky);
         }
         if (mode == Doffline|| mode == Donline) {
-            ThanosPast->update(&event,map);
             Inky->update(map, ThanosPast,NULL);
             Clyde->update(map, ThanosPast,Inky);
         }
@@ -140,6 +135,53 @@ class Pacman: public Game, public TextureSet{
             }
         }
         
+    }
+
+    void setMovement() {
+        if (event.type == SDL_KEYDOWN) {
+
+            switch (event.key.keysym.sym){
+            case SDLK_UP:
+                Thanos->update(MOVE_UP,map);           
+                break;
+
+            case SDLK_DOWN:
+                Thanos->update(MOVE_DOWN,map);                  
+                break;
+
+            case SDLK_RIGHT:
+                Thanos->update(MOVE_RIGHT,map);
+                break;
+
+            case SDLK_LEFT:
+                Thanos->update(MOVE_LEFT,map);              
+                break;
+
+            case SDLK_w:
+                if (mode ==Doffline) {
+                    ThanosPast->update(MOVE_UP,map);
+                }           
+                break;
+
+            case SDLK_s:
+                if (mode ==Doffline) {
+                    ThanosPast->update(MOVE_DOWN,map);
+                }                
+                break;
+
+            case SDLK_d:
+                if (mode ==Doffline) {
+                    ThanosPast->update(MOVE_RIGHT,map);
+                }
+                break;
+
+            case SDLK_a:
+                if (mode ==Doffline) {
+                    ThanosPast->update(MOVE_LEFT,map);
+                }              
+                break;
+            }
+        }
     }
 
 };

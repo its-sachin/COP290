@@ -15,10 +15,12 @@ enum PlayMode: unsigned char{
     Donline
 };
 
-enum MoveType: unsigned char{
+enum Move: unsigned char{
 
-    ULDR,
-    WASD
+    MOVE_UP,
+    MOVE_DOWN,
+    MOVE_LEFT,
+    MOVE_RIGHT
 
 };
 
