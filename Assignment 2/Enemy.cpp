@@ -28,6 +28,7 @@ private:
     int xHome;//x cordinate of home tile
     int yHome;//y cordinate of home tile 
     int levels=0;//level of the operation of enemy
+    int offset=0;//for timing
 
 public: 
 
@@ -297,7 +298,7 @@ public:
 
     void updateState(Player* P,Map* map){
         int state=currstate;
-        if (P->getStone()==MIND) {
+        if (P->getStone()== MIND) {
             if (P->getcurrTile()==this->getcurrTile()){
                 state=3;       
             }
@@ -317,17 +318,18 @@ public:
                 }
             }
             else if (currstate==1){
-                cout<<st<<endl;
-                st+=SDL_GetTicks()/1000;
+                st=SDL_GetTicks()/1000-offset;
                 if (st==stime[levels]){
-                    state=2;
+                    state=2;        
+                    offset+=stime[levels];
                     st=0;
                 }
             }
             else if (currstate==2){
-                ct+=SDL_GetTicks()/1000;
+                ct=SDL_GetTicks()/1000-offset;
                 if (ct==ctime[levels]){
                     state=1;
+                    offset+=ctime[levels];
                     ct=0;
                     levels++;
                 }
