@@ -19,18 +19,12 @@ class Pacman: public Game, public TextureSet{
 
     SDL_Rect lifeRect = {0,0,30,30};
 
+    bool selected = false;
+
     public:
 
     SDL_Event event;
 
-    Pacman(PlayMode m) {
-        //0 for singke player
-        //1 for multiplayer offline
-        //2 for multiplayer online
-
-        mode = m;
-
-    }
 
     void init() {
 
@@ -45,20 +39,59 @@ class Pacman: public Game, public TextureSet{
             Thanos->setBounds(map->getHeight(),map->getWidth());
             Thanos->setInitTile(map->getPlayerInit());
 
-            if (mode == Doffline || mode == Donline) {
-                ThanosPast->setBounds(map->getHeight(),map->getWidth());
-                ThanosPast->setInitTile(map->getPlayerInit());
-
-                Inky->setID("blinky");
-                Clyde->setID("pinky");
-            }
 
             Blinky->init(map);
             Pinky->init(map);
             Inky->init(map);
             Clyde->init(map);
+
+            mainMenu();
         }
 
+    }
+
+    void initMode() {
+
+        if (mode == Doffline || mode == Donline) {
+            ThanosPast->setBounds(map->getHeight(),map->getWidth());
+            ThanosPast->setInitTile(map->getPlayerInit());
+
+            Inky->setID("blinky");
+            Clyde->setID("pinky");
+        }
+
+    }
+
+    void mainMenu() {
+        
+        Uint32 start;
+        int spend;
+
+        while (isRunning && !selected) {
+
+            start = SDL_GetTicks();
+
+            eventManager(&event);
+
+            SDL_SetRenderDrawColor(renderer, 0,0,0,255);
+            SDL_RenderClear(renderer);
+
+            logoTex.renderWM(220,100);
+            menuFont.renderWM(250,350);
+            gameTex.renderWM((WIN_WIDTH-gameTex.getWidth())/2, WIN_HEIGHT-gameTex.getHeight());
+
+            SDL_RenderPresent(renderer);
+
+            selected = selecMenu();
+
+            spend = SDL_GetTicks() - start;
+
+            if (FRAME_DELAY > spend) {
+                SDL_Delay(FRAME_DELAY- spend);
+            }
+        }
+
+        initMode();
     }
 
 
@@ -86,7 +119,7 @@ class Pacman: public Game, public TextureSet{
             Thanos->die();
         }
 
-        if (mode == Doffline || mode == Donline || ThanosPast->getcurrTile() == Blinky->getcurrTile() || ThanosPast->getcurrTile() == Pinky->getcurrTile() || ThanosPast->getcurrTile() == Inky->getcurrTile() || ThanosPast->getcurrTile() == Clyde->getcurrTile()){
+        if ((mode == Doffline || mode == Donline) && (ThanosPast->getcurrTile() == Blinky->getcurrTile() || ThanosPast->getcurrTile() == Pinky->getcurrTile() || ThanosPast->getcurrTile() == Inky->getcurrTile() || ThanosPast->getcurrTile() == Clyde->getcurrTile())){
             ThanosPast->die();
         }
 
@@ -201,6 +234,28 @@ class Pacman: public Game, public TextureSet{
                 break;
             }
         }
+    }
+
+    bool selecMenu() {
+
+        if (event.type == SDL_KEYDOWN) {
+
+            switch (event.key.keysym.sym){
+            case SDLK_s:
+                mode = Single;           
+                return true;
+
+            case SDLK_d:
+                mode = Doffline;           
+                return true;
+
+            case SDLK_o:
+                mode = Donline;           
+                return true;
+            }
+        }
+
+        return false;
     }
 
 };

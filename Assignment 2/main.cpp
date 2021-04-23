@@ -4,12 +4,12 @@
 int main(int argc, char const *argv[])
 {
 
-    Pacman *game = new Pacman(Single);
-    game->init();
+    Pacman *game = new Pacman();
 
     Uint32 start;
     int spend;
 
+    game->init();
     while (game->isOn()) {
         
         start = SDL_GetTicks();

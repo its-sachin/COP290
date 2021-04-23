@@ -63,7 +63,8 @@ public:
 
         free();
 
-        SDL_Surface *surface = TTF_RenderText_Solid(font, text.c_str(), colour);
+        // SDL_Surface *surface = TTF_RenderText_Solid(font, text.c_str(), colour);
+        SDL_Surface *surface = TTF_RenderText_Blended_Wrapped(font, text.c_str(), colour, 500);
         if (surface == NULL) {
             cout << "Not able to load text surface Error: " << TTF_GetError() << endl;
             return false;
