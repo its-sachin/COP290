@@ -21,6 +21,9 @@ protected:
     gameTex,
     menuFont,
     logoTex,
+    movableBG,
+    sciTex,
+    sparkTex,
     scoreBackTex;
 
     TTF_Font *font = NULL;
@@ -46,19 +49,20 @@ public:
         }
 
         
-        player1Tex.Load(path + "/" + "player1.bmp");
-        player2Tex.Load(path + "/" + "player2.bmp");
-        blinkyTex.Load(path + "/" + "blinky.bmp");
-        pinkyTex.Load(path + "/" + "pinky.bmp");
-        inkyTex.Load(path + "/" + "inky.bmp");
-        clydeTex.Load(path + "/" + "clyde.bmp");
-        brickTex.Load(path + "/" + "brick.bmp");
-        coinTex.Load(path + "/" + "coin.bmp");
-        frightTex.Load(path + "/" + "frightened.bmp");
-        dieTex.Load(path + "/" + "die.bmp");
-        scoreBackTex.Load(path + "/" + "scoreUI.jpg");
+        player1Tex.Load(path + "/" + "player1.png");
+        player2Tex.Load(path + "/" + "player2.png");
+        blinkyTex.Load(path + "/" + "blinky.png");
+        pinkyTex.Load(path + "/" + "pinky.png");
+        inkyTex.Load(path + "/" + "inky.png");
+        clydeTex.Load(path + "/" + "clyde.png");
+        brickTex.Load(path + "/" + "brick.jpg");
+        coinTex.Load(path + "/" + "coin.png");
+        frightTex.Load(path + "/" + "frightened.png");
+        dieTex.Load(path + "/" + "die.png");
+        scoreBackTex.Load(path + "/" + "scoreUI.png");
         gameTex.Load(path + "/gamePhoto.png");
         logoTex.Load(path + "/logo.bmp");
+        movableBG.Load(path + "/back.jpg");
         menuFont.Load("      --Select Mode--\n   Single Player [Press s]\nTwo Player Online [Press o]\nTwo Player Offline [Press d]",font,textColour);
     }
 

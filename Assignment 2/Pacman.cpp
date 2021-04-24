@@ -18,8 +18,18 @@ class Pacman: public Game, public TextureSet{
     PlayMode mode = Single;
 
     SDL_Rect lifeRect = {0,0,30,30};
+    SDL_Rect backRect = {0,0,WIN_WIDTH,WIN_HEIGHT};
 
     bool selected = false;
+
+    string balStr(int n) {
+        string out = to_string(n);
+
+        while (out.size() != 4) {
+            out = "0" + out;
+        } 
+        return out;
+    }
 
     public:
 
@@ -67,6 +77,11 @@ class Pacman: public Game, public TextureSet{
         Uint32 start;
         int spend;
 
+        int backCurr = 0;
+        int sparkCurr = 225;
+        int sciCurr = 140;
+        int base = movableBG.getWidth();
+
         while (isRunning && !selected) {
 
             start = SDL_GetTicks();
@@ -76,9 +91,32 @@ class Pacman: public Game, public TextureSet{
             SDL_SetRenderDrawColor(renderer, 0,0,0,255);
             SDL_RenderClear(renderer);
 
+            movableBG.renderWM(0,0,&backRect);
+            backCurr += 1;
+            if (backCurr == base) {
+                backCurr = 0;
+            }
+            
+            backRect.x = backCurr;
+
             logoTex.renderWM(220,100);
-            menuFont.renderWM(250,350);
+            menuFont.renderWM(100,350);
             gameTex.renderWM((WIN_WIDTH-gameTex.getWidth())/2, WIN_HEIGHT-gameTex.getHeight());
+
+            // SDL_Rect a = {0,0,300,250};
+            // player2Tex.renderWM(500,300, &a);
+
+            sciTex.Load(IMAGES_PATH + "/sci/" + balStr(sciCurr) + ".png");
+            sciTex.renderWM(500,300);
+
+            sparkTex.Load(IMAGES_PATH + "/spark/" + balStr(sparkCurr) + ".png");
+            sparkTex.renderWM(275,595);
+
+            if (backCurr%10 ==0 ){
+
+                sciCurr = sciCurr%63 + 140;
+                sparkCurr = sparkCurr%51 + 225;
+            }
 
             SDL_RenderPresent(renderer);
 
@@ -183,12 +221,16 @@ class Pacman: public Game, public TextureSet{
         renderScore2(Thanos->getScore(), 85,60);
 
         for (int i=0; i< Thanos->getLifeLeft(); i++) {
-            player1Tex.renderWM(40*i +150,37,&lifeRect);
+            player1Tex.renderWM(40*i +150,40,&lifeRect);
         }
 
         if (mode ==Doffline || mode == Donline) {
             scoreBackTex.renderWM(WIN_WIDTH - (scoreBackTex.getWidth() +5) ,10, NULL, SDL_FLIP_HORIZONTAL);
             renderScore2(ThanosPast->getScore(), WIN_WIDTH - 110,60);
+
+            // for (int i=0; i< Thanos->getLifeLeft(); i++) {
+            //     player2Tex.renderWM(40*i +150,37,&lifeRect);
+            // }
         }
     }
 
