@@ -90,7 +90,10 @@ class Pacman: public Game, public TextureSet{
                 SDL_Delay(FRAME_DELAY- spend);
             }
         }
-
+        Blinky->setOffset(SDL_GetTicks()/1000);
+        Inky->setOffset(SDL_GetTicks()/1000);
+        Pinky->setOffset(SDL_GetTicks()/1000);
+        Clyde->setOffset(SDL_GetTicks()/1000);
         initMode();
     }
 
