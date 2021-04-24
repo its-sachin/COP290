@@ -116,6 +116,7 @@ public:
                         nextY=nextYY[i];
                         nextTile=map->getTile(nextX,nextY);
                         if (nextTile!=NULL && nextTile->getBrick()== false){
+                            initRel();
                             currTile = nextTile;
                             nextTile = NULL;
                             animating=true;
@@ -133,6 +134,7 @@ public:
                 nextY=nextYY[i];
                 nextTile=map->getTile(nextX,nextY);
                 if (nextTile!=NULL && nextTile->getBrick()== false){
+                    initRel();
                     currTile = nextTile;
                     nextTile = NULL;
                     animating=true;
@@ -143,6 +145,7 @@ public:
                     nextY=nextYY[currDir];
                     nextTile=map->getTile(nextX,nextY);  
                     nextTile=map->getTile(nextX,nextY);  
+                    initRel();
                     currTile = nextTile;
                     nextTile = NULL;
                     animating=true;
@@ -156,6 +159,7 @@ public:
             nextX=nextXX[nextDir];
             nextY=nextYY[nextDir];    
             nextTile=map->getTile(nextX,nextY);
+            initRel();
             currTile = nextTile;
             nextTile = NULL;
             animating=true;       
@@ -172,6 +176,7 @@ public:
             nextX=nextXX[nextDir];
             nextY=nextYY[nextDir];    
             nextTile=map->getTile(nextX,nextY);
+            initRel();
             currTile = nextTile;
             nextTile = NULL;
             animating=true;   
@@ -184,20 +189,8 @@ public:
 
     void update( Map *map,Player* P,Enemy* E) {
 
-
-        if (animating) {
-            spend = SDL_GetTicks() - start;
-
-            if (FRAME_DELAY*SPEED <= spend) {
-                animating = false;
-            }
-        }
-
-        else  {
-            if (visible) {
-                start = SDL_GetTicks();
-                movement(map,P,E);
-            }
+        if (visible && !animating) {
+            movement(map,P,E);
         }
     }
 
@@ -320,6 +313,17 @@ public:
             }
             else if (currstate==1){
                 st=SDL_GetTicks()/1000-offset;
+                if (P->getcurrTile() == currTile) {
+                    Uint32 start1 = SDL_GetTicks();
+
+                    P->die();
+
+                    int spend1 = SDL_GetTicks() - start1;
+
+                    if (3500 > spend1) {
+                        SDL_Delay(3500- spend1);
+                    }
+                }
                 if (st==stime[levels]){
                     state=2;        
                     offset+=stime[levels];
@@ -328,6 +332,18 @@ public:
             }
             else if (currstate==2){
                 ct=SDL_GetTicks()/1000-offset;
+                if (P->getcurrTile() == currTile) {
+                    
+                    Uint32 start1 = SDL_GetTicks();
+
+                    P->die();
+
+                    int spend1 = SDL_GetTicks() - start1;
+
+                    if (3500 > spend1) {
+                        SDL_Delay(3500- spend1);
+                    }
+                }
                 if (ct==ctime[levels]){
                     state=1;
                     offset+=ctime[levels];
@@ -351,6 +367,12 @@ public:
 
         SDL_Rect src = {0,0,TILE_WIDTH,TILE_HEIGHT};
 
-        texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,&src);
+        texture->render(currTile->getX()*TILE_WIDTH- xRel,currTile->getY()*TILE_HEIGHT- yRel,&src);
+
+        updateRel();
+        if (xRel ==0 && yRel ==0) {
+            animating = false;
+        }
+
     }
 };

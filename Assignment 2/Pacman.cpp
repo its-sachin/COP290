@@ -122,10 +122,13 @@ class Pacman: public Game, public TextureSet{
 
             selected = selecMenu();
 
-            spend = SDL_GetTicks() - start;
+            
 
-            if (FRAME_DELAY > spend) {
-                SDL_Delay(FRAME_DELAY- spend);
+            while (FRAME_DELAY > spend) {
+                
+                eventManager(&event);
+
+                spend = SDL_GetTicks() - start;
             }
         }
         Blinky->setOffset(SDL_GetTicks()/1000);
@@ -137,8 +140,12 @@ class Pacman: public Game, public TextureSet{
 
 
     void render(){
+
         SDL_SetRenderDrawColor(renderer, 0,0,0,255);
         SDL_RenderClear(renderer);
+
+        Uint32 start = SDL_GetTicks();
+
         renderBack();
 
         Blinky->render(); 
@@ -152,17 +159,17 @@ class Pacman: public Game, public TextureSet{
         }
 
         SDL_RenderPresent(renderer);
+
+        int spend = SDL_GetTicks() - start;
+
+        while (spend < SPEED*FRAME_DELAY/(60*35)) {
+            spend = SDL_GetTicks() - start;
+
+            eventManager(&event);
+        }
     }
 
     void update() {
-
-        if (Thanos->getcurrTile() == Blinky->getcurrTile() || Thanos->getcurrTile() == Pinky->getcurrTile() || Thanos->getcurrTile() == Inky->getcurrTile() || Thanos->getcurrTile() == Clyde->getcurrTile()){
-            Thanos->die();
-        }
-
-        if ((mode == Doffline || mode == Donline) && (ThanosPast->getcurrTile() == Blinky->getcurrTile() || ThanosPast->getcurrTile() == Pinky->getcurrTile() || ThanosPast->getcurrTile() == Inky->getcurrTile() || ThanosPast->getcurrTile() == Clyde->getcurrTile())){
-            ThanosPast->die();
-        }
 
         setMovement();
         Blinky->update(map, Thanos,NULL);

@@ -90,10 +90,12 @@ public:
                 sound->playCoin();
                 nextTile->isCoin = false;
 
+                initRel();
                 currTile = nextTile;
             }
             
             else if (nextTile->getBrick() == false) {
+                initRel();
                 currTile = nextTile;
             }
 
@@ -105,19 +107,8 @@ public:
 
     void update(Move dir, Map *map) {
 
-        if (animating) {
-            spend = SDL_GetTicks() - start;
-
-            if (FRAME_DELAY*SPEED <= spend) {
-                animating = false;
-            }
-        }
-
-        else  {
-            if (visible) {
-                start = SDL_GetTicks();
-                movement(dir, map);
-            }
+        if (visible && !animating) {
+            movement(dir, map);
         }
     }
 

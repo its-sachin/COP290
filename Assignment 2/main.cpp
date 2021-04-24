@@ -20,8 +20,9 @@ int main(int argc, char const *argv[])
 
         spend = SDL_GetTicks() - start;
 
-        if (FRAME_DELAY > spend) {
-            SDL_Delay(FRAME_DELAY- spend);
+        while (FRAME_DELAY > spend){
+            game->eventManager(&game->event);
+            spend = SDL_GetTicks() - start;
         }
     }
 

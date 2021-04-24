@@ -35,5 +35,13 @@ enum Stone: unsigned char{
     NONE
 };
 
+enum EnemyState: unsigned char{
+
+    FRIGHTENED,
+    SCATTER,
+    CHASE,
+    DIE
+};
+
 
 

@@ -12,6 +12,10 @@ protected:
     bool visible = true;
     bool animating = false;
 
+    int xRel;
+    int yRel;
+    int psuedoRel = TILE_HEIGHT;
+
     UD currUD=FRONT;
     UD nextUD=FRONT;
     //0-front
@@ -22,10 +26,6 @@ protected:
     LR nextLR =LEFT;
     //0-left
     //1-right
-
-
-    Uint32 start;
-    int spend;
 
     Tile *currTile = NULL;
     Tile *nextTile = NULL;
@@ -40,6 +40,31 @@ protected:
         
         else if (x < 0) {
             x = (x+bound)%bound;
+        }
+    }
+
+    void initRel() {
+        animating = true;
+        xRel = (nextTile->getX() - currTile->getX())*TILE_WIDTH;
+        yRel = (nextTile->getY() - currTile->getY())*TILE_HEIGHT;
+    }
+
+    void updateRel() {
+
+        if (xRel < 0) {
+            xRel += 1;
+        }
+
+        else if (xRel >0 ) {
+            xRel -=1;
+        }
+        
+        if (yRel < 0) {
+            yRel += 1;
+        }
+
+        else if (yRel >0 ) {
+            yRel -=1;
         }
     }
 
@@ -74,60 +99,84 @@ public:
 
     void render() {
 
-        Uint32 start1;
-        int spend1;
-
         if (nextLR == currLR) {
 
             if (currUD == nextUD) {
 
+                if (animating == false) {
+                    animating  = true;
+                }
+
                 SDL_Rect *src = sprite->getRect(currUD,currLR);
 
-                texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
+                texture->render(currTile->getX()*TILE_WIDTH -xRel,currTile->getY()*TILE_HEIGHT - yRel,src);
+
+                updateRel();
+                psuedoRel -= 1;
+                if (psuedoRel == 0) {
+                    animating = false;
+                    psuedoRel = TILE_HEIGHT;
+                }
 
             }
 
             else {
-                
-                start1 = SDL_GetTicks();
+
 
                 SDL_Rect *src =NULL;
-                
-                src = sprite->getRect(FRONT,currLR);
-                texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
 
-                spend1 = SDL_GetTicks() - start1;
+                if (abs(xRel) > TILE_WIDTH || abs(xRel) > TILE_WIDTH) {
 
-                if (FRAME_DELAY > spend1) {
-                    SDL_Delay(FRAME_DELAY- spend1);
+                    src = sprite->getRect(FRONT,currLR);
+                    texture->render(currTile->getX()*TILE_WIDTH- xRel,currTile->getY()*TILE_HEIGHT- yRel,src);
+
+                    
                 }
 
-                src = sprite->getRect(nextUD ,currLR);
-                currUD = nextUD;
-                texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
+                else {
+                    src = sprite->getRect(nextUD ,currLR);
+                    texture->render(currTile->getX()*TILE_WIDTH- xRel,currTile->getY()*TILE_HEIGHT- yRel,src);
+                }
+                
+                updateRel();
+                if (xRel ==0 && yRel ==0) {
+                    animating = false;
+                    currUD = nextUD;
+                    psuedoRel = TILE_HEIGHT;
+                }
+
+                
             }
         }
 
         else {
 
-                
-            start1 = SDL_GetTicks();
 
             SDL_Rect *src =NULL;
-            
-            src = sprite->getRect(nextUD,currLR);
-            currUD = nextUD;
-            texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
 
-            spend1 = SDL_GetTicks() - start1;
+            if (abs(xRel) > TILE_WIDTH || abs(xRel) > TILE_WIDTH) {
 
-            if (FRAME_DELAY > spend1) {
-                SDL_Delay(FRAME_DELAY- spend1);
+                src = sprite->getRect(nextUD,currLR);
+                texture->render(currTile->getX()*TILE_WIDTH- xRel,currTile->getY()*TILE_HEIGHT- yRel,src);
             }
 
-            src = sprite->getRect(currUD ,nextLR);
-            currLR = nextLR;
-            texture->render(currTile->getX()*TILE_WIDTH,currTile->getY()*TILE_HEIGHT,src);
+            else {
+
+                src = sprite->getRect(currUD ,nextLR);
+                texture->render(currTile->getX()*TILE_WIDTH- xRel,currTile->getY()*TILE_HEIGHT- yRel,src);
+
+            }            
+
+            updateRel();
+            if (abs(xRel) < TILE_WIDTH && abs(xRel) < TILE_WIDTH) {
+                currUD = nextUD;
+            }
+
+            if (xRel ==0 && yRel ==0) {
+                animating = false;
+                currLR = nextLR;
+                psuedoRel = TILE_HEIGHT;
+            }
 
         }
 
