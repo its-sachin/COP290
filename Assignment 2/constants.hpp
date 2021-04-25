@@ -28,3 +28,5 @@ const string IMAGES_PATH = "Assets/Images";
 const string MAPS_PATH = "Assets/Maps";
 const string SOUND_PATH = "Assets/Sounds";
 const string TEXT_PATH = "Assets/Text";
+
+const int DIE_STOP = 3500;

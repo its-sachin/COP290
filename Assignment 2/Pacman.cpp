@@ -79,7 +79,7 @@ class Pacman: public Game, public TextureSet{
 
         int backCurr = 0;
         int sparkCurr = 225;
-        int sciCurr = 140;
+        int sciCurr = 0;
         int base = movableBG.getWidth();
 
         while (isRunning && !selected) {
@@ -114,7 +114,7 @@ class Pacman: public Game, public TextureSet{
 
             if (backCurr%10 ==0 ){
 
-                sciCurr = sciCurr%63 + 140;
+                sciCurr = (sciCurr + 1)%71;
                 sparkCurr = sparkCurr%51 + 225;
             }
 
