@@ -19,7 +19,7 @@ using namespace std;
 
 class Server{
     private:
-    int portNum=8080;
+    int portNum=8000;
     char message[1024];
     sockaddr_in servAddr;
     sockaddr_in clientAddr;
@@ -69,8 +69,12 @@ class Server{
         setMessage(s);
         send(clientSd, (char*)&message,strlen(message),0);
     }
-    void recieveMessage(){
+    string recieveMessage(){
         memset(&message,0,sizeof(message));
         recv(clientSd,(char*)&message,sizeof(message),0);
+        string s;
+        strcpy(message,s.c_str());
+        cout<<s<<endl;
+        return s;
     }
 };

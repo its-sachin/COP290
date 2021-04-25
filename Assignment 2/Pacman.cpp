@@ -1,4 +1,6 @@
 #include "Enemy.cpp"
+#include "Server.cpp"
+#include "Client.cpp"
 
 
 
@@ -7,6 +9,7 @@ class Pacman: public Game, public TextureSet{
     private:
     Player *Thanos = new Player(&player1Tex);
     Player *ThanosPast = new Player(&player2Tex);
+    bool type=true;
 
     Enemy *Blinky = new Enemy(&blinkyTex, "blinky");
     Enemy *Pinky = new Enemy(&pinkyTex, "pinky");
@@ -30,6 +33,8 @@ class Pacman: public Game, public TextureSet{
         } 
         return out;
     }
+    Server s;
+    Client c;
 
     public:
 
@@ -62,14 +67,26 @@ class Pacman: public Game, public TextureSet{
 
     void initMode() {
 
-        if (mode == Doffline || mode == Donline) {
+        if (mode == Doffline) {
             ThanosPast->setBounds(map->getHeight(),map->getWidth());
             ThanosPast->setInitTile(map->getPlayerInit());
 
             Inky->setID("blinky");
             Clyde->setID("pinky");
         }
+        if (mode == Donline){
+            if (type){
+                s.innit();
+            }
+            else {
+                c.innit();
+            }
+            ThanosPast->setBounds(map->getHeight(),map->getWidth());
+            ThanosPast->setInitTile(map->getPlayerInit());
 
+            Inky->setID("blinky");
+            Clyde->setID("pinky");
+        }
     }
 
     void mainMenu() {
@@ -242,22 +259,26 @@ class Pacman: public Game, public TextureSet{
     }
 
     void setMovement() {
-        if (event.type == SDL_KEYDOWN) {
+        if (event.type == SDL_KEYDOWN && type) {
 
             switch (event.key.keysym.sym){
             case SDLK_UP:
+                s.sendMessage("up");
                 Thanos->update(MOVE_UP,map);           
                 break;
 
             case SDLK_DOWN:
-                Thanos->update(MOVE_DOWN,map);                  
+                s.sendMessage("down");
+                Thanos->update(MOVE_DOWN,map);                
                 break;
 
             case SDLK_RIGHT:
+                s.sendMessage("right");
                 Thanos->update(MOVE_RIGHT,map);
                 break;
 
             case SDLK_LEFT:
+                s.sendMessage("left");
                 Thanos->update(MOVE_LEFT,map);              
                 break;
 
@@ -285,6 +306,54 @@ class Pacman: public Game, public TextureSet{
                 }              
                 break;
             }
+            if (c.recieveMessage()=="up"){
+                ThanosPast->update(MOVE_UP,map);                 
+            }
+            else if (c.recieveMessage()=="down"){
+                ThanosPast->update(MOVE_DOWN,map);                 
+            }
+            else if (c.recieveMessage()=="right"){
+                ThanosPast->update(MOVE_RIGHT,map);                 
+            }
+            else if (c.recieveMessage()=="left"){
+                ThanosPast->update(MOVE_LEFT,map);                 
+            }
+        }
+        else if (event.type == SDL_KEYDOWN && !type) {
+
+            switch (event.key.keysym.sym){
+            case SDLK_UP:
+                c.sendMessage("up");
+                ThanosPast->update(MOVE_UP,map);           
+                break;
+
+            case SDLK_DOWN:
+                c.sendMessage("down");
+                ThanosPast->update(MOVE_DOWN,map);                
+                break;
+
+            case SDLK_RIGHT:
+                c.sendMessage("right");
+                ThanosPast->update(MOVE_RIGHT,map);
+                break;
+
+            case SDLK_LEFT:
+                c.sendMessage("left");
+                ThanosPast->update(MOVE_LEFT,map);              
+                break;
+            }
+            if (s.recieveMessage()=="up"){
+                Thanos->update(MOVE_UP,map);                 
+            }
+            else if (c.recieveMessage()=="down"){
+                Thanos->update(MOVE_DOWN,map);                 
+            }
+            else if (c.recieveMessage()=="right"){
+                Thanos->update(MOVE_RIGHT,map);                 
+            }
+            else if (c.recieveMessage()=="left"){
+                Thanos->update(MOVE_LEFT,map);                 
+            }
         }
     }
 
@@ -303,6 +372,10 @@ class Pacman: public Game, public TextureSet{
 
             case SDLK_o:
                 mode = Donline;           
+                return true;
+            case SDLK_c:
+                mode=Donline;
+                type=false;
                 return true;
             }
         }

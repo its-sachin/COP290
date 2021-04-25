@@ -21,7 +21,7 @@ class Client{
     private:
 
     char* serverIp="127.1.0.0";
-    int portNum=8080;
+    int portNum=8000;
     char message[1024];
     struct hostent* host;
     sockaddr_in sendAddr;
@@ -61,9 +61,13 @@ class Client{
         send(clientSd,(char*)&message,strlen(message),0);
     }
 
-    void recieveMessage(){
+    string recieveMessage(){
         memset(&message,0,sizeof(message));
         recv(clientSd,(char*)&message,sizeof(message),0);
+        string s;
+        strcpy(message,s.c_str());
+        cout<<s<<endl;
+        return s;
     }
 
 
