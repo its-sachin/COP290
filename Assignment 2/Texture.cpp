@@ -113,6 +113,11 @@ public:
         SDL_RenderCopy(renderer, texture, clip,&dest);
     }
 
+    void setAlpha( Uint8 alpha ){
+
+        SDL_SetTextureAlphaMod( texture, alpha );
+    }
+
     void free() {
 
         if (texture != NULL) {

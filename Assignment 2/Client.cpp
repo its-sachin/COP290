@@ -66,7 +66,7 @@ class Client{
         recv(clientSd,(char*)&message,sizeof(message),0);
         string s;
         strcpy(message,s.c_str());
-        cout<<s<<endl;
+        // cout<<s<<endl;
         return s;
     }
 

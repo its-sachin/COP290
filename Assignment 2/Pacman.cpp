@@ -1,4 +1,4 @@
-#include "Enemy.cpp"
+#include "Button.cpp"
 #include "Server.cpp"
 #include "Client.cpp"
 
@@ -87,72 +87,11 @@ class Pacman: public Game, public TextureSet{
             Inky->setID("blinky");
             Clyde->setID("pinky");
         }
-    }
 
-    void mainMenu() {
-        
-        Uint32 start;
-        int spend;
-
-        int backCurr = 0;
-        int sparkCurr = 225;
-        int sciCurr = 0;
-        int base = movableBG.getWidth();
-
-        while (isRunning && !selected) {
-
-            start = SDL_GetTicks();
-
-            eventManager(&event);
-
-            SDL_SetRenderDrawColor(renderer, 0,0,0,255);
-            SDL_RenderClear(renderer);
-
-            movableBG.renderWM(0,0,&backRect);
-            backCurr += 1;
-            if (backCurr == base) {
-                backCurr = 0;
-            }
-            
-            backRect.x = backCurr;
-
-            logoTex.renderWM(220,100);
-            menuFont.renderWM(100,350);
-            gameTex.renderWM((WIN_WIDTH-gameTex.getWidth())/2, WIN_HEIGHT-gameTex.getHeight());
-
-            // SDL_Rect a = {0,0,300,250};
-            // player2Tex.renderWM(500,300, &a);
-
-            sciTex.Load(IMAGES_PATH + "/sci/" + balStr(sciCurr) + ".png");
-            sciTex.renderWM(500,300);
-
-            sparkTex.Load(IMAGES_PATH + "/spark/" + balStr(sparkCurr) + ".png");
-            sparkTex.renderWM(275,595);
-
-            if (backCurr%10 ==0 ){
-
-                sciCurr = (sciCurr + 1)%71;
-                sparkCurr = sparkCurr%51 + 225;
-            }
-
-            SDL_RenderPresent(renderer);
-
-            selected = selecMenu();
-
-            
-
-            while (FRAME_DELAY > spend) {
-                
-                eventManager(&event);
-
-                spend = SDL_GetTicks() - start;
-            }
-        }
         Blinky->setOffset(SDL_GetTicks()/1000);
         Inky->setOffset(SDL_GetTicks()/1000);
         Pinky->setOffset(SDL_GetTicks()/1000);
         Clyde->setOffset(SDL_GetTicks()/1000);
-        initMode();
     }
 
 
@@ -356,8 +295,99 @@ class Pacman: public Game, public TextureSet{
             }
         }
     }
+    
+    void mainMenu() {
+        
+        Uint32 start;
+        int spend;
 
-    bool selecMenu() {
+        int backCurr = 0;
+        int sparkCurr = 225;
+        int sciCurr = 0;
+        int base = movableBG.getWidth();
+
+        Button *menuText[3];
+        string names[3] = {"Single Player [s]", "Two Player [d]", "Online [o]"};
+
+        for (int i=0; i< 3; i++) {
+            menuText[i] = new Button(150,75*i + 325,&modeTex);
+            loadWord(menuText[i]->getFont(), names[i]);
+        }
+        
+
+        while (isRunning && !selected) {
+
+            start = SDL_GetTicks();
+
+            eventManager(&event);
+
+            SDL_SetRenderDrawColor(renderer, 0,0,0,255);
+            SDL_RenderClear(renderer);
+
+
+
+            movableBG.renderWM(0,0,&backRect);
+            backCurr += 1;
+            if (backCurr == base) {
+                backCurr = 0;
+            }
+            
+            backRect.x = backCurr;
+
+            logoTex.renderWM(220,100);
+            gameTex.renderWM((WIN_WIDTH-gameTex.getWidth())/2, WIN_HEIGHT-gameTex.getHeight());
+
+            sciTex.Load(IMAGES_PATH + "/sci/" + balStr(sciCurr) + ".png");
+            sciTex.renderWM(500,300);
+
+            sparkTex.Load(IMAGES_PATH + "/spark/" + balStr(sparkCurr) + ".png");
+            sparkTex.renderWM(275,595);
+
+            if (backCurr%10 ==0 ){
+
+                sciCurr = (sciCurr + 1)%71;
+                sparkCurr = sparkCurr%51 + 225;
+            }
+
+            for (int i=0; i<3; i++) {
+                menuText[i]->handleEvent(&event);
+            }
+
+            SDL_RenderPresent(renderer);
+
+
+            selected = selecMenu(menuText);
+
+            while (FRAME_DELAY > spend) {
+                
+                eventManager(&event);
+
+                spend = SDL_GetTicks() - start;
+            }
+        }
+
+        for (int i=0; i<3; i++) {
+            menuText[i]->~Button();
+        }
+        initMode();
+    }
+
+    bool selecMenu(Button** menuText) {
+
+        if (menuText[0]->isSelected()){
+            mode = Single;
+            return true;
+        }
+
+        else if (menuText[1]->isSelected()){
+            mode = Doffline;
+            return true;
+        }
+
+        else if (menuText[2]->isSelected()){
+            mode = Donline;
+            return true;
+        }
 
         if (event.type == SDL_KEYDOWN) {
 
@@ -373,6 +403,7 @@ class Pacman: public Game, public TextureSet{
             case SDLK_o:
                 mode = Donline;           
                 return true;
+
             case SDLK_c:
                 mode=Donline;
                 type=false;

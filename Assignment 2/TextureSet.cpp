@@ -19,11 +19,11 @@ protected:
     score1Tex,
     score2Tex,
     gameTex,
-    menuFont,
     logoTex,
     movableBG,
     sciTex,
     sparkTex,
+    modeTex,
     scoreBackTex;
 
     TTF_Font *font = NULL;
@@ -63,7 +63,11 @@ public:
         gameTex.Load(path + "/gamePhoto.png");
         logoTex.Load(path + "/logo.bmp");
         movableBG.Load(path + "/back.jpg");
-        menuFont.Load("      --Select Mode--\n   Single Player [Press s]\nTwo Player Online [Press o]\nTwo Player Offline [Press d]",font,textColour);
+        modeTex.Load(path + "/mode.png");
+    }
+
+    void loadWord(Texture *texture,string word) {
+        texture->Load(word,font,textColour);
     }
 
     void renderScore1(int score, int x, int y) {
@@ -95,8 +99,8 @@ public:
         score1Tex.free();
         score2Tex.free();
         gameTex.free();
-        menuFont.free();
         logoTex.free();
+        modeTex.free();
 
         TTF_CloseFont(font);
         TTF_Quit();
