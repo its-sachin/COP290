@@ -20,10 +20,12 @@ class Pacman: public Game, public TextureSet{
 
     PlayMode mode = Single;
 
-    SDL_Rect lifeRect = {0,0,30,30};
+    SDL_Rect life1 = {0,0,20,20};
+    SDL_Rect life2 = {20,0,20,20};
     SDL_Rect backRect = {0,0,WIN_WIDTH,WIN_HEIGHT};
 
     bool selected = false;
+    bool paused = false;
 
     string balStr(int n) {
         string out = to_string(n);
@@ -127,17 +129,35 @@ class Pacman: public Game, public TextureSet{
 
     void update() {
 
-        setMovement();
-        Blinky->update(map, Thanos,NULL);
-        Pinky->update(map, Thanos,Blinky);
+        if (!paused) {
 
-        if (mode ==Single) {
-            Inky->update(map, Thanos,Blinky);
-            Clyde->update(map, Thanos,Blinky);
+            setMovement();
+            Blinky->update(map, Thanos,NULL);
+            Pinky->update(map, Thanos,Blinky);
+
+            if (mode ==Single) {
+                Inky->update(map, Thanos,Blinky);
+                Clyde->update(map, Thanos,Blinky);
+            }
+            else if (mode == Doffline|| mode == Donline) {
+                Inky->update(map, ThanosPast,NULL);
+                Clyde->update(map, ThanosPast,Inky);
+            }
+
         }
-        else if (mode == Doffline|| mode == Donline) {
-            Inky->update(map, ThanosPast,NULL);
-            Clyde->update(map, ThanosPast,Inky);
+
+        else {
+            if (event.type == SDL_KEYDOWN && type) {
+
+                switch (event.key.keysym.sym){
+                
+                case SDLK_ESCAPE:
+                    paused = false;
+                    break;
+                
+                }
+            }
+
         }
         
     }
@@ -184,16 +204,16 @@ class Pacman: public Game, public TextureSet{
         renderScore2(Thanos->getScore(), 85,60);
 
         for (int i=0; i< Thanos->getLifeLeft(); i++) {
-            player1Tex.renderWM(40*i +150,40,&lifeRect);
+            playerShow.renderWM(40*i +200,45,&life1);
         }
 
         if (mode ==Doffline || mode == Donline) {
             scoreBackTex.renderWM(WIN_WIDTH - (scoreBackTex.getWidth() +5) ,10, NULL, SDL_FLIP_HORIZONTAL);
             renderScore2(ThanosPast->getScore(), WIN_WIDTH - 110,60);
 
-            // for (int i=0; i< Thanos->getLifeLeft(); i++) {
-            //     player2Tex.renderWM(40*i +150,37,&lifeRect);
-            // }
+            for (int i=0; i< Thanos->getLifeLeft(); i++) {
+                playerShow.renderWM(WIN_WIDTH- (40*i +200),47,&life2);
+            }
         }
     }
 
@@ -201,6 +221,11 @@ class Pacman: public Game, public TextureSet{
         if (event.type == SDL_KEYDOWN && type) {
 
             switch (event.key.keysym.sym){
+            
+            case SDLK_ESCAPE:
+                paused = true;
+                break;
+
             case SDLK_UP:
                 s.sendMessage("up");
                 Thanos->update(MOVE_UP,map);           

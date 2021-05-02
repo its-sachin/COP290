@@ -314,15 +314,8 @@ public:
             else if (currstate==1){
                 st=SDL_GetTicks()/1000-offset;
                 if (P->getcurrTile() == currTile) {
-                    Uint32 start1 = SDL_GetTicks();
 
                     P->die();
-
-                    int spend1 = SDL_GetTicks() - start1;
-
-                    if (3500 > spend1) {
-                        SDL_Delay(3500- spend1);
-                    }
                 }
                 if (st==stime[levels]){
                     state=2;        
@@ -334,15 +327,9 @@ public:
                 ct=SDL_GetTicks()/1000-offset;
                 if (P->getcurrTile() == currTile) {
                     
-                    Uint32 start1 = SDL_GetTicks();
 
                     P->die();
 
-                    int spend1 = SDL_GetTicks() - start1;
-
-                    if (3500 > spend1) {
-                        SDL_Delay(3500- spend1);
-                    }
                 }
                 if (ct==ctime[levels]){
                     state=1;

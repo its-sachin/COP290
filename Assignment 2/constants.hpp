@@ -22,7 +22,7 @@ const int TILE_HEIGHT = 35;
 
 const int TEXT_SIZE = 20;
 
-const float SPEED = 5;
+const float SPEED = 4;
 
 const string IMAGES_PATH = "Assets/Images";
 const string MAPS_PATH = "Assets/Maps";

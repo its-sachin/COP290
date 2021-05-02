@@ -6,8 +6,8 @@ class Player : public Gamer{
 private:
 
     int score = 0;
-    int maxLife = 3;
-    int lifeLeft = 3;
+    int maxLife = 5;
+    int lifeLeft = 5;
 
     bool alive = true;
     Stone stone = NONE;
