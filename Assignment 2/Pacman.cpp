@@ -22,10 +22,16 @@ class Pacman: public Game, public TextureSet{
 
     SDL_Rect life1 = {0,0,20,20};
     SDL_Rect life2 = {20,0,20,20};
+    SDL_Rect optionsRect[3] = {{0,0,50,50},{50,0,50,50},{100,0,50,50}};
     SDL_Rect backRect = {0,0,WIN_WIDTH,WIN_HEIGHT};
 
     bool selected = false;
     bool paused = false;
+
+    bool escDown = false;
+
+    Uint32 pauseStart = 0;
+    int pauseTime = 0;
 
     string balStr(int n) {
         string out = to_string(n);
@@ -38,12 +44,19 @@ class Pacman: public Game, public TextureSet{
     Server s;
     Client c;
 
+    Button *pauseBtn[3];
+
     public:
 
     SDL_Event event;
 
 
     void init() {
+
+        selected = false;
+        paused = false;
+
+        escDown = false;
 
         const char* temp = WIN_NAME.c_str();
         Game::init(temp,SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,WIN_WIDTH,WIN_HEIGHT);
@@ -116,6 +129,11 @@ class Pacman: public Game, public TextureSet{
             ThanosPast->render();
         }
 
+        if (paused) {
+            renderPause();
+        }
+
+
         SDL_RenderPresent(renderer);
 
         int spend = SDL_GetTicks() - start;
@@ -127,57 +145,14 @@ class Pacman: public Game, public TextureSet{
         }
     }
 
-    void update() {
+    void renderPause() {
+        pauseTex.renderWM(100,300);
 
-        if (!paused) {
-
-            setMovement();
-            Blinky->update(map, Thanos,NULL);
-            Pinky->update(map, Thanos,Blinky);
-
-            if (mode ==Single) {
-                Inky->update(map, Thanos,Blinky);
-                Clyde->update(map, Thanos,Blinky);
-            }
-            else if (mode == Doffline|| mode == Donline) {
-                Inky->update(map, ThanosPast,NULL);
-                Clyde->update(map, ThanosPast,Inky);
-            }
-
+        for (int i=0; i<3; i++) {
+            pauseBtn[i]->handleEventWT(&event,&optionsRect[i]);
         }
 
-        else {
-            if (event.type == SDL_KEYDOWN && type) {
-
-                switch (event.key.keysym.sym){
-                
-                case SDLK_ESCAPE:
-                    paused = false;
-                    break;
-                
-                }
-            }
-
-        }
-        
     }
-
-    void clean() {
-        freeTex();
-
-        Thanos->~Player();
-        ThanosPast->~Player();
-
-        map->~Map();
-
-        Blinky->~Enemy();
-        Pinky->~Enemy();
-        Inky->~Enemy();
-        Clyde->~Enemy();
-
-        Game::clean();
-    }
-
 
     void renderBack() {
 
@@ -217,13 +192,128 @@ class Pacman: public Game, public TextureSet{
         }
     }
 
+    void update() {
+
+        if (!paused) {
+
+            setMovement();
+            Blinky->update(map, Thanos,NULL);
+            Pinky->update(map, Thanos,Blinky);
+
+            if (mode ==Single) {
+                Inky->update(map, Thanos,Blinky);
+                Clyde->update(map, Thanos,Blinky);
+            }
+            else if (mode == Doffline|| mode == Donline) {
+                Inky->update(map, ThanosPast,NULL);
+                Clyde->update(map, ThanosPast,Inky);
+            }
+
+            // this we've to look upon.....pausing 1 tile before!!(maybe have to review when to call p->die())
+
+            if (Thanos->justDied) {
+                Thanos->justDied = false;
+
+                Uint32 start = SDL_GetTicks();
+
+                int spend = SDL_GetTicks() - start;
+
+                while (spend < 3500) {
+                    spend = SDL_GetTicks() - start;
+
+                    eventManager(&event);
+
+                    if (!isRunning){break;}
+                }
+            }
+
+        }
+
+        else {
+            pauseTime = SDL_GetTicks() - pauseStart;
+
+
+            if (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_ESCAPE && escDown) {
+
+                for (int i=0; i<3; i++) {
+                    pauseBtn[i]->~Button();
+                }
+
+                paused = false;
+                escDown = false;
+                
+            }
+
+            else if (event.type == SDL_KEYDOWN && type && event.key.keysym.sym == SDLK_ESCAPE) {
+                escDown = true;
+            }
+
+            if (pauseBtn[0]->isSelected()) {
+                for (int i=0; i<3; i++) {
+                    pauseBtn[i]->~Button();
+                }
+
+                paused = false;
+                escDown = false;
+                pauseBtn[0]->deselect();
+            }
+
+            else if (pauseBtn[1]->isSelected()){
+                //restart
+                pauseBtn[1]->deselect();
+            }
+
+            else if (pauseBtn[2]->isSelected()) {
+
+                pauseBtn[2]->deselect();
+
+                for (int i=0; i<3; i++) {
+                    pauseBtn[i]->~Button();
+                }
+
+                isRunning = false;
+            }
+
+        }
+        
+    }
+
+    void clean() {
+        freeTex();
+
+        Thanos->~Player();
+        ThanosPast->~Player();
+
+        map->~Map();
+
+        Blinky->~Enemy();
+        Pinky->~Enemy();
+        Inky->~Enemy();
+        Clyde->~Enemy();
+
+        Game::clean();
+    }
+
+
     void setMovement() {
+        if (event.type == SDL_KEYUP && type && event.key.keysym.sym == SDLK_ESCAPE && escDown) {
+            paused = true;
+            pauseStart = SDL_GetTicks();
+            pauseTime = 0;
+            escDown = false;
+
+            for (int i=0; i< 3; i++) {
+                pauseBtn[i] = new Button(100*i + 300,500,&optionTex);
+                pauseBtn[i]->setDimen(50,50);
+            }
+        }
+
         if (event.type == SDL_KEYDOWN && type) {
 
             switch (event.key.keysym.sym){
             
             case SDLK_ESCAPE:
-                paused = true;
+                escDown = true;
                 break;
 
             case SDLK_UP:
@@ -401,16 +491,19 @@ class Pacman: public Game, public TextureSet{
 
         if (menuText[0]->isSelected()){
             mode = Single;
+            menuText[0]->deselect();
             return true;
         }
 
         else if (menuText[1]->isSelected()){
             mode = Doffline;
+            menuText[1]->deselect();
             return true;
         }
 
         else if (menuText[2]->isSelected()){
             mode = Donline;
+            menuText[2]->deselect();
             return true;
         }
 

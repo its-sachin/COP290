@@ -30,30 +30,59 @@ public:
 
     bool isSelected() {return selected;} 
 
+    void deselect() {selected = false;}
+
+    void setDimen(int w, int h) {
+        width = w;
+        height = h;
+    }
+
     Texture *getFont() {
         return &font;
     }
 
     void handleEvent( SDL_Event* e){
 
-            int x, y;
-            SDL_GetMouseState( &x, &y );
+        int x, y;
+        SDL_GetMouseState( &x, &y );
 
-            if( x < position.x ||  x > position.x + width || y < position.y || y > position.y + height){
+        if( x < position.x ||  x > position.x + width || y < position.y || y > position.y + height){
 
-                texture->setAlpha(175);
+            texture->setAlpha(175);
+        }
+
+        else{
+
+            texture->setAlpha(255);
+            if ( e->type == SDL_MOUSEBUTTONDOWN){
+
+                selected = true;
             }
+        }
+        texture->renderWM(position.x,position.y);
+        font.renderWM(position.x+20,position.y+7);
+    }
 
-            else{
+    void handleEventWT(SDL_Event *e, SDL_Rect *clip =NULL) {
 
-                texture->setAlpha(255);
-                if ( e->type == SDL_MOUSEBUTTONDOWN){
+        int x, y;
+        SDL_GetMouseState( &x, &y );
 
-                    selected = true;
-                }
+        if( x < position.x ||  x > position.x + width || y < position.y || y > position.y + height){
+
+            texture->setAlpha(175);
+        }
+
+        else{
+
+            texture->setAlpha(255);
+            if ( e->type == SDL_MOUSEBUTTONDOWN){
+
+                selected = true;
             }
-            texture->renderWM(position.x,position.y);
-            font.renderWM(position.x+20,position.y+7);
+        }
+        texture->renderWM(position.x,position.y,clip);
+
     }
 
 };

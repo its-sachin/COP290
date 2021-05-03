@@ -25,6 +25,8 @@ protected:
     sparkTex,
     modeTex,
     playerShow,
+    pauseTex,
+    optionTex,
     scoreBackTex;
 
     TTF_Font *font = NULL;
@@ -66,6 +68,8 @@ public:
         movableBG.Load(path + "/back.jpg");
         modeTex.Load(path + "/mode.png");
         playerShow.Load(path + "/playerShow.png");
+        pauseTex.Load(path + "/pause.png");
+        optionTex.Load(path + "/options.png");
     }
 
     void loadWord(Texture *texture,string word) {
@@ -104,6 +108,8 @@ public:
         logoTex.free();
         modeTex.free();
         playerShow.free();
+        pauseTex.free();
+        optionTex.free();
 
         TTF_CloseFont(font);
         TTF_Quit();

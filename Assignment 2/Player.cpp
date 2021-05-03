@@ -14,6 +14,8 @@ private:
 
 public: 
 
+    bool justDied = false;
+
 
     Player(Texture *playerTex){
         texture = playerTex;
@@ -132,6 +134,8 @@ public:
         currUD = FRONT;
         currLR = LEFT;
         animating  = false;
+
+        justDied = true;
     }
 
 
