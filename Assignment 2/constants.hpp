@@ -22,6 +22,8 @@ const int TILE_HEIGHT = 35;
 
 const int TEXT_SIZE = 20;
 
+const int MAX_LIFE = 0;
+
 const float SPEED = 4;
 
 const string IMAGES_PATH = "Assets/Images";

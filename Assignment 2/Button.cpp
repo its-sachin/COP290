@@ -85,4 +85,8 @@ public:
 
     }
 
+    void renderOT() {
+        font.renderWM(position.x+20,position.y+7);
+    }
+
 };

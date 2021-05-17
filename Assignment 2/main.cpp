@@ -16,7 +16,10 @@ int main(int argc, char const *argv[])
 
         game->eventManager(&game->event);
         game->update();
-        game->render();
+
+        if (game->isOn() && !game->isRestarted()) {
+            game->render();
+        }
 
         spend = SDL_GetTicks() - start;
 

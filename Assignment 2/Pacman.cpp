@@ -29,6 +29,8 @@ class Pacman: public Game, public TextureSet{
     bool paused = false;
 
     bool escDown = false;
+    bool restarted = false;
+    bool finished = false;
 
     Uint32 pauseStart = 0;
     int pauseTime = 0;
@@ -53,13 +55,20 @@ class Pacman: public Game, public TextureSet{
 
     void init() {
 
-        selected = false;
-        paused = false;
-
-        escDown = false;
-
         const char* temp = WIN_NAME.c_str();
         Game::init(temp,SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,WIN_WIDTH,WIN_HEIGHT);
+        start();
+
+    }
+
+    void start() {
+
+        selected = false;
+        paused = false;
+        restarted = false;
+        escDown = false;
+        finished = false;
+
         if (isRunning) {
 
             loadTex(IMAGES_PATH);
@@ -133,6 +142,10 @@ class Pacman: public Game, public TextureSet{
             renderPause();
         }
 
+        if (finished) {
+            renderFinish();
+        }
+
 
         SDL_RenderPresent(renderer);
 
@@ -152,6 +165,15 @@ class Pacman: public Game, public TextureSet{
             pauseBtn[i]->handleEventWT(&event,&optionsRect[i]);
         }
 
+    }
+
+    void renderFinish() {
+        pauseTex.renderWM(100,300);
+
+        pauseBtn[0]->renderOT();
+        for (int i=1; i<3; i++) {
+            pauseBtn[i]->handleEventWT(&event,&optionsRect[i]);
+        }
     }
 
     void renderBack() {
@@ -194,42 +216,36 @@ class Pacman: public Game, public TextureSet{
 
     void update() {
 
-        if (!paused) {
+        if (restarted) {
+            start();
+        }
 
-            setMovement();
-            Blinky->update(map, Thanos,NULL);
-            Pinky->update(map, Thanos,Blinky);
+        if (finished) {
 
-            if (mode ==Single) {
-                Inky->update(map, Thanos,Blinky);
-                Clyde->update(map, Thanos,Blinky);
-            }
-            else if (mode == Doffline|| mode == Donline) {
-                Inky->update(map, ThanosPast,NULL);
-                Clyde->update(map, ThanosPast,Inky);
-            }
+            if (pauseBtn[1]->isSelected()){
 
-            // this we've to look upon.....pausing 1 tile before!!(maybe have to review when to call p->die())
+                restarted = true;
 
-            if (Thanos->justDied) {
-                Thanos->justDied = false;
-
-                Uint32 start = SDL_GetTicks();
-
-                int spend = SDL_GetTicks() - start;
-
-                while (spend < 3500) {
-                    spend = SDL_GetTicks() - start;
-
-                    eventManager(&event);
-
-                    if (!isRunning){break;}
+                pauseBtn[1]->deselect();
+                for (int i=0; i<3; i++) {
+                    pauseBtn[i]->~Button();
                 }
+            }
+
+            else if (pauseBtn[2]->isSelected()) {
+
+                pauseBtn[2]->deselect();
+
+                for (int i=0; i<3; i++) {
+                    pauseBtn[i]->~Button();
+                }
+
+                isRunning = false;
             }
 
         }
 
-        else {
+        else if (paused){
             pauseTime = SDL_GetTicks() - pauseStart;
 
 
@@ -259,8 +275,13 @@ class Pacman: public Game, public TextureSet{
             }
 
             else if (pauseBtn[1]->isSelected()){
-                //restart
+
+                restarted = true;
+
                 pauseBtn[1]->deselect();
+                for (int i=0; i<3; i++) {
+                    pauseBtn[i]->~Button();
+                }
             }
 
             else if (pauseBtn[2]->isSelected()) {
@@ -272,6 +293,85 @@ class Pacman: public Game, public TextureSet{
                 }
 
                 isRunning = false;
+            }
+        }
+
+        else{
+
+
+            setMovement();
+            Blinky->update(map, Thanos,NULL);
+            Pinky->update(map, Thanos,Blinky);
+
+            if (mode ==Single) {
+                Inky->update(map, Thanos,Blinky);
+                Clyde->update(map, Thanos,Blinky);
+            }
+            else if (mode == Doffline|| mode == Donline) {
+                Inky->update(map, ThanosPast,NULL);
+                Clyde->update(map, ThanosPast,Inky);
+            }
+
+            // this we've to look upon.....pausing 1 tile before!!(maybe have to review when to call p->die())
+
+            if (Thanos->justDied || ((mode == Doffline || mode == Donline) &&ThanosPast->justDied)) {
+                Thanos->justDied = false;
+                ThanosPast->justDied = false;
+
+
+                if (Thanos->getLifeLeft() < 0 || ((mode == Doffline || mode == Donline) && ThanosPast->getLifeLeft() < 0)){
+                    finished = true;
+
+                    string message;
+                    int x;
+
+                    if (Thanos->getLifeLeft() < 0) {
+                        if (mode == Single){
+                            message = "YOU LOOSE";
+                            x = 350;
+                        }
+
+                        else {
+                            if (ThanosPast->getLifeLeft() >= 0) {
+                                message = "PAST THANOS WON";
+                                x = 300;
+                            }
+
+                            else {
+                                message = "ITS A DRAW";
+                                x = 330;
+                            }
+                        }
+                    }
+
+                    else {
+                        if (mode == Donline || mode == Doffline) {
+                            message = "PRESENT THANOS WON";
+                            x = 270;
+                        }
+                    }
+
+                    pauseBtn[0] = new Button(x,450,&movableBG);
+                    loadWord(pauseBtn[0]->getFont(), message);
+
+                    for (int i=1; i< 3; i++) {
+                        pauseBtn[i] = new Button(150*(i-1) + 340,550,&optionTex);
+                        pauseBtn[i]->setDimen(50,50);
+                    }
+                }
+
+                Uint32 start = SDL_GetTicks();
+
+                int spend = SDL_GetTicks() - start;
+
+                while (spend < 3500) {
+                    spend = SDL_GetTicks() - start;
+
+                    eventManager(&event);
+
+                    if (!isRunning){break;}
+                }
+
             }
 
         }
@@ -294,6 +394,9 @@ class Pacman: public Game, public TextureSet{
         Game::clean();
     }
 
+    bool isRestarted() {
+        return restarted;
+    }
 
     void setMovement() {
         if (event.type == SDL_KEYUP && type && event.key.keysym.sym == SDLK_ESCAPE && escDown) {
