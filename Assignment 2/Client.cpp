@@ -20,54 +20,45 @@ using namespace std;
 class Client{
     private:
 
-    char* serverIp="127.1.0.0";
-    int portNum=8000;
-    char message[1024];
-    struct hostent* host;
-    sockaddr_in sendAddr;
-    socklen_t sendAddrSize;
-    int clientSd,status;
+    int sock = 0, valread;
+    struct sockaddr_in serv_addr;
+    char buffer[1024];
     public: 
 
-    ~Client(){
-        close(clientSd);
-    }
-    void setIp(string s){
-        serverIp=const_cast<char*>(s.c_str());
-    }
-    void setPort(int p){
-        portNum=p;
-    }
-    void setMessage(string s){
-        memset(&message, 0, sizeof(message));
-        strcpy(message,s.c_str());
-    }
     void innit(){
-        host=gethostbyname(serverIp);
-        sendAddrSize=sizeof(sendAddr);
-        bzero((char*)&sendAddr,sendAddrSize);
-        sendAddr.sin_family=AF_INET;
-        sendAddr.sin_addr.s_addr=inet_addr(inet_ntoa(*(struct in_addr*)*host->h_addr_list));
-        sendAddr.sin_port = htons(portNum);
-        clientSd = socket(AF_INET, SOCK_STREAM, 0);
-        status=connect(clientSd,(sockaddr*) &sendAddr, sendAddrSize);
-        if (status<0){
-            cerr<<"Error connecting to socket!"<<endl; return ;
+        if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+        {
+            printf("\n Socket creation error \n");
+            return ;
+        }
+    
+        serv_addr.sin_family = AF_INET;
+        serv_addr.sin_port = htons(PORT);
+        
+        if(inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)<=0) 
+        {
+            printf("\nInvalid address/ Address not supported \n");
+            return ;
+        }
+    
+        if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+        {
+            printf("\nConnection Failed \n");
+            return ;
         }
     }
 
-    void sendMessage(string s){
-        setMessage(s);
-        send(clientSd,(char*)&message,strlen(message),0);
+    void sendMessage(const char* s){
+        send(sock , s , strlen(s)*sizeof(char) , 0 );
+        cout<<"sendc: " <<s<<endl;
     }
 
     string recieveMessage(){
-        memset(&message,0,sizeof(message));
-        recv(clientSd,(char*)&message,sizeof(message),0);
-        string s;
-        strcpy(message,s.c_str());
-        // cout<<s<<endl;
-        return s;
+        valread = recv( sock , buffer, 1024,0);
+        string s(buffer);
+        // strcpy(buffer,s.c_str());
+        cout<<"recievec: "<<s<<endl;
+        return s.substr(0,valread);
     }
 
 
