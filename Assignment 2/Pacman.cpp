@@ -313,7 +313,6 @@ class Pacman: public Game, public TextureSet{
                 Inky->update(map, ThanosPast,NULL);
                 Clyde->update(map, ThanosPast,Inky);
             }
-
             // this we've to look upon.....pausing 1 tile before!!(maybe have to review when to call p->die())
             if (Thanos->justDied || ((mode == Doffline || mode == Donline) &&ThanosPast->justDied)) {
                 Thanos->justDied = false;

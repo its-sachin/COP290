@@ -157,7 +157,7 @@ public:
         else if (currstate==1){
             nextDir= nextDirg(xCorner,yCorner,nextXX,nextYY,map);
             nextX=nextXX[nextDir];
-            nextY=nextYY[nextDir];    
+            nextY=nextYY[nextDir];   
             nextTile=map->getTile(nextX,nextY);
             initRel();
             currTile = nextTile;

@@ -55,15 +55,15 @@ class MapGenerate {
 private:
 
     int MAX_COIN = 256;
-    bool iselected = false;
-    bool pselected = false;
-    bool cselected = false;
-    bool bselected = false;
-    bool hselected = false;
     bool playerselected = false;
+    bool bselected = false;
+    bool nselected = false;
+    bool hselected = false;
+    bool cselected = false;
+    bool iselected = false;
     int numCoins = 0;
-    int pX; 
-    int pY;
+    //0p 1b 2n 3h 4c 5i
+    int store[6][2] = {-1}; 
 
     void initMap(Block Maze[DIMEN][DIMEN]) {
 
@@ -78,40 +78,81 @@ private:
         }
     }
 
-    char addChar(int x, int y) {
+    char isDone(int y, int x) {
+
+        if (playerselected && y == store[0][0] && x == store[0][1]) {
+            return 'p';
+        }
+
+        else if (bselected && y == store[1][0] && x == store[1][1]) {
+            return 'b';
+        }
+
+        else if (nselected && y == store[2][0] && x == store[2][1]) {
+            return 'n';
+        }
+
+        else if (hselected && y == store[3][0] && x == store[3][1]) {
+            return 'h';
+        }
+
+        else if (cselected && y == store[4][0] && x == store[4][1]) {
+            return 'c';
+        }
+
+        else if (iselected && y == store[5][0] && x == store[5][1]) {
+            return 'i';
+        }
+        return ' ';
+
+    }
+
+    char addChar(int y, int x) {
+
+        char curr = isDone(y,x);
+
+        if (curr != ' ') {
+            return curr;
+        }
 
         if (!playerselected) {
             playerselected = true;
-            pX = x;
-            pY = y;
+            store[0][0] = y;
+            store[0][1] = x;
             return 'p';
         }
 
-        else if (x == pX && y == pX) {
-            return 'p';
-        }
-
-        if (abs(pX-x) > 8 || abs(pY-y) > 8) {
+        if (abs(store[0][0]-y) > 8 || abs(store[0][1]-x) > 8) {
             if (!bselected) {
                 bselected = true;
+                store[1][0] = y;
+                store[1][1] = x;
                 return 'b';
             }
-            else if (!pselected) {
-                pselected = true;
+            else if (!nselected) {
+                nselected = true;
+                store[2][0] = y;
+                store[2][1] = x;
                 return 'n';
             }
 
             else if (!hselected) {
                 hselected = true;
+                store[3][0] = y;
+                store[3][1] = x;
                 return 'h';
             }
 
             else if (!cselected) {
                 cselected = true;
+                store[4][0] = y;
+                store[4][1] = x;
                 return 'c';
             }
             else if (!iselected) {
                 iselected = true;
+                store[5][0] = y;
+                store[5][1] = x;
                 return 'i';
             }
         }
@@ -147,9 +188,6 @@ private:
 
         stack<pair<int,int>> s;
 
-        int pX = x;
-        int pY = y;
-
         while(covered < n) {
 
             bool a = !Maze[y-2][x].isVisited() && Maze[y][x].isTop() && Maze[y-2][x].isBottom();
@@ -172,12 +210,12 @@ private:
 
                             Maze[y][x].unsetTop();
                             Maze[y-1][x].setVisited();
-                            Maze[y-1][x].setType(addChar(x,y));
+                            Maze[y-1][x].setType(addChar(y-1,x));
 
                             y -=2;
 
                             Maze[y][x].setVisited();
-                            Maze[y][x].setType(addChar(x,y));
+                            Maze[y][x].setType(addChar(y,x));
                             Maze[y][x].unsetBottom();
 
                         }
@@ -197,12 +235,12 @@ private:
 
                             Maze[y][x].unsetBottom();
                             Maze[y+1][x].setVisited();
-                            Maze[y+1][x].setType(addChar(x,y));
+                            Maze[y+1][x].setType(addChar(y+1,x));
 
                             y +=2;
 
                             Maze[y][x].setVisited();
-                            Maze[y][x].setType(addChar(x,y));
+                            Maze[y][x].setType(addChar(y,x));
                             Maze[y][x].unsetTop();
 
 
@@ -223,12 +261,12 @@ private:
 
                             Maze[y][x].unsetLeft();
                             Maze[y][x-1].setVisited();
-                            Maze[y][x-1].setType(addChar(x,y));
+                            Maze[y][x-1].setType(addChar(y,x-1));
 
                             x -=2;
 
                             Maze[y][x].setVisited();
-                            Maze[y][x].setType(addChar(x,y));
+                            Maze[y][x].setType(addChar(y,x));
                             Maze[y][x].unsetRight();
 
                         }
@@ -248,12 +286,12 @@ private:
 
                             Maze[y][x].unsetRight();
                             Maze[y][x+1].setVisited();
-                            Maze[y][x+1].setType(addChar(x,y));
+                            Maze[y][x+1].setType(addChar(y,x+1));
 
                             x +=2;
 
                             Maze[y][x].setVisited();
-                            Maze[y][x].setType(addChar(x,y));
+                            Maze[y][x].setType(addChar(y,x));
                             Maze[y][x].unsetLeft();
 
                         }
@@ -280,7 +318,7 @@ private:
 
         }
 
-        Maze[y][x].setType(addChar(x,y));
+        Maze[y][x].setType(addChar(y,x));
 
     }
 
