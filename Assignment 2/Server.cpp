@@ -14,6 +14,7 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <fstream>
+#include <sys/ioctl.h>
 #define PORT 8080
 
 using namespace std;
@@ -45,6 +46,9 @@ class Server{
         address.sin_family = AF_INET;
         address.sin_addr.s_addr = INADDR_ANY;
         address.sin_port = htons( PORT );
+        ulong optval =0;
+
+        int nRet= ioctl(server_fd,FIONBIO,&optval);
         
         // Forcefully attaching socket to the port 8080
         if (bind(server_fd, (struct sockaddr *)&address, 
@@ -70,9 +74,9 @@ class Server{
         cout<<"sends: " <<s<<endl;
     }
     string recieveMessage(){
-        valread = recv( new_socket , buffer, 1024,0);
+        valread = recv(new_socket , buffer, 1024,MSG_DONTWAIT);
         string s(buffer);
-        cout<<"recieves: "<<s<<endl;
+        cout<<"recieves: "<<s.substr(0,valread)<<endl;
         return s.substr(0,valread);
     }
 };

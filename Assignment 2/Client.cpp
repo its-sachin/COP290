@@ -55,10 +55,10 @@ class Client{
     }
 
     string recieveMessage(){
-        valread = recv( sock , buffer, 1024,0);
+        valread = recv(sock , buffer, 1024,MSG_DONTWAIT);
         string s(buffer);
         // strcpy(buffer,s.c_str());
-        cout<<"recievec: "<<s<<endl;
+        cout<<"recievec: "<<s.substr(0,valread)<<endl;
         return s.substr(0,valread);
     }
 

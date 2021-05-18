@@ -31,6 +31,7 @@ class Pacman: public Game, public TextureSet{
     bool escDown = false;
     bool restarted = false;
     bool finished = false;
+    int t=0;
 
     bool mapSelected = false;
     string mapStr = "/titan.txt";
@@ -510,19 +511,20 @@ class Pacman: public Game, public TextureSet{
         }
         if (type){
             s.sendMessage(send.c_str());
+            cout<<"server send: "<<send<<endl;
         }
         else {
-            cout<<"x1\n";
-            recieve=c.recieveMessage();
-            cout<<"y1\n";
+            c.sendMessage(send.c_str());
+            cout<<"client send: "<<send<<endl;         
         }
+
         if (type){
             recieve=s.recieveMessage();
+            cout<<"server receive: "<<recieve<<endl;
         }
-        else {
-            cout<<"x\n";
-            c.sendMessage(send.c_str());
-            cout<<"y\n";
+        else{
+            recieve=c.recieveMessage();
+            cout<<"client receive: "<<recieve<<endl;   
         }
         if (recieve!=""){
             if (recieve=="up"){
@@ -538,6 +540,7 @@ class Pacman: public Game, public TextureSet{
                 ThanosPast->update(MOVE_LEFT,map);                 
             }
         }
+        t++;
     }
     
     void mainMenu() {
@@ -684,7 +687,10 @@ class Pacman: public Game, public TextureSet{
         }
         else {
             cout<<"aa\n";
-            mapStr=c.recieveMessage();
+            mapStr="";
+            while (mapStr==""){
+                mapStr=c.recieveMessage();
+            }
             mapSelected=true;
             cout<<"nn\n";
         }
