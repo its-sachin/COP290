@@ -55,7 +55,8 @@ class Pacman: public Game, public TextureSet{
 
     SDL_Event event;
 
-
+    string send="";
+    string recieve="";
     void init() {
 
         const char* temp = WIN_NAME.c_str();
@@ -469,7 +470,6 @@ class Pacman: public Game, public TextureSet{
                 pauseBtn[i]->setDimen(50,50);
             }
         }
-
         if (event.type == SDL_KEYDOWN && type) {
 
             switch (event.key.keysym.sym){
@@ -479,22 +479,22 @@ class Pacman: public Game, public TextureSet{
                 break;
 
             case SDLK_UP:
-                s.sendMessage("up");
+                send="up";
                 Thanos->update(MOVE_UP,map);           
                 break;
 
             case SDLK_DOWN:
-                s.sendMessage("down");
+                send="down";
                 Thanos->update(MOVE_DOWN,map);                
                 break;
 
             case SDLK_RIGHT:
-                s.sendMessage("right");
+                send="right";
                 Thanos->update(MOVE_RIGHT,map);
                 break;
 
             case SDLK_LEFT:
-                s.sendMessage("left");
+                send="left";
                 Thanos->update(MOVE_LEFT,map);              
                 break;
 
@@ -522,6 +522,23 @@ class Pacman: public Game, public TextureSet{
                 }              
                 break;
             }
+<<<<<<< HEAD
+            recieve=s.recieveMessage();
+            s.sendMessage(send);
+            if (recieve=="up"){
+                ThanosPast->update(MOVE_UP,map);                 
+            }
+            else if (recieve=="down"){
+                ThanosPast->update(MOVE_DOWN,map);                 
+            }
+            else if (recieve=="right"){
+                ThanosPast->update(MOVE_RIGHT,map);                 
+            }
+            else if (recieve=="left"){
+                ThanosPast->update(MOVE_LEFT,map);                 
+            }
+=======
+>>>>>>> b483c796aae1c912512a4f6dc516991cc6b2afcb
         }
         else if (event.type == SDL_KEYDOWN && !type) {
 
