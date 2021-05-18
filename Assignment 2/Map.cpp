@@ -100,6 +100,10 @@ public:
                     case 'h':
                         tile =new Tile(x,y,false,false);
                         homeTile=tile;
+                        break;
+                    case 'm':
+                        tile = new Tile(x,y,false,false,true);
+                        break;
                 }
                 if (tile!=NULL){
                     trow.push_back(tile);

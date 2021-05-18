@@ -1,6 +1,6 @@
 xxxxxxxxxxxxxxxxxxxxxxxxx
 x.........x...x.........x
-x.xxxx.x..x.x.x..x.xxxx.x
+xmxxxx.x..x.x.x..x.xxxxmx
 x......x....x....x......x
 x.xxx..xxxx.x.xxxx..xxx.x
 x.x.........x.........x.x
@@ -20,6 +20,6 @@ x xxx..x....p....x..xxx x
 x......x.x..x..x.x......x
 x.x.xxxx.x..x..x.xxxx.x.x
 x.x......x.....x......x.x
-x.xxxxxx.xxxxxxx.xxxxxx.x
+xmxxxxxx.xxxxxxx.xxxxxxmx
 x.......................x
 xxxxxxxxxxxxxxxxxxxxxxxxx

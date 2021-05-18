@@ -21,10 +21,19 @@ public:
     Player(Texture *playerTex){
         texture = playerTex;
         sprite = new Sprites(playerTex);
+        score = 0;
+        lifeLeft = MAX_LIFE;
     }
 
     ~Player() {
         free();
+    }
+
+    void init(int height, int width, Tile* initialTile) {
+        Gamer::setBounds(height,width);
+        Gamer::setInitTile(initialTile);
+        score = 0;
+        lifeLeft = MAX_LIFE;
     }
 
     void setStone(Stone s){stone =s;}

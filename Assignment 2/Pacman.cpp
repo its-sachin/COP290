@@ -83,8 +83,7 @@ class Pacman: public Game, public TextureSet{
         map = new Map(MAPS_PATH + mapStr);
         map->genrateMap();
 
-        Thanos->setBounds(map->getHeight(),map->getWidth());
-        Thanos->setInitTile(map->getPlayerInit());
+        Thanos->init(map->getHeight(),map->getWidth(),map->getPlayerInit());
 
 
         Blinky->init(map);
@@ -93,9 +92,8 @@ class Pacman: public Game, public TextureSet{
         Clyde->init(map);
 
         if (mode == Doffline) {
-            ThanosPast->setBounds(map->getHeight(),map->getWidth());
-            ThanosPast->setInitTile(map->getPlayerInit());
-
+            ThanosPast->init(map->getHeight(),map->getWidth(),map->getPlayerInit());
+            
             Inky->setID("blinky");
             Clyde->setID("pinky");
         }
@@ -196,6 +194,10 @@ class Pacman: public Game, public TextureSet{
                     else if (currTile->isCoin) {
                         coinTex.render(x,y);
                     }
+
+                    else if (currTile->isMind) {
+                        mindTex.render(x,y);
+                    }
                 }
             }
         }
@@ -232,6 +234,8 @@ class Pacman: public Game, public TextureSet{
                 for (int i=0; i<3; i++) {
                     pauseBtn[i]->~Button();
                 }
+
+                
             }
 
             else if (pauseBtn[2]->isSelected()) {

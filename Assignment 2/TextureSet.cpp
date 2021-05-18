@@ -27,6 +27,7 @@ protected:
     playerShow,
     pauseTex,
     optionTex,
+    mindTex,
     scoreBackTex;
 
     TTF_Font *font = NULL;
@@ -70,6 +71,7 @@ public:
         playerShow.Load(path + "/playerShow.png");
         pauseTex.Load(path + "/pause.png");
         optionTex.Load(path + "/options.png");
+        mindTex.Load(path + "/mind.png");
     }
 
     void loadWord(Texture *texture,string word) {
@@ -110,6 +112,7 @@ public:
         playerShow.free();
         pauseTex.free();
         optionTex.free();
+        mindTex.free();
 
         TTF_CloseFont(font);
         TTF_Quit();
