@@ -74,7 +74,6 @@ class Pacman: public Game, public TextureSet{
         escDown = false;
         finished = false;
         mapSelected = false;
-
         mainMenu();
 
 
@@ -314,6 +313,47 @@ class Pacman: public Game, public TextureSet{
                 Inky->update(map, ThanosPast,NULL);
                 Clyde->update(map, ThanosPast,Inky);
             }
+
+            if (COINS_LEFT <= 0) {
+                
+                finished = true;
+
+                string message;
+                int x;
+
+                if (mode == Single) {
+                    message = "YOU WON";
+                    x = 350;
+                }
+
+                else {
+                    if (Thanos->getScore() < ThanosPast->getScore()) {
+                        message = "PAST THANOS WON";
+                        x = 300;
+                    }
+
+                    else if (Thanos->getScore() > ThanosPast->getScore()) {
+                        message = "PRESENT THANOS WON";
+                        x = 270;
+
+                    }
+
+                    else  {
+
+                        message = "ITS A DRAW";
+                        x = 330;
+                    }
+                }
+
+                pauseBtn[0] = new Button(x,450,&movableBG);
+                loadWord(pauseBtn[0]->getFont(), message);
+
+                for (int i=1; i< 3; i++) {
+                    pauseBtn[i] = new Button(150*(i-1) + 340,550,&optionTex);
+                    pauseBtn[i]->setDimen(50,50);
+                }
+            }
+
             // this we've to look upon.....pausing 1 tile before!!(maybe have to review when to call p->die())
             if (Thanos->justDied || ((mode == Doffline || mode == Donline) &&ThanosPast->justDied)) {
                 Thanos->justDied = false;
@@ -400,6 +440,21 @@ class Pacman: public Game, public TextureSet{
     }
 
     void setMovement() {
+
+        if (c.recieveMessage()=="up"){
+            ThanosPast->update(MOVE_UP,map);                 
+        }
+        else if (c.recieveMessage()=="down"){
+            ThanosPast->update(MOVE_DOWN,map);                 
+        }
+        else if (c.recieveMessage()=="right"){
+            ThanosPast->update(MOVE_RIGHT,map);                 
+        }
+        else if (c.recieveMessage()=="left"){
+            ThanosPast->update(MOVE_LEFT,map);                 
+        }
+
+
         if (event.type == SDL_KEYUP && type && event.key.keysym.sym == SDLK_ESCAPE && escDown) {
             paused = true;
             pauseStart = SDL_GetTicks();
@@ -463,6 +518,7 @@ class Pacman: public Game, public TextureSet{
                 }              
                 break;
             }
+<<<<<<< HEAD
             recieve=s.recieveMessage();
             s.sendMessage(send);
             if (recieve=="up"){
@@ -477,6 +533,8 @@ class Pacman: public Game, public TextureSet{
             else if (recieve=="left"){
                 ThanosPast->update(MOVE_LEFT,map);                 
             }
+=======
+>>>>>>> b483c796aae1c912512a4f6dc516991cc6b2afcb
         }
         else if (event.type == SDL_KEYDOWN && !type) {
 
@@ -554,7 +612,7 @@ class Pacman: public Game, public TextureSet{
             
             backRect.x = backCurr;
 
-            logoTex.renderWM(220,100);
+            logoTex.renderWM(100,100);
             gameTex.renderWM((WIN_WIDTH-gameTex.getWidth())/2, WIN_HEIGHT-gameTex.getHeight());
 
             sciTex.Load(IMAGES_PATH + "/sci/" + balStr(sciCurr) + ".png");
@@ -617,7 +675,7 @@ class Pacman: public Game, public TextureSet{
             
             backRect.x = backCurr;
 
-            logoTex.renderWM(220,100);
+            logoTex.renderWM(100,100);
             gameTex.renderWM((WIN_WIDTH-gameTex.getWidth())/2, WIN_HEIGHT-gameTex.getHeight());
 
             sciTex.Load(IMAGES_PATH + "/sci/" + balStr(sciCurr) + ".png");

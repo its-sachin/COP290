@@ -1,6 +1,7 @@
 #include "Gamer.cpp"
 
 
+
 class Player : public Gamer{
 
 private:
@@ -89,6 +90,7 @@ public:
 
             if (nextTile->isCoin) {
                 score+= 1;
+                COINS_LEFT -= 1;
                 sound->playCoin();
                 nextTile->isCoin = false;
 
