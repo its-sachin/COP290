@@ -23,7 +23,7 @@ int main(int argc, char const *argv[])
 
         spend = SDL_GetTicks() - start;
 
-        while (FRAME_DELAY > spend){
+        while (FRAME_DELAY > spend && game->isOn()){
             game->eventManager(&game->event);
             spend = SDL_GetTicks() - start;
         }

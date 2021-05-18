@@ -32,6 +32,9 @@ class Pacman: public Game, public TextureSet{
     bool restarted = false;
     bool finished = false;
 
+    bool mapSelected = false;
+    string mapStr = "/titan.txt";
+
     Uint32 pauseStart = 0;
     int pauseTime = 0;
 
@@ -57,6 +60,7 @@ class Pacman: public Game, public TextureSet{
 
         const char* temp = WIN_NAME.c_str();
         Game::init(temp,SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,WIN_WIDTH,WIN_HEIGHT);
+        loadTex(IMAGES_PATH);
         start();
 
     }
@@ -68,28 +72,26 @@ class Pacman: public Game, public TextureSet{
         restarted = false;
         escDown = false;
         finished = false;
+        mapSelected = false;
 
-        if (isRunning) {
+        mainMenu();
 
-            loadTex(IMAGES_PATH);
-            map = new Map(MAPS_PATH + "/map2.txt");
-            map->genrateMap();
-
-            Thanos->setBounds(map->getHeight(),map->getWidth());
-            Thanos->setInitTile(map->getPlayerInit());
-
-
-            Blinky->init(map);
-            Pinky->init(map);
-            Inky->init(map);
-            Clyde->init(map);
-
-            mainMenu();
-        }
 
     }
 
     void initMode() {
+
+        map = new Map(MAPS_PATH + mapStr);
+        map->genrateMap();
+
+        Thanos->setBounds(map->getHeight(),map->getWidth());
+        Thanos->setInitTile(map->getPlayerInit());
+
+
+        Blinky->init(map);
+        Pinky->init(map);
+        Inky->init(map);
+        Clyde->init(map);
 
         if (mode == Doffline) {
             ThanosPast->setBounds(map->getHeight(),map->getWidth());
@@ -116,6 +118,7 @@ class Pacman: public Game, public TextureSet{
         Inky->setOffset(SDL_GetTicks()/1000);
         Pinky->setOffset(SDL_GetTicks()/1000);
         Clyde->setOffset(SDL_GetTicks()/1000);
+
     }
 
 
@@ -132,8 +135,8 @@ class Pacman: public Game, public TextureSet{
         Pinky->render();      
         Inky->render();
         Clyde->render();
-        Thanos->render();
 
+        Thanos->render();
         if (mode == Donline || mode == Doffline) {
             ThanosPast->render();
         }
@@ -298,7 +301,6 @@ class Pacman: public Game, public TextureSet{
 
         else{
 
-
             setMovement();
             Blinky->update(map, Thanos,NULL);
             Pinky->update(map, Thanos,Blinky);
@@ -313,7 +315,6 @@ class Pacman: public Game, public TextureSet{
             }
 
             // this we've to look upon.....pausing 1 tile before!!(maybe have to review when to call p->die())
-
             if (Thanos->justDied || ((mode == Doffline || mode == Donline) &&ThanosPast->justDied)) {
                 Thanos->justDied = false;
                 ThanosPast->justDied = false;
@@ -576,12 +577,77 @@ class Pacman: public Game, public TextureSet{
 
             selected = selecMenu(menuText);
 
-            while (FRAME_DELAY > spend) {
+            spend = SDL_GetTicks() - start;
+
+            while ((FRAME_DELAY > spend) && isRunning) {
                 
                 eventManager(&event);
 
                 spend = SDL_GetTicks() - start;
             }
+        }
+
+
+        names[0] = "Titan";
+        names[1] = "Wakanda"; 
+        names[2] = "Random Planet";
+
+        for (int i=0; i< 3; i++) {
+            loadWord(menuText[i]->getFont(), names[i]);
+        }
+        
+
+        while (isRunning && !mapSelected) {
+
+            start = SDL_GetTicks();
+
+            eventManager(&event);
+
+            SDL_SetRenderDrawColor(renderer, 0,0,0,255);
+            SDL_RenderClear(renderer);
+
+
+
+            movableBG.renderWM(0,0,&backRect);
+            backCurr += 1;
+            if (backCurr == base) {
+                backCurr = 0;
+            }
+            
+            backRect.x = backCurr;
+
+            logoTex.renderWM(220,100);
+            gameTex.renderWM((WIN_WIDTH-gameTex.getWidth())/2, WIN_HEIGHT-gameTex.getHeight());
+
+            sciTex.Load(IMAGES_PATH + "/sci/" + balStr(sciCurr) + ".png");
+            sciTex.renderWM(500,300);
+
+            sparkTex.Load(IMAGES_PATH + "/spark/" + balStr(sparkCurr) + ".png");
+            sparkTex.renderWM(275,595);
+
+            if (backCurr%10 ==0 ){
+
+                sciCurr = (sciCurr + 1)%71;
+                sparkCurr = sparkCurr%51 + 225;
+            }
+            
+            for (int i=0; i<3; i++) {
+                menuText[i]->handleEvent(&event);
+            }
+
+            SDL_RenderPresent(renderer);
+
+            spend = SDL_GetTicks() - start;
+
+            mapSelected =  selectMap(menuText);
+
+            while (FRAME_DELAY > spend && isRunning) {
+                
+                eventManager(&event);
+
+                spend = SDL_GetTicks() - start;
+            }
+
         }
 
         for (int i=0; i<3; i++) {
@@ -633,6 +699,32 @@ class Pacman: public Game, public TextureSet{
         }
 
         return false;
+    }
+
+    bool selectMap(Button** menuText) {
+
+        if (menuText[0]->isSelected()){
+            mapStr = "/titan.txt";
+            menuText[0]->deselect();
+            return true;
+        }
+
+        else if (menuText[1]->isSelected()){
+            mapStr = "/titan.txt";
+            menuText[1]->deselect();
+            return true;
+        }
+
+        else if (menuText[2]->isSelected()){
+            MapGenerate rand;
+            rand.drawMap();
+            mapStr = "/random.txt";
+            menuText[2]->deselect();
+            return true;
+        }
+
+        return false;
+
     }
 
 };

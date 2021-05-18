@@ -8,6 +8,7 @@ private:
     Texture *texture;
     Texture font;
     bool selected = false;
+    bool changed = false;
     int width;
     int height;
 
@@ -25,12 +26,17 @@ public:
         width = 0;
         height = 0;
         texture = NULL;
+        selected = false;
+        changed = false;
         font.free();
     }
 
     bool isSelected() {return selected;} 
 
-    void deselect() {selected = false;}
+    void deselect() {
+        selected = false;
+        changed = false;
+    }
 
     void setDimen(int w, int h) {
         width = w;
@@ -54,9 +60,17 @@ public:
         else{
 
             texture->setAlpha(255);
-            if ( e->type == SDL_MOUSEBUTTONDOWN){
+            if (changed) {
 
-                selected = true;
+                if (e->type == SDL_MOUSEBUTTONUP) {
+                    selected = true;
+                    changed = false;
+                }
+
+            }
+            else if ( e->type == SDL_MOUSEBUTTONDOWN){
+
+                changed = true;
             }
         }
         texture->renderWM(position.x,position.y);

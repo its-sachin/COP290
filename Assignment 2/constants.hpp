@@ -11,6 +11,7 @@ const int FRAME_DELAY = 1000/FPS;
 
 const int WIN_HEIGHT = 1000;
 const int WIN_WIDTH = 875;
+const int DIMEN = 25;
 
 const int X_MARGIN = 0;
 const int Y_MARGIN = 125;

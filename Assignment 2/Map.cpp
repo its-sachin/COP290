@@ -1,6 +1,5 @@
-#include "Tile.cpp"
+#include "MapGenerate.cpp"
 #include <vector>
-#include<fstream>
 
 class Map{
 
