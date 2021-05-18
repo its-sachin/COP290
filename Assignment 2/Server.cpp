@@ -28,12 +28,14 @@ class Server{
     public:
 
     void innit(){
+    // Creating socket file descriptor
         if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
         {
             perror("socket failed");
             exit(EXIT_FAILURE);
         }
         
+        // Forcefully attaching socket to the port 8080
         if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
                                                     &opt, sizeof(opt)))
         {
@@ -44,6 +46,7 @@ class Server{
         address.sin_addr.s_addr = INADDR_ANY;
         address.sin_port = htons( PORT );
         
+        // Forcefully attaching socket to the port 8080
         if (bind(server_fd, (struct sockaddr *)&address, 
                                     sizeof(address))<0)
         {
