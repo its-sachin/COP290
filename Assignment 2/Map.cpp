@@ -1,6 +1,8 @@
 #include "MapGenerate.cpp"
 #include <vector>
 
+int MAX_COINS;
+int COINS_LEFT;
 class Map{
 
 private:
@@ -37,6 +39,8 @@ public:
     }
 
     bool genrateMap(){
+        
+        MAX_COINS = 0;
         fstream file;
         file.open(path.c_str(), std::ios::in);
         if (file.is_open() == false){
@@ -68,6 +72,7 @@ public:
                         break;
                     case '.':
                         tile= new Tile(x,y,false,true);
+                        MAX_COINS += 1;
                         break;
                     case 'p':
                         tile=new Tile(x,y,false,false);
@@ -104,6 +109,7 @@ public:
             y++;
         }
         width=tileStruct[0].size();
+        COINS_LEFT = MAX_COINS;
         file.close();
         file1.close();
         return true;

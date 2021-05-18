@@ -64,7 +64,7 @@ public:
         dieTex.Load(path + "/" + "die.png");
         scoreBackTex.Load(path + "/" + "scoreUI.png");
         gameTex.Load(path + "/gamePhoto.png");
-        logoTex.Load(path + "/logo.bmp");
+        logoTex.Load(path + "/logo.png");
         movableBG.Load(path + "/back.jpg");
         modeTex.Load(path + "/mode.png");
         playerShow.Load(path + "/playerShow.png");
