@@ -106,6 +106,14 @@ public:
                 initRel();
                 currTile = nextTile;
             }
+
+            else if (nextTile->isMind) {
+                sound->playMind();
+                nextTile->isMind = false;
+
+                initRel();
+                currTile = nextTile;
+            }
             
             else if (nextTile->getBrick() == false) {
                 initRel();

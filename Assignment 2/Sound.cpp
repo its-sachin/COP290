@@ -14,6 +14,7 @@ private:
     Mix_Chunk *die = NULL;
     Mix_Chunk *respawn = NULL;
     Mix_Chunk *eat = NULL;
+    Mix_Chunk *mind = NULL;
 
     bool success = true;
 
@@ -63,6 +64,14 @@ public:
         {
             cout<< "Failed to load " << name << " sound effect! Error: " << Mix_GetError() << endl;
         }
+
+        name = "mind";
+
+        mind = Mix_LoadWAV( (SOUND_PATH + "/" + name + ".wav").c_str() );
+        if( mind == NULL )
+        {
+            cout<< "Failed to load " << name << " sound effect! Error: " << Mix_GetError() << endl;
+        }
     
 
     }
@@ -75,11 +84,13 @@ public:
         Mix_FreeChunk(eat);
         Mix_FreeChunk(respawn);
         Mix_FreeChunk(coin);
+        Mix_FreeChunk(mind);
         bgm = NULL;
         coin = NULL;
         die = NULL;
         respawn = NULL;
         eat = NULL;
+        mind = NULL;
 
         Mix_Quit();
     }
@@ -105,6 +116,12 @@ public:
     void playCoin() {
         if (coin != NULL) {
             Mix_PlayChannel( -1, coin, 0 );
+        }
+    }
+
+    void playMind() {
+        if (mind != NULL) {
+            Mix_PlayChannel( -1, mind, 0 );
         }
     }
 
