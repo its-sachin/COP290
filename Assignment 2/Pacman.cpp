@@ -445,6 +445,7 @@ class Pacman: public Game, public TextureSet{
 
         else{
             setMovement();
+            Thanos->updateM(map);
             Blinky->update(map, Thanos,NULL);
             Pinky->update(map, Thanos,Blinky);
 
@@ -453,6 +454,7 @@ class Pacman: public Game, public TextureSet{
                 Clyde->update(map, Thanos,Blinky);
             }
             else if (mode == Doffline|| mode == Donline) {
+                ThanosPast->updateM(map);
                 Inky->update(map, ThanosPast,NULL);
                 Clyde->update(map, ThanosPast,Inky);
             }
@@ -556,22 +558,22 @@ class Pacman: public Game, public TextureSet{
 
             case SDLK_UP:
                 send +="u";
-                Thanos->update(MOVE_UP,map);           
+                Thanos->update(MOVE_UP);           
                 break;
 
             case SDLK_DOWN:
                 send +="d";
-                Thanos->update(MOVE_DOWN,map);                
+                Thanos->update(MOVE_DOWN);                
                 break;
 
             case SDLK_RIGHT:
                 send +="r";
-                Thanos->update(MOVE_RIGHT,map);
+                Thanos->update(MOVE_RIGHT);
                 break;
 
             case SDLK_LEFT:
                 send +="l";
-                Thanos->update(MOVE_LEFT,map);              
+                Thanos->update(MOVE_LEFT);              
                 break;
 
             default:
@@ -583,19 +585,19 @@ class Pacman: public Game, public TextureSet{
                 switch (event.key.keysym.sym){
 
                 case SDLK_w:
-                    ThanosPast->update(MOVE_UP,map);         
+                    ThanosPast->update(MOVE_UP);         
                     break;
 
                 case SDLK_s:
-                    ThanosPast->update(MOVE_DOWN,map);              
+                    ThanosPast->update(MOVE_DOWN);              
                     break;
 
                 case SDLK_d:
-                    ThanosPast->update(MOVE_RIGHT,map);
+                    ThanosPast->update(MOVE_RIGHT);
                     break;
 
                 case SDLK_a:
-                    ThanosPast->update(MOVE_LEFT,map);            
+                    ThanosPast->update(MOVE_LEFT);            
                     break;
                 default:
                     break;
@@ -610,16 +612,16 @@ class Pacman: public Game, public TextureSet{
         if (recieve.size()> 1){
             recieve = recieve.substr(1,2);
             if (recieve=="u"){
-                ThanosPast->update(MOVE_UP,map);                 
+                ThanosPast->update(MOVE_UP);                 
             }
             else if (recieve=="d"){
-                ThanosPast->update(MOVE_DOWN,map);                 
+                ThanosPast->update(MOVE_DOWN);                 
             }
             else if (recieve=="r"){
-                ThanosPast->update(MOVE_RIGHT,map);                 
+                ThanosPast->update(MOVE_RIGHT);                 
             }
             else if (recieve=="l"){
-                ThanosPast->update(MOVE_LEFT,map);                 
+                ThanosPast->update(MOVE_LEFT);                 
             }
         }
     }

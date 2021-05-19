@@ -355,7 +355,7 @@ public:
         int state=currstate;
         if (P->getStone()== MIND && state!=3) {
             pair<int,int> thanosPos = P->getExactPos();
-            if (checkCollision(getExactPos(),thanosPos)){
+            if (checkCollision(exactPos,thanosPos)){
                 sound->playEat();
                 state=3;    
                 P->updateScore(50);   

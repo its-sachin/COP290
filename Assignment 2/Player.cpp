@@ -11,6 +11,7 @@ private:
 
     bool alive = true;
     Stone stone = NONE;
+    Move moveDir = STATIC;
 
 public: 
 
@@ -33,6 +34,7 @@ public:
         Gamer::setInitTile(initialTile);
         score = 0;
         lifeLeft = MAX_LIFE;
+        moveDir = STATIC;
     }
 
     void setStone(Stone s){stone =s;}
@@ -58,14 +60,14 @@ public:
         score+=a;
     }
 
-    void movement(Move dir,Map *map) {
+    void movement(Map *map) {
         int currX = currTile->getX();
         int currY = currTile->getY();
 
         int nextX = currX;
         int nextY = currY;
 
-        switch (dir){
+        switch (moveDir){
         case MOVE_UP:
 
             nextY -= 1; 
@@ -129,6 +131,7 @@ public:
 
             nextTile = NULL;
             animating = true;
+            moveDir = STATIC;
         }
         
     }
@@ -139,17 +142,21 @@ public:
             cout<<SDL_GetTicks()/1000;
         }
     }
-    void update(Move dir, Map *map) {
+    void update(Move dir) {
 
-        if (visible && !animating) {
-            movement(dir, map);
-        }
+        moveDir = dir;
     }
 
     void render() {
         if (visible) {
             checkStone();
             Gamer::render();
+        }
+    }
+
+    void updateM(Map *map) {
+        if (moveDir != STATIC && visible && !animating) {
+            movement( map);
         }
     }
 

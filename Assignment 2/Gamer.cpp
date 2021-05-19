@@ -186,7 +186,7 @@ public:
                 currUD = nextUD;
             }
 
-            if (xRel ==0 && yRel ==0) {
+            if (abs(xRel) ==0 && yRel ==0) {
                 animating = false;
                 currLR = nextLR;
                 psuedoRel = TILE_HEIGHT;
