@@ -9,14 +9,19 @@
 
  * ###  __Libraries Used:__
  	We have used following libraries and can be installed in Ubuntu from command line using below specified commands:
- 	1.lSDL2: 
+	
+ 	1. lSDL2: 
 		$ sudo apt-get install libsdl2-dev
-	2.lSDL2_image:
+		
+	2. lSDL2_image:
 		$ sudo apt-get install libsdl2-image-2.0-0-dev
-	3.lSDL2_mixer:
+		
+	3. lSDL2_mixer:
 		$ sudo apt-get install -y libsdl2-mixer-2.0-0
-	4.lSDL2_ttf:
+		
+	4. lSDL2_ttf:
 		$ sudo apt-get install libsdl2-ttf-dev
+		
 		
 
   * ### __How to run:__
