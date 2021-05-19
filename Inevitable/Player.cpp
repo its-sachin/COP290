@@ -101,7 +101,6 @@ public:
         nextTile = map->getTile(nextX,nextY);
 
         if (nextTile != NULL) {
-            initTile= currTile;
 
             if (nextTile->isCoin) {
                 score+= 1;
@@ -117,7 +116,6 @@ public:
                 sound->playMind();
                 nextTile->isMind = false;
                 stoneTime=SDL_GetTicks()/1000;
-                cout<<"time "<<stoneTime<<endl;
                 setStone(MIND);
 
                 initRel();
@@ -139,7 +137,6 @@ public:
     void checkStone(){
         if (stone==MIND && SDL_GetTicks()/1000-stoneTime>POWER_TIME){
             setStone(NONE);
-            cout<<SDL_GetTicks()/1000;
         }
     }
     void update(Move dir) {
