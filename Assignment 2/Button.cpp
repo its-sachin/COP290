@@ -19,6 +19,8 @@ public:
         width = t->getWidth();
         height = t->getHeight();
         texture = t;
+        selected = false;
+        changed = false;
     }
 
     ~Button(){

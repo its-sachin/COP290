@@ -113,6 +113,34 @@ class Pacman: public Game, public TextureSet{
 
     }
 
+    void sendM(string send) {
+
+        if (mode == Donline) {
+
+            if (type) {
+                s.sendMessage(send.c_str());
+            }
+            else {
+                c.sendMessage(send.c_str());
+            }
+        }
+
+    }
+
+    string recieveM() {
+
+        if (mode == Donline) {
+
+            if (type) {
+                return s.recieveMessage();
+            }
+            else {
+                return c.recieveMessage();
+            }
+        }
+        return "";
+    }    
+
 
     void render(){
 
@@ -247,10 +275,17 @@ class Pacman: public Game, public TextureSet{
         }
 
         else if (paused){
+        
+
             pauseTime = SDL_GetTicks() - pauseStart;
 
+            string send = "1";
+            string recieve = "";
 
-            if (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_ESCAPE && escDown) {
+            recieve = recieveM();
+
+
+            if (recieve.substr(0,1) == "0" || (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_ESCAPE && escDown)) {
 
                 for (int i=0; i<3; i++) {
                     pauseBtn[i]->~Button();
@@ -258,6 +293,8 @@ class Pacman: public Game, public TextureSet{
 
                 paused = false;
                 escDown = false;
+
+                send = "0";
                 
             }
 
@@ -273,6 +310,8 @@ class Pacman: public Game, public TextureSet{
                 paused = false;
                 escDown = false;
                 pauseBtn[0]->deselect();
+
+                send = "0";
             }
 
             else if (pauseBtn[1]->isSelected()){
@@ -295,6 +334,9 @@ class Pacman: public Game, public TextureSet{
 
                 isRunning = false;
             }
+
+            sendM(send);
+            
         }
 
         else{
@@ -417,6 +459,8 @@ class Pacman: public Game, public TextureSet{
         
     }
 
+
+
     void clean() {
         freeTex();
 
@@ -438,21 +482,29 @@ class Pacman: public Game, public TextureSet{
     }
 
     void setMovement() {
+        
         string send="";
         string recieve="";
 
-        cout<<"in\n";
-        if (event.type == SDL_KEYUP && type && event.key.keysym.sym == SDLK_ESCAPE && escDown) {
+        recieve = recieveM();
+
+        if ((recieve.size() >=1 && recieve.substr(0,1) == "1" && !paused) || (event.type == SDL_KEYUP && type && event.key.keysym.sym == SDLK_ESCAPE && escDown)) {
             paused = true;
             pauseStart = SDL_GetTicks();
             pauseTime = 0;
             escDown = false;
+            send = "1";
 
             for (int i=0; i< 3; i++) {
                 pauseBtn[i] = new Button(100*i + 300,500,&optionTex);
                 pauseBtn[i]->setDimen(50,50);
             }
         }
+
+        else {
+            send = "0";
+        }
+
         if (event.type == SDL_KEYDOWN) {
 
             switch (event.key.keysym.sym){
@@ -462,85 +514,73 @@ class Pacman: public Game, public TextureSet{
                 break;
 
             case SDLK_UP:
-                send="up";
+                send +="u";
                 Thanos->update(MOVE_UP,map);           
                 break;
 
             case SDLK_DOWN:
-                send="down";
+                send +="d";
                 Thanos->update(MOVE_DOWN,map);                
                 break;
 
             case SDLK_RIGHT:
-                send="right";
+                send +="r";
                 Thanos->update(MOVE_RIGHT,map);
                 break;
 
             case SDLK_LEFT:
-                send="left";
+                send +="l";
                 Thanos->update(MOVE_LEFT,map);              
                 break;
 
-            case SDLK_w:
-                if (mode ==Doffline) {
-                    ThanosPast->update(MOVE_UP,map);
-                }           
-                break;
-
-            case SDLK_s:
-                if (mode ==Doffline) {
-                    ThanosPast->update(MOVE_DOWN,map);
-                }                
-                break;
-
-            case SDLK_d:
-                if (mode ==Doffline) {
-                    ThanosPast->update(MOVE_RIGHT,map);
-                }
-                break;
-
-            case SDLK_a:
-                if (mode ==Doffline) {
-                    ThanosPast->update(MOVE_LEFT,map);
-                }              
-                break;
             default:
-                send="";
                 break;
             }
-        }
-        if (type){
-            s.sendMessage(send.c_str());
-            cout<<"server send: "<<send<<endl;
-        }
-        else {
-            c.sendMessage(send.c_str());
-            cout<<"client send: "<<send<<endl;         
+
+            if (mode == Doffline) {
+
+                switch (event.key.keysym.sym){
+
+                case SDLK_w:
+                    ThanosPast->update(MOVE_UP,map);         
+                    break;
+
+                case SDLK_s:
+                    ThanosPast->update(MOVE_DOWN,map);              
+                    break;
+
+                case SDLK_d:
+                    ThanosPast->update(MOVE_RIGHT,map);
+                    break;
+
+                case SDLK_a:
+                    ThanosPast->update(MOVE_LEFT,map);            
+                    break;
+                default:
+                    break;
+
+                }
+            }
         }
 
-        if (type){
-            recieve=s.recieveMessage();
-            cout<<"server receive: "<<recieve<<endl;
-        }
-        else{
-            recieve=c.recieveMessage();
-            cout<<"client receive: "<<recieve<<endl;   
-        }
-        if (recieve!=""){
-            if (recieve=="up"){
+        sendM(send);
+
+        
+        if (recieve.size()> 1){
+            recieve = recieve.substr(1,2);
+            if (recieve=="u"){
                 ThanosPast->update(MOVE_UP,map);                 
             }
-            else if (recieve=="down"){
+            else if (recieve=="d"){
                 ThanosPast->update(MOVE_DOWN,map);                 
             }
-            else if (recieve=="right"){
+            else if (recieve=="r"){
                 ThanosPast->update(MOVE_RIGHT,map);                 
             }
-            else if (recieve=="left"){
+            else if (recieve=="l"){
                 ThanosPast->update(MOVE_LEFT,map);                 
             }
         }
-        t++;
     }
     
     void mainMenu() {
@@ -615,11 +655,78 @@ class Pacman: public Game, public TextureSet{
             }
         }
         if (mode == Donline){
-            if (type){
-                s.innit();
+
+            names[0] = "Server [s]";
+            names[1] = "Client [c]"; 
+
+            for (int i=0; i< 2; i++) {
+                loadWord(menuText[i]->getFont(), names[i]);
             }
-            else {
-                c.innit();
+
+            selected = false;
+
+
+            while (isRunning && !selected) {
+
+                start = SDL_GetTicks();
+
+                eventManager(&event);
+
+                SDL_SetRenderDrawColor(renderer, 0,0,0,255);
+                SDL_RenderClear(renderer);
+
+
+
+                movableBG.renderWM(0,0,&backRect);
+                backCurr += 1;
+                if (backCurr == base) {
+                    backCurr = 0;
+                }
+                
+                backRect.x = backCurr;
+
+                logoTex.renderWM(100,100);
+                gameTex.renderWM((WIN_WIDTH-gameTex.getWidth())/2, WIN_HEIGHT-gameTex.getHeight());
+
+                sciTex.Load(IMAGES_PATH + "/sci/" + balStr(sciCurr) + ".png");
+                sciTex.renderWM(500,300);
+
+                sparkTex.Load(IMAGES_PATH + "/spark/" + balStr(sparkCurr) + ".png");
+                sparkTex.renderWM(275,595);
+
+                if (backCurr%10 ==0 ){
+
+                    sciCurr = (sciCurr + 1)%71;
+                    sparkCurr = sparkCurr%51 + 225;
+                }
+
+                for (int i=0; i<2; i++) {
+                    menuText[i]->handleEvent(&event);
+                }
+
+                SDL_RenderPresent(renderer);
+
+
+                selected = selectType(menuText);
+
+                spend = SDL_GetTicks() - start;
+
+                while ((FRAME_DELAY > spend) && isRunning) {
+                    
+                    eventManager(&event);
+
+                    spend = SDL_GetTicks() - start;
+                }
+            }
+
+            if (selected) {
+
+                if (type){
+                    s.innit();
+                }
+                else {
+                    c.innit();
+                }
             }
         }
 
@@ -631,7 +738,7 @@ class Pacman: public Game, public TextureSet{
             loadWord(menuText[i]->getFont(), names[i]);
         }
         
-        if (type){
+        if (mode != Donline || type){
             while (isRunning && !mapSelected ) {
 
                 start = SDL_GetTicks();
@@ -683,16 +790,17 @@ class Pacman: public Game, public TextureSet{
                     spend = SDL_GetTicks() - start;
                 }
             }
-            s.sendMessage(mapStr.c_str());
+
+            if (mode == Donline) {
+                s.sendMessage(mapStr.c_str());
+            }
         }
         else {
-            cout<<"aa\n";
             mapStr="";
-            while (mapStr==""){
+            while (isRunning && mapStr==""){
                 mapStr=c.recieveMessage();
             }
             mapSelected=true;
-            cout<<"nn\n";
         }
 
         for (int i=0; i<3; i++) {
@@ -736,14 +844,42 @@ class Pacman: public Game, public TextureSet{
                 mode = Donline;           
                 return true;
 
-            case SDLK_c:
-                mode=Donline;
-                type=false;
-                return true;
             }
         }
 
         return false;
+    }
+
+    bool selectType(Button** menuText) {
+
+        if (menuText[0]->isSelected()){
+            type = true;
+            menuText[0]->deselect();
+            return true;
+        }
+
+        else if (menuText[1]->isSelected()){
+            type = false;
+            menuText[1]->deselect();
+            return true;
+        }
+
+        if (event.type == SDL_KEYDOWN) {
+
+            switch (event.key.keysym.sym){
+            case SDLK_s:
+                type = true;           
+                return true;
+
+            case SDLK_c:
+                type = true;           
+                return true;
+
+            }
+        }
+
+        return false;
+
     }
 
     bool selectMap(Button** menuText) {
