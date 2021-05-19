@@ -386,6 +386,16 @@ public:
                     levels++;
                 }
             }
+            else if (currstate==0){
+                if (P->getStone()==NONE){
+                    if (ctime!=0){
+                        state=2;
+                    }
+                    else{
+                        state=1;
+                    }                 
+                }
+            }
         }
         prevstate=currstate;
         currstate=state;

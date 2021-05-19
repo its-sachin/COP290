@@ -20,6 +20,8 @@ public:
         sprite = new Sprites(playerTex);
         score = 0;
         lifeLeft = MAX_LIFE;
+        xRel=0;
+        yRel=0;
     }
 
     ~Player() {
@@ -112,6 +114,8 @@ public:
             else if (nextTile->isMind) {
                 sound->playMind();
                 nextTile->isMind = false;
+                stoneTime=SDL_GetTicks()/1000;
+                cout<<"time "<<stoneTime<<endl;
                 setStone(MIND);
 
                 initRel();
@@ -129,7 +133,12 @@ public:
         
     }
 
-
+    void checkStone(){
+        if (stone==MIND && SDL_GetTicks()/1000-stoneTime>5){
+            setStone(NONE);
+            cout<<SDL_GetTicks()/1000;
+        }
+    }
     void update(Move dir, Map *map) {
 
         if (visible && !animating) {
@@ -139,6 +148,7 @@ public:
 
     pair<int,int> render() {
         if (visible) {
+            checkStone();
             return Gamer::render();
         }
         return {-1,-1};

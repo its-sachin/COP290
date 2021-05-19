@@ -1,6 +1,8 @@
 #include "Sprites.cpp"
 #include "Enum.cpp"
 
+
+int stoneTime=0;
 class Gamer{
 
 protected:
