@@ -11,16 +11,16 @@
  	We have used following libraries and can be installed in Ubuntu from command line using below specified commands:
 	
  	1. lSDL2: 
-		$ sudo apt-get install libsdl2-dev
+		```$ sudo apt-get install libsdl2-dev```
 		
 	2. lSDL2_image:
-		$ sudo apt-get install libsdl2-image-2.0-0-dev
+		```$ sudo apt-get install libsdl2-image-2.0-0-dev```
 		
 	3. lSDL2_mixer:
-		$ sudo apt-get install -y libsdl2-mixer-2.0-0
+		```$ sudo apt-get install -y libsdl2-mixer-2.0-0```
 		
 	4. lSDL2_ttf:
-		$ sudo apt-get install libsdl2-ttf-dev
+		```$ sudo apt-get install libsdl2-ttf-dev```
 		
 		
 
@@ -31,14 +31,16 @@
     
     
    * ### __Resources and Help:__
-    1. Socket Programming: https://www.geeksforgeeks.org/socket-programming-cc/ , https://simpledevcode.wordpress.com/2016/06/16/client-server-chat-in-c-using-sockets/
-    2. SDL Functions: https://lazyfoo.net/tutorials/SDL/index.php , http://www.sdltutorials.com/sdl-net-part-1-user-tutorial
-    3. Basic Game Structure: https://github.com/DarkMuffinJoe/Pacman/tree/master/Pacman
-    4. Player images Pixalated: Anurag Mittal 2019ME10779
-    5. Droids movement Logic: https://gameinternals.com/understanding-pac-man-ghost-behavior
-    6. Map Generation: https://youtu.be/EvAzVhAii_o (code in comment section)
-    7. Logo Font: https://www.fontspace.com/category/marvel
-    8. Game Sound: https://soundbible.com/
+  1. Socket Programming: [GFG](https://www.geeksforgeeks.org/socket-programming-cc/) , [simpledevcode](https://simpledevcode.wordpress.com/2016/06/16/client-server-chat-in-c-using-sockets/)
+  2. SDL Functions: [lazyfoo](https://lazyfoo.net/tutorials/SDL/index.php) , [sdltutorials](http://www.sdltutorials.com/sdl-net-part-1-user-tutorial)
+  3. Basic Game Structure: [DarkMuffinJoe](https://github.com/DarkMuffinJoe/Pacman/tree/master/Pacman)
+  4. Player images Pixalated: Anurag Mittal 2019ME10779
+  5. Droids movement Logic: [gameinternals](https://gameinternals.com/understanding-pac-man-ghost-behavior)
+  6. Map Generation: [youtube](https://youtu.be/EvAzVhAii_o) (code in comment section)
+  7. Logo Font: [fontspace](https://www.fontspace.com/category/marvel)
+  8. Game Sound: [soundbible](https://soundbible.com/)
+
+  
     
     
     
