@@ -51,6 +51,16 @@ protected:
         animating = true;
         xRel = (nextTile->getX() - currTile->getX())*TILE_WIDTH;
         yRel = (nextTile->getY() - currTile->getY())*TILE_HEIGHT;
+
+        if (abs(xRel) > TILE_WIDTH) {
+            xRel = 0;
+            psuedoRel = TILE_HEIGHT;
+        }
+
+        if (abs(yRel) > TILE_HEIGHT) {
+            yRel = 0;
+            psuedoRel = TILE_HEIGHT;
+        }
     }
 
     void updateRel() {
