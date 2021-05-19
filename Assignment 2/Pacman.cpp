@@ -146,15 +146,24 @@ class Pacman: public Game, public TextureSet{
         renderBack();
 
 
-        pair<int,int> blinkyPos = Blinky->render(); 
-        pair<int,int> pinkyPos = Pinky->render();      
-        pair<int,int> inkyPos = Inky->render();
-        pair<int,int> clydePos = Clyde->render();
+        Blinky->render(); 
+        Pinky->render();      
+        Inky->render();
+        Clyde->render();
 
-        pair<int,int> thanosPos = Thanos->render();
+        Thanos->render();
+
+        pair<int,int> blinkyPos = Blinky->getExactPos();
+        pair<int,int> pinkyPos = Pinky->getExactPos();
+        pair<int,int> inkyPos = Inky->getExactPos();
+        pair<int,int> clydePos = Clyde->getExactPos();
+        pair<int,int> thanosPos = Thanos->getExactPos();
         pair <int,int> thanosPos2;
+
+
         if (mode == Donline || mode == Doffline) {
-            thanosPos2 = ThanosPast->render();
+            ThanosPast->render();
+            thanosPos2 = ThanosPast->getExactPos();
         }
         bool collision = false;
 
@@ -317,8 +326,9 @@ class Pacman: public Game, public TextureSet{
         int ye = enemyPos.second;
         int xp = thnaosPos.first;
         int yp = thnaosPos.second;
-        
-        int offset = 5;
+
+         
+        int offset = COLLISION_OFFSET;
 
         if (abs(xe-xp) <= offset && abs(ye-yp) <= offset) {
             return true;

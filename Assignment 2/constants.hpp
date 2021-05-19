@@ -27,6 +27,9 @@ const int MAX_LIFE = 0;
 
 const float SPEED = 4;
 
+const int COLLISION_OFFSET = 5;
+const int POWER_TIME = 10;
+
 const string IMAGES_PATH = "Assets/Images";
 const string MAPS_PATH = "Assets/Maps";
 const string SOUND_PATH = "Assets/Sounds";
