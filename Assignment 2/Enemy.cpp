@@ -336,11 +336,28 @@ public:
         }
     }
 
+    bool checkCollision(pair<int,int> enemyPos,pair<int,int> thnaosPos) {
+        int xe = enemyPos.first;
+        int ye = enemyPos.second;
+        int xp = thnaosPos.first;
+        int yp = thnaosPos.second;
+        
+        int offset = COLLISION_OFFSET;
+
+        if (abs(xe-xp) <= offset && abs(ye-yp) <= offset) {
+            return true;
+        }
+        return false;
+        
+
+    }
+
 
     bool updateState(Player* P,Map* map){
         int state=currstate;
         if (P->getStone()== MIND && state!=3) {
-            if (P->getcurrTile()==currTile){
+            pair<int,int> thanosPos = P->getExactPos();
+            if (checkCollision(getExactPos(),thanosPos)){
                 sound->playEat();
                 state=3; 
                 timeinOther=SDL_GetTicks()/1000;   
@@ -406,7 +423,8 @@ public:
         }
         return false;
     }
-    pair<int,int> render() {
+    
+    void render() {
         Texture* temp=texture;
         if (currstate==3){
             temp=eatenT;
@@ -417,13 +435,12 @@ public:
         SDL_Rect src = {0,0,TILE_WIDTH,TILE_HEIGHT};
 
         temp->render(currTile->getX()*TILE_WIDTH- xRel,currTile->getY()*TILE_HEIGHT- yRel,&src);
+        exactPos = {currTile->getX()*TILE_WIDTH -xRel,currTile->getY()*TILE_HEIGHT- yRel};
 
         updateRel();
         if (xRel ==0 && yRel ==0) {
             animating = false;
         }
-
-        return {currTile->getX()*TILE_WIDTH -xRel,currTile->getY()*TILE_HEIGHT};
 
     }
 };

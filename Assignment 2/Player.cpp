@@ -134,7 +134,7 @@ public:
     }
 
     void checkStone(){
-        if (stone==MIND && SDL_GetTicks()/1000-stoneTime>5){
+        if (stone==MIND && SDL_GetTicks()/1000-stoneTime>POWER_TIME){
             setStone(NONE);
             cout<<SDL_GetTicks()/1000;
         }
@@ -146,12 +146,11 @@ public:
         }
     }
 
-    pair<int,int> render() {
+    void render() {
         if (visible) {
             checkStone();
-            return Gamer::render();
+            Gamer::render();
         }
-        return {-1,-1};
     }
 
     void die() {

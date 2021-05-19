@@ -35,6 +35,8 @@ protected:
     Texture *texture = NULL;
     Sprites *sprite = NULL;
 
+    pair<int,int> exactPos;
+
     void handleBound(int& x, int bound) {
         if (x >= bound) {
             x = x%bound;
@@ -95,11 +97,16 @@ public:
         yBound = height;
     }
 
+    pair<int,int> getExactPos() {
+        return exactPos;
+    }
+
     bool isAnimating() {return animating;}
     Tile* getcurrTile(){
         return currTile;
     }
-    pair<int,int> render() {
+
+    void render() {
 
         if (nextLR == currLR) {
 
@@ -112,6 +119,7 @@ public:
                 SDL_Rect *src = sprite->getRect(currUD,currLR);
 
                 texture->render(currTile->getX()*TILE_WIDTH -xRel,currTile->getY()*TILE_HEIGHT - yRel,src);
+                exactPos = {currTile->getX()*TILE_WIDTH -xRel,currTile->getY()*TILE_HEIGHT- yRel};
 
                 updateRel();
                 psuedoRel -= 1;
@@ -131,6 +139,7 @@ public:
 
                     src = sprite->getRect(FRONT,currLR);
                     texture->render(currTile->getX()*TILE_WIDTH- xRel,currTile->getY()*TILE_HEIGHT- yRel,src);
+                    exactPos = {currTile->getX()*TILE_WIDTH -xRel,currTile->getY()*TILE_HEIGHT- yRel};
 
                     
                 }
@@ -138,6 +147,7 @@ public:
                 else {
                     src = sprite->getRect(nextUD ,currLR);
                     texture->render(currTile->getX()*TILE_WIDTH- xRel,currTile->getY()*TILE_HEIGHT- yRel,src);
+                    exactPos = {currTile->getX()*TILE_WIDTH -xRel,currTile->getY()*TILE_HEIGHT- yRel};
                 }
                 
                 updateRel();
@@ -160,12 +170,14 @@ public:
 
                 src = sprite->getRect(nextUD,currLR);
                 texture->render(currTile->getX()*TILE_WIDTH- xRel,currTile->getY()*TILE_HEIGHT- yRel,src);
+                exactPos = {currTile->getX()*TILE_WIDTH -xRel,currTile->getY()*TILE_HEIGHT- yRel};
             }
 
             else {
 
                 src = sprite->getRect(currUD ,nextLR);
                 texture->render(currTile->getX()*TILE_WIDTH- xRel,currTile->getY()*TILE_HEIGHT- yRel,src);
+                exactPos = {currTile->getX()*TILE_WIDTH -xRel,currTile->getY()*TILE_HEIGHT- yRel};
 
             }            
 
@@ -182,7 +194,6 @@ public:
 
         }
 
-        return {currTile->getX()*TILE_WIDTH -xRel,currTile->getY()*TILE_HEIGHT};
 
     }
 
