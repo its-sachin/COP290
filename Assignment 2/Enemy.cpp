@@ -255,7 +255,7 @@ public:
             }          
         }
         if (dir==-1){
-            cout<<"Power Failure, No energy on the planet!!!"<<endl;
+            cout<<"Power Failure\n No energy on the planet!!!"<<endl;
             dir =3-currDir;
         }
         return dir;
@@ -360,10 +360,10 @@ public:
             }
             else if (currstate==1){
                 st=SDL_GetTicks()/1000-offset;
-                if (P->getcurrTile() == currTile) {
-                    P->died=true;
-                    return false;
-                }
+                // if (P->getcurrTile() == currTile) {
+                //     P->died=true;
+                //     return false;
+                // }
                 if (st==stime[levels]){
                     state=2;        
                     offset+=stime[levels];
@@ -372,13 +372,13 @@ public:
             }
             else if (currstate==2){
                 ct=SDL_GetTicks()/1000-offset;
-                if (P->getcurrTile() == currTile) {
+                // if (P->getcurrTile() == currTile) {
                     
 
-                    P->died=true;
-                    return false;
+                //     P->died=true;
+                //     return false;
 
-                }
+                // }
                 if (ct==ctime[levels]){
                     state=1;
                     offset+=ctime[levels];
@@ -400,7 +400,7 @@ public:
         }
         return false;
     }
-    void render() {
+    pair<int,int> render() {
         Texture* temp=texture;
         if (currstate==3){
             temp=eatenT;
@@ -416,6 +416,8 @@ public:
         if (xRel ==0 && yRel ==0) {
             animating = false;
         }
+
+        return {currTile->getX()*TILE_WIDTH -xRel,currTile->getY()*TILE_HEIGHT};
 
     }
 };

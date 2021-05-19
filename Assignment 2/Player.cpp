@@ -13,8 +13,6 @@ private:
     Stone stone = NONE;
 
 public: 
-    bool died=false;
-    bool justDied = false;
 
 
     Player(Texture *playerTex){
@@ -135,19 +133,15 @@ public:
     void update(Move dir, Map *map) {
 
         if (visible && !animating) {
-            if (died){
-                die();
-            }
-            else{
-                movement(dir, map);
-            }
+            movement(dir, map);
         }
     }
 
-    void render() {
+    pair<int,int> render() {
         if (visible) {
-            Gamer::render();
+            return Gamer::render();
         }
+        return {-1,-1};
     }
 
     void die() {
@@ -164,8 +158,6 @@ public:
         currUD = FRONT;
         currLR = LEFT;
         animating  = false;
-        died=false;
-        justDied = true;
     }
 
 

@@ -146,15 +146,76 @@ class Pacman: public Game, public TextureSet{
         renderBack();
 
 
-        Blinky->render(); 
-        Pinky->render();      
-        Inky->render();
-        Clyde->render();
+        pair<int,int> blinkyPos = Blinky->render(); 
+        pair<int,int> pinkyPos = Pinky->render();      
+        pair<int,int> inkyPos = Inky->render();
+        pair<int,int> clydePos = Clyde->render();
 
-        Thanos->render();
+        pair<int,int> thanosPos = Thanos->render();
         if (mode == Donline || mode == Doffline) {
             ThanosPast->render();
         }
+
+        if (checkCollision(blinkyPos,thanosPos) || checkCollision(clydePos,thanosPos) || checkCollision(pinkyPos,thanosPos) || checkCollision(inkyPos,thanosPos)) {
+            Thanos->die();
+            cout << "done" << endl;
+            Uint32 start = SDL_GetTicks();
+
+
+            if (Thanos->getLifeLeft() < 0){
+                cout << "yes" << endl;
+                finished = true;
+
+                string message;
+                int x;
+
+                if (Thanos->getLifeLeft() < 0) {
+                    if (mode == Single){
+                        message = "YOU LOOSE";
+                        x = 350;
+                    }
+
+                    else {
+                        if (ThanosPast->getLifeLeft() >= 0) {
+                            message = "PAST THANOS WON";
+                            x = 300;
+                        }
+
+                        else {
+                            message = "ITS A DRAW";
+                            x = 330;
+                        }
+                    }
+                }
+
+                else {
+                    if (mode == Donline || mode == Doffline) {
+                        message = "PRESENT THANOS WON";
+                        x = 270;
+                    }
+                }
+
+                pauseBtn[0] = new Button(x,450,&movableBG);
+                loadWord(pauseBtn[0]->getFont(), message);
+
+                for (int i=1; i< 3; i++) {
+                    pauseBtn[i] = new Button(150*(i-1) + 340,550,&optionTex);
+                    pauseBtn[i]->setDimen(50,50);
+                }
+            }
+
+            int spend = SDL_GetTicks() - start;
+
+            while (spend < 3500) {
+                spend = SDL_GetTicks() - start;
+
+                eventManager(&event);
+
+                if (!isRunning){break;}
+            }
+
+        }
+
         if (paused) {
             renderPause();
         }
@@ -173,6 +234,7 @@ class Pacman: public Game, public TextureSet{
 
             eventManager(&event);
         }
+        
     }
 
     void renderPause() {
@@ -235,6 +297,21 @@ class Pacman: public Game, public TextureSet{
         }
     }
 
+    bool checkCollision(pair<int,int> enemyPos,pair<int,int> thnaosPos) {
+        int xe = enemyPos.first;
+        int ye = enemyPos.second;
+        int xp = thnaosPos.first;
+        int yp = thnaosPos.second;
+        
+        int offset = 5;
+
+        if (abs(xe-xp) <= offset && abs(ye-yp) <= offset) {
+            return true;
+        }
+        return false;
+        
+
+    }
     void update() {
 
         if (restarted) {
@@ -394,68 +471,6 @@ class Pacman: public Game, public TextureSet{
                     pauseBtn[i]->setDimen(50,50);
                 }
             }
-
-            // this we've to look upon.....pausing 1 tile before!!(maybe have to review when to call p->die())
-            if (Thanos->justDied || ((mode == Doffline || mode == Donline) &&ThanosPast->justDied)) {
-                Thanos->justDied = false;
-                ThanosPast->justDied = false;
-
-
-                if (Thanos->getLifeLeft() < 0 || ((mode == Doffline || mode == Donline) && ThanosPast->getLifeLeft() < 0)){
-                    finished = true;
-
-                    string message;
-                    int x;
-
-                    if (Thanos->getLifeLeft() < 0) {
-                        if (mode == Single){
-                            message = "YOU LOOSE";
-                            x = 350;
-                        }
-
-                        else {
-                            if (ThanosPast->getLifeLeft() >= 0) {
-                                message = "PAST THANOS WON";
-                                x = 300;
-                            }
-
-                            else {
-                                message = "ITS A DRAW";
-                                x = 330;
-                            }
-                        }
-                    }
-
-                    else {
-                        if (mode == Donline || mode == Doffline) {
-                            message = "PRESENT THANOS WON";
-                            x = 270;
-                        }
-                    }
-
-                    pauseBtn[0] = new Button(x,450,&movableBG);
-                    loadWord(pauseBtn[0]->getFont(), message);
-
-                    for (int i=1; i< 3; i++) {
-                        pauseBtn[i] = new Button(150*(i-1) + 340,550,&optionTex);
-                        pauseBtn[i]->setDimen(50,50);
-                    }
-                }
-
-                Uint32 start = SDL_GetTicks();
-
-                int spend = SDL_GetTicks() - start;
-
-                while (spend < 3500) {
-                    spend = SDL_GetTicks() - start;
-
-                    eventManager(&event);
-
-                    if (!isRunning){break;}
-                }
-
-            }
-
         }
         
     }

@@ -97,13 +97,11 @@ public:
     Tile* getcurrTile(){
         return currTile;
     }
-    void render() {
+    pair<int,int> render() {
 
         if (nextLR == currLR) {
-            cout<<"a\n";
 
             if (currUD == nextUD) {
-            cout<<"b\n";
 
                 if (animating == false) {
                     animating  = true;
@@ -124,7 +122,6 @@ public:
 
             else {
 
-              cout<<"c\n";
 
                 SDL_Rect *src =NULL;
 
@@ -183,6 +180,7 @@ public:
 
         }
 
+        return {currTile->getX()*TILE_WIDTH -xRel,currTile->getY()*TILE_HEIGHT};
 
     }
 
