@@ -33,6 +33,8 @@ private:
     Texture* eatenT=NULL;
     Texture* freightnedT=NULL;
 
+    int timeinOther=0;
+
 public: 
 
     Enemy(Texture *enemyTex,Texture *Eaten, Texture *Fright ,string s){
@@ -340,7 +342,8 @@ public:
         if (P->getStone()== MIND && state!=3) {
             if (P->getcurrTile()==currTile){
                 sound->playEat();
-                state=3;    
+                state=3; 
+                timeinOther=SDL_GetTicks()/1000;   
                 P->updateScore(50);   
             }
             else {
@@ -350,7 +353,10 @@ public:
         else{
             if (currstate==3){
                 if (checkForHome(map->getHomeTile()->getX(),map->getHomeTile()->getY())){
+                    timeinOther=SDL_GetTicks()/1000-timeinOther;
+                    offset+=timeinOther;
                     if (ctime!=0){
+
                         state=2;
                     }
                     else{
@@ -360,10 +366,6 @@ public:
             }
             else if (currstate==1){
                 st=SDL_GetTicks()/1000-offset;
-                // if (P->getcurrTile() == currTile) {
-                //     P->died=true;
-                //     return false;
-                // }
                 if (st==stime[levels]){
                     state=2;        
                     offset+=stime[levels];
@@ -372,13 +374,6 @@ public:
             }
             else if (currstate==2){
                 ct=SDL_GetTicks()/1000-offset;
-                // if (P->getcurrTile() == currTile) {
-                    
-
-                //     P->died=true;
-                //     return false;
-
-                // }
                 if (ct==ctime[levels]){
                     state=1;
                     offset+=ctime[levels];
@@ -388,6 +383,7 @@ public:
             }
             else if (currstate==0){
                 if (P->getStone()==NONE){
+                    offset+=10;
                     if (ctime!=0){
                         state=2;
                     }
