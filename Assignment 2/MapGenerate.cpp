@@ -61,9 +61,13 @@ private:
     bool hselected = false;
     bool cselected = false;
     bool iselected = false;
+    bool m1selected = false;
+    bool m2selected = false;
+    bool m3selected = false;
+    bool m4selected = false;
     int numCoins = 0;
     //0p 1b 2n 3h 4c 5i
-    int store[6][2] = {-1}; 
+    int store[10][2] = {-1}; 
 
     void initMap(Block Maze[DIMEN][DIMEN]) {
 
@@ -103,6 +107,14 @@ private:
         else if (iselected && y == store[5][0] && x == store[5][1]) {
             return 'i';
         }
+        else if (
+                (m1selected && y == store[6][0] && x == store[6][1])||
+                (m2selected && y == store[7][0] && x == store[7][1])||
+                (m3selected && y == store[8][0] && x == store[8][1])||
+                (m4selected && y == store[9][0] && x == store[9][1])
+                ) {
+                    return 'm';
+        }
         return ' ';
 
     }
@@ -113,6 +125,33 @@ private:
 
         if (curr != ' ') {
             return curr;
+        }
+
+        if (!m1selected && (x==DIMEN-2)){
+
+            m1selected = true;
+            return 'm';
+        }
+
+        if (!m2selected && (x==1)) {
+            
+            m2selected = true;
+            return 'm';
+
+        }
+
+        if (!m3selected && (y== 1)) {
+            
+            m3selected = true;
+            return 'm';
+
+        }
+
+        if (!m4selected && (y== DIMEN-2) ){
+            
+            m4selected = true;
+            return 'm';
+            
         }
 
         if (!playerselected) {
