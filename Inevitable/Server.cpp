@@ -71,12 +71,10 @@ class Server{
     }
     void sendMessage(const char* s){
         send(new_socket , s , strlen(s)*sizeof(char) , 0 );
-        cout<<"sends: " <<s<<endl;
     }
     string recieveMessage(){
         valread = recv(new_socket , buffer, 1024,MSG_DONTWAIT);
         string s(buffer);
-        cout<<"recieves: "<<s.substr(0,valread)<<endl;
         return s.substr(0,valread);
     }
 };

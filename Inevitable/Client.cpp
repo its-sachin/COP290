@@ -51,14 +51,11 @@ class Client{
 
     void sendMessage(const char* s){
         send(sock , s , strlen(s)*sizeof(char) , 0 );
-        cout<<"sendc: " <<s<<endl;
     }
 
     string recieveMessage(){
         valread = recv(sock , buffer, 1024,MSG_DONTWAIT);
         string s(buffer);
-        // strcpy(buffer,s.c_str());
-        cout<<"recievec: "<<s.substr(0,valread)<<endl;
         return s.substr(0,valread);
     }
 

@@ -16,7 +16,7 @@ const int DIMEN = 25;
 const int X_MARGIN = 0;
 const int Y_MARGIN = 125;
 
-const string WIN_NAME = "TEST";
+const string WIN_NAME = "INEVITABLE";
 
 const int TILE_WIDTH = 35;
 const int TILE_HEIGHT = 35;
