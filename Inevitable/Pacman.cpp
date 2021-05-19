@@ -178,7 +178,10 @@ class Pacman: public Game, public TextureSet{
 
             if (Thanos->getStone() != MIND) {
 
-                if (checkCollision(blinkyPos,thanosPos) || checkCollision(clydePos,thanosPos) || checkCollision(pinkyPos,thanosPos) || checkCollision(inkyPos,thanosPos)) {
+                if ((Blinky->getState() !=3 && checkCollision(blinkyPos,thanosPos)) || 
+                    (Clyde->getState() !=3 && checkCollision(clydePos,thanosPos)) || 
+                    (Pinky->getState() !=3 && checkCollision(pinkyPos,thanosPos)) || 
+                    (Inky->getState() !=3 && checkCollision(inkyPos,thanosPos))) {
                     Thanos->die();
                     collision = true;
                 }
@@ -215,7 +218,10 @@ class Pacman: public Game, public TextureSet{
 
                 if (ThanosPast->getStone() != MIND) {
 
-                    if (checkCollision(blinkyPos,thanosPos2) || checkCollision(clydePos,thanosPos2) || checkCollision(pinkyPos,thanosPos2) || checkCollision(inkyPos,thanosPos2)){
+                    if ((Blinky->getState() != 3 && checkCollision(blinkyPos,thanosPos2)) || 
+                    (Clyde->getState() != 3 && checkCollision(clydePos,thanosPos2)) || 
+                    (Pinky->getState() != 3 && checkCollision(pinkyPos,thanosPos2)) || 
+                    (Inky->getState() != 3 && checkCollision(inkyPos,thanosPos2))){
                         ThanosPast->die();
                         collision = true;
                     }

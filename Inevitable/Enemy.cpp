@@ -51,6 +51,8 @@ public:
         Gamer::free();
     }
 
+    int getState() {return currstate;}
+
     void setState(int s) {currstate = s;}
     void setOffset(int s){offset=s;}
     void setID(string newId) {id =newId;}

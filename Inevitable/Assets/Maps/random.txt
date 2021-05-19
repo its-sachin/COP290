@@ -1,25 +1,25 @@
 xxxxxxxxxxxxxxxxxxxxxxxxx
-x...x.. . ...m....x...x.x
-x.xxx.xxxxxxx.xxx.x.x.x.x
-x.x...x.......x.x...x.x.x
-x.x.xxx.xxxxxxx.xxxxx.x x
-x.....x...x..... .....x.x
-x.xxxxxxx.x.xxxxxxxxx x x
-x.. x.....x.x.. ....x...x
-xxx.x.xxxxxxx.xxxxx.xxx.x
-x...x.x.......x.....x...x
-xxxxx.x.xxxxxxx.xxx.xxxxx
-x.....x.x...x...x...x..mx
-x.xxx.x xix.x.xxx.xpx.x.x
-xm..x.x.xcx...x x.x...x.x
-x.x.x.x.xhxxxxx x.xxxxx.x
-x.x.x x.xnb...x...x...x.x
-x x.xxx.xxxxx.xxxxx x.x.x
-x.x.... x...x.x.....x x.x
-x.xxxxxxx.xxx.x.xxxxx.x x
-x.x.......xxx...x...x...x
-x.xxxxxxx.xxxxxxxxx.xxxxx
-x......... ...x....... .x
-xxxxxxxxxxxxx.x.xxxxxxx.x
-x........... m..x.......x
+x  m    x     x xxx   x x
+x x xxx xxx x x xxx x x x
+x x x x     x x x   x x x
+xxx x xxxxxxx x x x x x x
+x   x       x x   x x   x
+x xxx xxxxx x xxx x xxxxx
+x   x x   x     x x     x
+x x xxx x xxxxx xxxxxxx x
+x x     x     x x   x   x
+xxxxxxxxxxxxx x x x x x x
+x ...... .bnx x x x   x x
+x.xxxxxxxxxhx x x xxxxx x
+x.x       xcx x   x x   x
+x.x xxx xxxix xxxxx x xxx
+xpx x   x...x x         x
+xmxxx x x.xxx xxx xxxxxxx
+x   x x x.x     x x.. ..x
+x x x xxx.xxxxx xxx xxx.x
+x x x x...x...x     x. mx
+x x x x.xxx.x x xxxxx.x.x
+x x   x.x  .x.x x.... x.x
+x xxxxx.xxx.x.xxx.xxxxx.x
+x      m... x. ...x ....x
 xxxxxxxxxxxxxxxxxxxxxxxxx 
