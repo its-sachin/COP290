@@ -70,10 +70,10 @@ protected:
 
 public: 
 
-
     void free() {
         currTile = NULL;
         nextTile = NULL;
+        // prevTile =NULL;
         texture = NULL;
         initTile = NULL;
 
@@ -85,6 +85,7 @@ public:
         initTile = initialTile;
         currTile = initTile;
         nextTile = NULL;
+        // prevTile=initialTile;
     }
 
     void setBounds(int height, int width) {
@@ -96,12 +97,13 @@ public:
     Tile* getcurrTile(){
         return currTile;
     }
-
     void render() {
 
         if (nextLR == currLR) {
+            cout<<"a\n";
 
             if (currUD == nextUD) {
+            cout<<"b\n";
 
                 if (animating == false) {
                     animating  = true;
@@ -122,6 +124,7 @@ public:
 
             else {
 
+              cout<<"c\n";
 
                 SDL_Rect *src =NULL;
 

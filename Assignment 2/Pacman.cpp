@@ -11,10 +11,10 @@ class Pacman: public Game, public TextureSet{
     Player *ThanosPast = new Player(&player2Tex);
     bool type=true;
 
-    Enemy *Blinky = new Enemy(&blinkyTex, "blinky");
-    Enemy *Pinky = new Enemy(&pinkyTex, "pinky");
-    Enemy *Inky  = new Enemy(&inkyTex, "inky");
-    Enemy *Clyde = new Enemy(&clydeTex, "clyde");
+    Enemy *Blinky = new Enemy(&blinkyTex,&dieTex,&frightTex ,"blinky");
+    Enemy *Pinky = new Enemy(&pinkyTex,&dieTex,&frightTex, "pinky");
+    Enemy *Inky  = new Enemy(&inkyTex,&dieTex,&frightTex ,"inky");
+    Enemy *Clyde = new Enemy(&clydeTex,&dieTex,&frightTex, "clyde");
 
     Map *map = NULL; 
 
@@ -87,11 +87,10 @@ class Pacman: public Game, public TextureSet{
         Thanos->init(map->getHeight(),map->getWidth(),map->getPlayerInit());
 
 
-        Blinky->init(map);
-        Pinky->init(map);
-        Inky->init(map);
-        Clyde->init(map);
-
+        Blinky->init(map,SDL_GetTicks()/1000);
+        Pinky->init(map,SDL_GetTicks()/1000);
+        Inky->init(map,SDL_GetTicks()/1000);
+        Clyde->init(map,SDL_GetTicks()/1000);
         if (mode == Doffline) {
             ThanosPast->init(map->getHeight(),map->getWidth(),map->getPlayerInit());
             
@@ -105,11 +104,6 @@ class Pacman: public Game, public TextureSet{
             Inky->setID("blinky");
             Clyde->setID("pinky");
         }
-
-        Blinky->setOffset(SDL_GetTicks()/1000);
-        Inky->setOffset(SDL_GetTicks()/1000);
-        Pinky->setOffset(SDL_GetTicks()/1000);
-        Clyde->setOffset(SDL_GetTicks()/1000);
 
     }
 
@@ -151,6 +145,7 @@ class Pacman: public Game, public TextureSet{
 
         renderBack();
 
+
         Blinky->render(); 
         Pinky->render();      
         Inky->render();
@@ -160,7 +155,6 @@ class Pacman: public Game, public TextureSet{
         if (mode == Donline || mode == Doffline) {
             ThanosPast->render();
         }
-
         if (paused) {
             renderPause();
         }
@@ -292,6 +286,10 @@ class Pacman: public Game, public TextureSet{
                 }
 
                 paused = false;
+                Pinky->PauseUpdate(pauseTime);
+                Inky->PauseUpdate(pauseTime);
+                Clyde->PauseUpdate(pauseTime);
+                Blinky->PauseUpdate(pauseTime);
                 escDown = false;
 
                 send = "0";
@@ -308,6 +306,10 @@ class Pacman: public Game, public TextureSet{
                 }
 
                 paused = false;
+                Pinky->PauseUpdate(pauseTime);
+                Inky->PauseUpdate(pauseTime);
+                Clyde->PauseUpdate(pauseTime);
+                Blinky->PauseUpdate(pauseTime);
                 escDown = false;
                 pauseBtn[0]->deselect();
 
@@ -340,7 +342,6 @@ class Pacman: public Game, public TextureSet{
         }
 
         else{
-
             setMovement();
             Blinky->update(map, Thanos,NULL);
             Pinky->update(map, Thanos,Blinky);

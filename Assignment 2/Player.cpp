@@ -1,7 +1,6 @@
 #include "Gamer.cpp"
 
 
-
 class Player : public Gamer{
 
 private:
@@ -14,7 +13,7 @@ private:
     Stone stone = NONE;
 
 public: 
-
+    bool died=false;
     bool justDied = false;
 
 
@@ -53,6 +52,10 @@ public:
     }
     Tile* getcurrTile(){
         return currTile;
+    }
+
+    void updateScore(int a){
+        score+=a;
     }
 
     void movement(Move dir,Map *map) {
@@ -96,6 +99,7 @@ public:
         nextTile = map->getTile(nextX,nextY);
 
         if (nextTile != NULL) {
+            initTile= currTile;
 
             if (nextTile->isCoin) {
                 score+= 1;
@@ -110,6 +114,7 @@ public:
             else if (nextTile->isMind) {
                 sound->playMind();
                 nextTile->isMind = false;
+                setStone(MIND);
 
                 initRel();
                 currTile = nextTile;
@@ -126,10 +131,16 @@ public:
         
     }
 
+
     void update(Move dir, Map *map) {
 
         if (visible && !animating) {
-            movement(dir, map);
+            if (died){
+                die();
+            }
+            else{
+                movement(dir, map);
+            }
         }
     }
 
@@ -153,7 +164,7 @@ public:
         currUD = FRONT;
         currLR = LEFT;
         animating  = false;
-
+        died=false;
         justDied = true;
     }
 
