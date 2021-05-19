@@ -23,7 +23,7 @@ const int TILE_HEIGHT = 35;
 
 const int TEXT_SIZE = 20;
 
-const int MAX_LIFE = 0;
+const int MAX_LIFE = 3;
 
 const float SPEED = 4;
 
