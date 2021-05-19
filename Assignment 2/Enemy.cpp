@@ -11,8 +11,8 @@ private:
 
     string id;
 
-    int currstate;
-    int prevstate;
+    int currstate=1;
+    int prevstate=1;
 
     bool moving=false;
     int pr[4]={4,3,1,2};
@@ -28,12 +28,17 @@ private:
     int xHome;//x cordinate of home tile
     int yHome;//y cordinate of home tile 
     int levels=0;//level of the operation of enemy
-    int offset=0;//for timing
+    int offset=0;//for timing   
+
+    Texture* eatenT=NULL;
+    Texture* freightnedT=NULL;
 
 public: 
 
-    Enemy(Texture *enemyTex,string s){
+    Enemy(Texture *enemyTex,Texture *Eaten, Texture *Fright ,string s){
         texture = enemyTex;
+        eatenT=Eaten;
+        freightnedT=Fright;
         sprite = new Sprites(enemyTex);
         id=s;
         currstate = 1;
@@ -48,8 +53,14 @@ public:
     void setOffset(int s){offset=s;}
     void setID(string newId) {id =newId;}
     string getId() {return id;}
-    void init(Map *map) {
 
+    void init(Map *map,int time ) {
+        levels=0;
+        ct=0;
+        st=0;
+        currstate=1;
+        prevstate=1;
+        offset=time;
         setBounds(map->getWidth(), map->getHeight());
         xHome=map->getHomeTile()->getX();
         yHome=map->getHomeTile()->getY();   
@@ -85,10 +96,24 @@ public:
         }
     }
 
+    // void RestartUpdate(int time){
+    //     levels=0;
+    //     ct=0;
+    //     st=0;
+    //     currstate=1;
+    //     prevstate=1;
+    //     offset=time;
+    // }
+
+    void PauseUpdate(int time){
+        offset+=time;
+    }
 
     void movement(Map *map,Player* P,Enemy* E) {
         dirConfig(currDir,false);
-        updateState(P,map);
+        if (!updateState(P,map)) {
+            return;
+        }
         int currX = currTile->getX();
         int currY = currTile->getY();
         int nextX = currX;
@@ -182,6 +207,22 @@ public:
             animating=true;   
 
         }
+        //eaten mode
+        else if (currstate==3){
+            if (prevstate!=3){
+                nextDir=3-currDir;
+            }
+            else{
+                nextDir= nextDirg(map->getHomeTile()->getX(),map->getHomeTile()->getY(),nextXX,nextYY,map); 
+            }
+            nextX=nextXX[nextDir];
+            nextY=nextYY[nextDir];    
+            nextTile=map->getTile(nextX,nextY);
+            initRel();
+            currTile = nextTile;
+            nextTile = NULL;
+            animating=true;  
+        }
         dirConfig(nextDir,true);
         currDir = nextDir;
         nextDir = 0;
@@ -196,7 +237,7 @@ public:
 
 
     int nextDirg(int a, int b,int X[],int Y[],Map* map){
-        int dir;
+        int dir=-1;
         double minn=INFINITY;
         for(int i=0;i<4;i++){              
             nextTile=map->getTile(X[i],Y[i]);      
@@ -212,6 +253,10 @@ public:
                     }
                 }
             }          
+        }
+        if (dir==-1){
+            cout<<"Power Failure, No energy on the planet!!!"<<endl;
+            dir =3-currDir;
         }
         return dir;
     }
@@ -290,11 +335,13 @@ public:
     }
 
 
-    void updateState(Player* P,Map* map){
+    bool updateState(Player* P,Map* map){
         int state=currstate;
-        if (P->getStone()== MIND) {
-            if (P->getcurrTile()==this->getcurrTile()){
-                state=3;       
+        if (P->getStone()== MIND && state!=3) {
+            if (P->getcurrTile()==currTile){
+                sound->playEat();
+                state=3;    
+                P->updateScore(50);   
             }
             else {
                 state=0;
@@ -302,7 +349,7 @@ public:
         }
         else{
             if (currstate==3){
-                if (this->getcurrTile()==map->getHomeTile()){
+                if (checkForHome(map->getHomeTile()->getX(),map->getHomeTile()->getY())){
                     if (ctime!=0){
                         state=2;
                     }
@@ -314,8 +361,8 @@ public:
             else if (currstate==1){
                 st=SDL_GetTicks()/1000-offset;
                 if (P->getcurrTile() == currTile) {
-
-                    P->die();
+                    P->died=true;
+                    return false;
                 }
                 if (st==stime[levels]){
                     state=2;        
@@ -328,7 +375,8 @@ public:
                 if (P->getcurrTile() == currTile) {
                     
 
-                    P->die();
+                    P->died=true;
+                    return false;
 
                 }
                 if (ct==ctime[levels]){
@@ -338,23 +386,31 @@ public:
                     levels++;
                 }
             }
-            if (P->getStone()== MIND){
-                if (P->getcurrTile()==this->getcurrTile()){
-                    state=3;       
-                }
-                else {
-                    state=0;
-                }           
-            }
         }
         prevstate=currstate;
         currstate=state;
+        return true;
+    }
+
+    bool checkForHome(int a,int b){
+        int x=currTile->getX();
+        int y=currTile->getY();
+        if (abs(x-a)<2 && abs(y-b)<2){
+            return true;
+        }
+        return false;
     }
     void render() {
-
+        Texture* temp=texture;
+        if (currstate==3){
+            temp=eatenT;
+        }
+        else if (currstate==0){
+            temp=freightnedT;
+        }
         SDL_Rect src = {0,0,TILE_WIDTH,TILE_HEIGHT};
 
-        texture->render(currTile->getX()*TILE_WIDTH- xRel,currTile->getY()*TILE_HEIGHT- yRel,&src);
+        temp->render(currTile->getX()*TILE_WIDTH- xRel,currTile->getY()*TILE_HEIGHT- yRel,&src);
 
         updateRel();
         if (xRel ==0 && yRel ==0) {
