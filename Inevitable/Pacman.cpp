@@ -980,7 +980,7 @@ class Pacman: public Game, public TextureSet{
         }
 
         else if (menuText[1]->isSelected()){
-            mapStr = "/titan.txt";
+            mapStr = "/wakanda.txt";
             menuText[1]->deselect();
             return true;
         }
