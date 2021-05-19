@@ -152,18 +152,33 @@ class Pacman: public Game, public TextureSet{
         pair<int,int> clydePos = Clyde->render();
 
         pair<int,int> thanosPos = Thanos->render();
+        pair <int,int> thanosPos2;
         if (mode == Donline || mode == Doffline) {
-            ThanosPast->render();
+            thanosPos2 = ThanosPast->render();
+        }
+        bool collision = false;
+
+        if (Thanos->getStone() != MIND) {
+
+            if (checkCollision(blinkyPos,thanosPos) || checkCollision(clydePos,thanosPos) || checkCollision(pinkyPos,thanosPos) || checkCollision(inkyPos,thanosPos)) {
+                Thanos->die();
+                collision = true;
+            }
         }
 
-        if (checkCollision(blinkyPos,thanosPos) || checkCollision(clydePos,thanosPos) || checkCollision(pinkyPos,thanosPos) || checkCollision(inkyPos,thanosPos)) {
-            Thanos->die();
-            cout << "done" << endl;
+        if (mode != Single && ThanosPast->getStone() != MIND) {
+
+            if (checkCollision(blinkyPos,thanosPos2) || checkCollision(clydePos,thanosPos2) || checkCollision(pinkyPos,thanosPos2) || checkCollision(inkyPos,thanosPos2)){
+                ThanosPast->die();
+                collision = true;
+            }
+        }
+
+        if (collision) {
             Uint32 start = SDL_GetTicks();
 
 
-            if (Thanos->getLifeLeft() < 0){
-                cout << "yes" << endl;
+            if (Thanos->getLifeLeft() < 0 || ((mode == Doffline || mode == Donline) && ThanosPast->getLifeLeft() < 0)){
                 finished = true;
 
                 string message;
@@ -171,7 +186,7 @@ class Pacman: public Game, public TextureSet{
 
                 if (Thanos->getLifeLeft() < 0) {
                     if (mode == Single){
-                        message = "YOU LOOSE";
+                        message = "YOU DIED";
                         x = 350;
                     }
 
