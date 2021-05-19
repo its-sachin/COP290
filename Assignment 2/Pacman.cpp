@@ -153,99 +153,145 @@ class Pacman: public Game, public TextureSet{
 
         Thanos->render();
 
-        pair<int,int> blinkyPos = Blinky->getExactPos();
-        pair<int,int> pinkyPos = Pinky->getExactPos();
-        pair<int,int> inkyPos = Inky->getExactPos();
-        pair<int,int> clydePos = Clyde->getExactPos();
-        pair<int,int> thanosPos = Thanos->getExactPos();
-        pair <int,int> thanosPos2;
-
-
-        if (mode == Donline || mode == Doffline) {
-            ThanosPast->render();
-            thanosPos2 = ThanosPast->getExactPos();
-        }
-        bool collision = false;
-
-        if (Thanos->getStone() != MIND) {
-
-            if (checkCollision(blinkyPos,thanosPos) || checkCollision(clydePos,thanosPos) || checkCollision(pinkyPos,thanosPos) || checkCollision(inkyPos,thanosPos)) {
-                Thanos->die();
-                collision = true;
-            }
-        }
-
-        if (mode != Single && ThanosPast->getStone() != MIND) {
-
-            if (checkCollision(blinkyPos,thanosPos2) || checkCollision(clydePos,thanosPos2) || checkCollision(pinkyPos,thanosPos2) || checkCollision(inkyPos,thanosPos2)){
-                ThanosPast->die();
-                collision = true;
-            }
-        }
-
-        if (collision) {
-            Uint32 start = SDL_GetTicks();
-
-
-            if (Thanos->getLifeLeft() < 0 || ((mode == Doffline || mode == Donline) && ThanosPast->getLifeLeft() < 0)){
-                finished = true;
-
-                string message;
-                int x;
-
-                if (Thanos->getLifeLeft() < 0) {
-                    if (mode == Single){
-                        message = "YOU DIED";
-                        x = 350;
-                    }
-
-                    else {
-                        if (ThanosPast->getLifeLeft() >= 0) {
-                            message = "PAST THANOS WON";
-                            x = 300;
-                        }
-
-                        else {
-                            message = "ITS A DRAW";
-                            x = 330;
-                        }
-                    }
-                }
-
-                else {
-                    if (mode == Donline || mode == Doffline) {
-                        message = "PRESENT THANOS WON";
-                        x = 270;
-                    }
-                }
-
-                pauseBtn[0] = new Button(x,450,&movableBG);
-                loadWord(pauseBtn[0]->getFont(), message);
-
-                for (int i=1; i< 3; i++) {
-                    pauseBtn[i] = new Button(150*(i-1) + 340,550,&optionTex);
-                    pauseBtn[i]->setDimen(50,50);
-                }
-            }
-
-            int spend = SDL_GetTicks() - start;
-
-            while (spend < 3500) {
-                spend = SDL_GetTicks() - start;
-
-                eventManager(&event);
-
-                if (!isRunning){break;}
-            }
-
-        }
-
         if (paused) {
             renderPause();
         }
 
         if (finished) {
             renderFinish();
+        }
+
+        else {
+            pair<int,int> blinkyPos = Blinky->getExactPos();
+            pair<int,int> pinkyPos = Pinky->getExactPos();
+            pair<int,int> inkyPos = Inky->getExactPos();
+            pair<int,int> clydePos = Clyde->getExactPos();
+            pair<int,int> thanosPos = Thanos->getExactPos();
+            pair <int,int> thanosPos2;
+
+
+            if (mode == Donline || mode == Doffline) {
+                ThanosPast->render();
+                thanosPos2 = ThanosPast->getExactPos();
+            }
+            bool collision = false;
+
+            if (Thanos->getStone() != MIND) {
+
+                if (checkCollision(blinkyPos,thanosPos) || checkCollision(clydePos,thanosPos) || checkCollision(pinkyPos,thanosPos) || checkCollision(inkyPos,thanosPos)) {
+                    Thanos->die();
+                    collision = true;
+                }
+            }
+            
+            else {
+                if (checkCollision(blinkyPos,thanosPos)) {
+                    Blinky->doCollision(Thanos);
+                }
+
+                if (checkCollision(pinkyPos,thanosPos)) {
+
+                    Pinky->doCollision(Thanos);
+
+                }
+
+                if (mode == Single) {
+
+                    if (checkCollision(inkyPos,thanosPos)) {
+
+                        Inky->doCollision(Thanos);
+
+                    }
+
+                    if (checkCollision(clydePos,thanosPos)) {
+
+                        Clyde->doCollision(Thanos);
+
+                    }
+                }
+            }
+
+            if (mode != Single) {
+
+                if (ThanosPast->getStone() != MIND) {
+
+                    if (checkCollision(blinkyPos,thanosPos2) || checkCollision(clydePos,thanosPos2) || checkCollision(pinkyPos,thanosPos2) || checkCollision(inkyPos,thanosPos2)){
+                        ThanosPast->die();
+                        collision = true;
+                    }
+                }
+
+                else {
+
+                    if (checkCollision(inkyPos,thanosPos2)) {
+
+                        Inky->doCollision(ThanosPast);
+
+                    }
+
+                    if (checkCollision(clydePos,thanosPos2)) {
+                        Clyde->doCollision(ThanosPast);
+                    }
+
+                }
+            }
+
+            if (collision) {
+                Uint32 start = SDL_GetTicks();
+
+
+                if (Thanos->getLifeLeft() < 0 || ((mode == Doffline || mode == Donline) && ThanosPast->getLifeLeft() < 0)){
+                    finished = true;
+
+                    string message;
+                    int x;
+
+                    if (Thanos->getLifeLeft() < 0) {
+                        if (mode == Single){
+                            message = "YOU DIED";
+                            x = 350;
+                        }
+
+                        else {
+                            if (ThanosPast->getLifeLeft() >= 0) {
+                                message = "PAST THANOS WON";
+                                x = 300;
+                            }
+
+                            else {
+                                message = "ITS A DRAW";
+                                x = 330;
+                            }
+                        }
+                    }
+
+                    else {
+                        if (mode == Donline || mode == Doffline) {
+                            message = "PRESENT THANOS WON";
+                            x = 270;
+                        }
+                    }
+
+                    pauseBtn[0] = new Button(x,450,&movableBG);
+                    loadWord(pauseBtn[0]->getFont(), message);
+
+                    for (int i=1; i< 3; i++) {
+                        pauseBtn[i] = new Button(150*(i-1) + 340,550,&optionTex);
+                        pauseBtn[i]->setDimen(50,50);
+                    }
+                }
+
+                int spend = SDL_GetTicks() - start;
+
+                while (spend < 3500) {
+                    spend = SDL_GetTicks() - start;
+
+                    eventManager(&event);
+
+                    if (!isRunning){break;}
+                }
+
+            }
         }
 
 

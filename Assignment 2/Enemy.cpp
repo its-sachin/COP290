@@ -336,38 +336,16 @@ public:
         }
     }
 
-    bool checkCollision(pair<int,int> enemyPos,pair<int,int> thnaosPos) {
-        int xe = enemyPos.first;
-        int ye = enemyPos.second;
-        int xp = thnaosPos.first;
-        int yp = thnaosPos.second;
-        
-        int offset = COLLISION_OFFSET;
-
-        if (abs(xe-xp) <= offset && abs(ye-yp) <= offset) {
-            return true;
-        }
-        return false;
-        
-
-    }
-
 
     bool updateState(Player* P,Map* map){
         int state=currstate;
+
         if (P->getStone()== MIND && state!=3) {
-            pair<int,int> thanosPos = P->getExactPos();
-            if (checkCollision(exactPos,thanosPos)){
-                sound->playEat();
-                state=3; 
-                timeinOther=SDL_GetTicks()/1000;   
-                P->updateScore(50);   
-            }
-            else {
-                state=0;
-            }
+
+            state = 0;
         }
-        else{
+
+        else {
             if (currstate==3){
                 if (checkForHome(map->getHomeTile()->getX(),map->getHomeTile()->getY())){
                     timeinOther=SDL_GetTicks()/1000-timeinOther;
@@ -424,6 +402,18 @@ public:
         return false;
     }
     
+
+    void doCollision(Player* P) {
+
+        if (currstate!=3) {
+            sound->playEat();
+            prevstate = currstate;
+            currstate=3; 
+            P->updateScore(50);
+            timeinOther=SDL_GetTicks()/1000;     
+        }
+    }
+
     void render() {
         Texture* temp=texture;
         if (currstate==3){
