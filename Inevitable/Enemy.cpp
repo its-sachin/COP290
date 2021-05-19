@@ -349,11 +349,10 @@ public:
 
         else {
             if (currstate==3){
-                if (checkForHome(map->getHomeTile()->getX(),map->getHomeTile()->getY())){
+                if (checkForHome(map->getHomeTile()->getX(),map->getHomeTile()->getY()) || P->getStone()!= MIND){
                     timeinOther=SDL_GetTicks()/1000-timeinOther;
                     offset+=timeinOther;
                     if (ctime!=0){
-
                         state=2;
                     }
                     else{
