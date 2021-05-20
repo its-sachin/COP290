@@ -26,7 +26,7 @@
 
   * ### __How to run:__
     1. After installing all the libraries successfully run the makefile from the home folder (/Invietable). An executable named game would be formed.
-    2. Run the game from command line as: ./game
+    2. Run the game from command line as: ```$ ./game```
     3. Play !!!!!
     
     
